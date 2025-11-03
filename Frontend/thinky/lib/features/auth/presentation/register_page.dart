@@ -43,7 +43,7 @@ class RegisterPage extends StatelessWidget {
           child: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryPurple,
+              backgroundColor: Color.fromRGBO(117, 131, 202, 1),
               shape: RoundedRectangleBorder(borderRadius: radius),
               elevation: 0,
             ),
@@ -65,7 +65,8 @@ class RegisterPage extends StatelessWidget {
       );
     }
 
-    InputDecoration inputDecoration(String hint, {Widget? suffix}) => InputDecoration(
+    InputDecoration inputDecoration(String hint, {Widget? suffix}) =>
+        InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.alata(
             color: const Color(0xFFB7BAC3),
@@ -73,7 +74,10 @@ class RegisterPage extends StatelessWidget {
           ),
           filled: true,
           fillColor: const Color(0xFFF2F3F7),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Colors.transparent),
@@ -86,30 +90,30 @@ class RegisterPage extends StatelessWidget {
         );
 
     Widget orDivider() => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Divider(color: Color(0xFFE6E7EB), thickness: 1),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'OR LOG IN WITH EMAIL',
-                  style: GoogleFonts.alata(
-                    color: const Color(0xFFA3A6AD),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-              ),
-              const Expanded(
-                child: Divider(color: Color(0xFFE6E7EB), thickness: 1),
-              ),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Divider(color: Color(0xFFE6E7EB), thickness: 1),
           ),
-        );
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'OR LOG IN WITH EMAIL',
+              style: GoogleFonts.alata(
+                color: const Color(0xFFA3A6AD),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+          const Expanded(
+            child: Divider(color: Color(0xFFE6E7EB), thickness: 1),
+          ),
+        ],
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -145,31 +149,48 @@ class RegisterPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   socialButton(
-                    leading: Image.asset('assets/auth/icons/facebook.png', height: 20, width: 20),
+                    leading: Image.asset(
+                      'assets/auth/icons/facebook.png',
+                      height: 20,
+                      width: 20,
+                    ),
                     label: 'CONTINUE WITH FACEBOOK',
                     filled: true,
                   ),
                   const SizedBox(height: 14),
                   socialButton(
-                    leading: Image.asset('assets/auth/icons/google.png', height: 20, width: 20),
+                    leading: Image.asset(
+                      'assets/auth/icons/google.png',
+                      height: 20,
+                      width: 20,
+                    ),
                     label: 'CONTINUE WITH GOOGLE',
                     filled: false,
                   ),
                   orDivider(),
                   TextField(
-                    decoration: inputDecoration('Username',
-                        suffix: const Icon(Icons.check, color: Color(0xFF7EC18C))),
+                    decoration: inputDecoration(
+                      'Username',
+                      suffix: const Icon(Icons.check, color: Color(0xFF7EC18C)),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    decoration: inputDecoration('Email address',
-                        suffix: const Icon(Icons.check, color: Color(0xFF7EC18C))),
+                    decoration: inputDecoration(
+                      'Email address',
+                      suffix: const Icon(Icons.check, color: Color(0xFF7EC18C)),
+                    ),
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    decoration: inputDecoration('Password',
-                        suffix: const Icon(Icons.visibility, color: Color(0xFF60646D))),
+                    decoration: inputDecoration(
+                      'Password',
+                      suffix: const Icon(
+                        Icons.visibility,
+                        color: Color(0xFF60646D),
+                      ),
+                    ),
                     obscureText: true,
                   ),
                   const SizedBox(height: 24),
@@ -216,7 +237,7 @@ class RegisterPage extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -226,5 +247,3 @@ class RegisterPage extends StatelessWidget {
     );
   }
 }
-
-

@@ -144,25 +144,6 @@ class IntroPage extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // const SizedBox(height: 12),
-                        // TextButton(
-                        //   onPressed: () {
-                        //     Navigator.of(context).push(
-                        //       MaterialPageRoute(
-                        //         builder: (_) => const GuestNamePage(),
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: Text(
-                        //     'Continue as guest',
-                        //     style: GoogleFonts.alata(
-                        //       color: const Color(0xFF8E97FD),
-                        //       fontWeight: FontWeight.w600,
-                        //     ),
-                        //   ),
-                        // ),
-                        // No extra bottom margin
                         Wrap(
                           alignment: WrapAlignment.center,
                           crossAxisAlignment: WrapCrossAlignment.center,
