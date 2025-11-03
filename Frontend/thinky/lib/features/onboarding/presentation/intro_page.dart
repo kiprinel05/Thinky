@@ -98,7 +98,7 @@ class IntroPage extends StatelessWidget {
                               backgroundColor: const Color(0xFF8E97FD),
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
+                                borderRadius: BorderRadius.circular(38),
                               ),
                             ),
                             child: Text(
@@ -106,27 +106,62 @@ class IntroPage extends StatelessWidget {
                               style: GoogleFonts.alata(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
+                                fontSize: 14,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const GuestNamePage(),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const GuestNamePage(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                255,
+                                253,
+                                253,
                               ),
-                            );
-                          },
-                          child: Text(
-                            'Continue as guest',
-                            style: GoogleFonts.alata(
-                              color: const Color(0xFF8E97FD),
-                              fontWeight: FontWeight.w600,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(38),
+                              ),
+                            ),
+                            child: Text(
+                              'CONTINUE AS GUEST',
+                              style: GoogleFonts.alata(
+                                color: const Color.fromRGBO(142, 151, 253, 1),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
+
+                        // const SizedBox(height: 12),
+                        // TextButton(
+                        //   onPressed: () {
+                        //     Navigator.of(context).push(
+                        //       MaterialPageRoute(
+                        //         builder: (_) => const GuestNamePage(),
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: Text(
+                        //     'Continue as guest',
+                        //     style: GoogleFonts.alata(
+                        //       color: const Color(0xFF8E97FD),
+                        //       fontWeight: FontWeight.w600,
+                        //     ),
+                        //   ),
+                        // ),
                         // No extra bottom margin
                         Wrap(
                           alignment: WrapAlignment.center,
@@ -158,6 +193,7 @@ class IntroPage extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 15),
                       ],
                     ),
                   ],
