@@ -13,13 +13,11 @@ EPOCHS = 10
 BATCH_SIZE = 32
 LR = 0.001
 
-# === TRANSFORMĂRI ===
 transform = transforms.Compose([
     transforms.Resize((128, 128)),
     transforms.ToTensor(),
 ])
 
-# === DATASET ===
 dataset = datasets.ImageFolder(root=str(DATA_DIR), transform=transform)
 train_loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
@@ -47,4 +45,4 @@ for epoch in range(EPOCHS):
 
 # === SAVE MODEL ===
 torch.save(model.state_dict(), MODEL_PATH)
-print(f"✅ Model saved to: {MODEL_PATH}")
+print(f"Model saved to: {MODEL_PATH}")

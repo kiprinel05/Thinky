@@ -144,6 +144,7 @@ class IntroPage extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 50),
                         Wrap(
                           alignment: WrapAlignment.center,
                           crossAxisAlignment: WrapCrossAlignment.center,
@@ -155,6 +156,7 @@ class IntroPage extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
+
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).push(
@@ -174,7 +176,7 @@ class IntroPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 35),
                       ],
                     ),
                   ],

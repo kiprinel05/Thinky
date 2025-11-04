@@ -13,7 +13,7 @@ BATCH_SIZE = 64
 LR = 0.001
 
 # === LOAD DATASET ===
-print("📦 Loading dataset from Hugging Face...")
+print("Loading dataset from Hugging Face...")
 ds = load_dataset("chungimungi/Colors")
 
 label_names = ds["train"].features["label"].names
@@ -42,7 +42,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
 # === TRAIN ===
-print("🚀 Training started...")
+print("Training started...")
 for epoch in range(EPOCHS):
     total_loss = 0
     for colors, labels in train_loader:
@@ -60,4 +60,4 @@ torch.save({
     "state_dict": model.state_dict(),
     "labels": label_names
 }, MODEL_PATH)
-print(f"✅ Model saved to {MODEL_PATH}")
+print(f"Model saved to {MODEL_PATH}")

@@ -1,4 +1,8 @@
 import torch
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 from config import MODEL_PATHS
 from models.shape_model.model import ShapeClassifier
 from models.color_model.model import ColorClassifier
@@ -28,9 +32,9 @@ def init_models():
     for name in MODEL_PATHS:
         try:
             _loaded_models[name] = load_model(name)
-            print(f"✅ Loaded model: {name}")
+            print(f"Loaded model: {name}")
         except Exception as e:
-            print(f"⚠️ Could not load model '{name}': {e}")
+            print(f"Could not load model '{name}': {e}")
 
 def get_model(name: str):
     return _loaded_models.get(name)

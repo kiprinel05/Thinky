@@ -1,8 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/models/auth_response.dart';
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await AuthService.register(
+        username: _usernameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+      );
+
+      if (mounted) {
+        // Navigate to home or main screen
+        // TODO: Implement home screen and routing
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Welcome, ${response.username ?? response.email}!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } on AuthError catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +102,9 @@ class RegisterPage extends StatelessWidget {
             label,
             style: GoogleFonts.alata(
               color: filled ? Colors.white : const Color(0xFF60646D),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               fontSize: 12,
-              letterSpacing: 0.2,
+              letterSpacing: 0.7,
             ),
           ),
         ],
@@ -86,6 +159,14 @@ class RegisterPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Colors.transparent),
           ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
           suffixIcon: suffix,
         );
 
@@ -136,109 +217,228 @@ class RegisterPage extends StatelessWidget {
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Create your account',
-                    style: GoogleFonts.alata(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  socialButton(
-                    leading: Image.asset(
-                      'assets/auth/icons/facebook.png',
-                      height: 20,
-                      width: 20,
-                    ),
-                    label: 'CONTINUE WITH FACEBOOK',
-                    filled: true,
-                  ),
-                  const SizedBox(height: 14),
-                  socialButton(
-                    leading: Image.asset(
-                      'assets/auth/icons/google.png',
-                      height: 20,
-                      width: 20,
-                    ),
-                    label: 'CONTINUE WITH GOOGLE',
-                    filled: false,
-                  ),
-                  orDivider(),
-                  TextField(
-                    decoration: inputDecoration(
-                      'Username',
-                      suffix: const Icon(Icons.check, color: Color(0xFF7EC18C)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: inputDecoration(
-                      'Email address',
-                      suffix: const Icon(Icons.check, color: Color(0xFF7EC18C)),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: inputDecoration(
-                      'Password',
-                      suffix: const Icon(
-                        Icons.visibility,
-                        color: Color(0xFF60646D),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      'Create your account',
+                      style: GoogleFonts.aleo(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: Color.fromRGBO(63, 64, 78, 1),
                       ),
                     ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryPurple,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
+                    const SizedBox(height: 18),
+                    socialButton(
+                      leading: Image.asset(
+                        'assets/auth/icons/facebook.png',
+                        height: 20,
+                        width: 20,
+                      ),
+                      label: 'CONTINUE WITH FACEBOOK',
+                      filled: true,
+                    ),
+                    const SizedBox(height: 14),
+                    socialButton(
+                      leading: Image.asset(
+                        'assets/auth/icons/google.png',
+                        height: 20,
+                        width: 20,
+                      ),
+                      label: 'CONTINUE WITH GOOGLE',
+                      filled: false,
+                    ),
+                    orDivider(),
+                    if (_errorMessage != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.red.shade300),
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'GET STARTED',
-                        style: GoogleFonts.alata(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Already have an account? ',
-                        style: GoogleFonts.alata(
-                          fontSize: 12,
-                          color: const Color(0xFF8A8A8F),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(
-                          'LOG IN',
-                          style: GoogleFonts.alata(
-                            color: primaryPurple,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.red.shade700),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: GoogleFonts.alata(
+                                  color: Colors.red.shade700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                ],
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: inputDecoration(
+                        'Username',
+                        suffix: _usernameController.text.isNotEmpty
+                            ? const Icon(Icons.check, color: Color(0xFF7EC18C))
+                            : null,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Username is required';
+                        }
+                        if (value.trim().length < 3) {
+                          return 'Username must be at least 3 characters';
+                        }
+                        if (value.trim().length > 50) {
+                          return 'Username must be less than 50 characters';
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: inputDecoration(
+                        'Email address',
+                        suffix: _emailController.text.isNotEmpty &&
+                                _emailController.text.contains('@')
+                            ? const Icon(Icons.check, color: Color(0xFF7EC18C))
+                            : null,
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Email is required';
+                        }
+                        if (!value.contains('@') || !value.contains('.')) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: inputDecoration(
+                        'Password',
+                        suffix: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: const Color(0xFF60646D),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscurePassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Password is required';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: inputDecoration(
+                        'Confirm password',
+                        suffix: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: const Color(0xFF60646D),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: _obscureConfirmPassword,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm your password';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 50),
+                    SizedBox(
+                      height: 56,
+                      width: 500,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleRegister,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryPurple,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text(
+                                'GET STARTED',
+                                style: GoogleFonts.alata(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Already have an account? ',
+                          style: GoogleFonts.alata(
+                            fontSize: 12,
+                            color: const Color(0xFF8A8A8F),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'LOG IN',
+                            style: GoogleFonts.alata(
+                              color: primaryPurple,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

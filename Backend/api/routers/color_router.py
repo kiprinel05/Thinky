@@ -1,12 +1,16 @@
 from fastapi import APIRouter, HTTPException
-from api.utils import get_model, get_labels
 import torch
+import sys
+from pathlib import Path
+
+# Adaugă parent directory la path pentru import
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from api.utils import get_model, get_labels
 
 router = APIRouter(prefix="/color", tags=["Color Classification"])
 
 @router.post("/predict")
 async def predict_color(r: int, g: int, b: int):
-    """Primește RGB și returnează culoarea"""
     model = get_model("color")
     labels = get_labels("color")
 

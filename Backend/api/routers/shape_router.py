@@ -2,6 +2,10 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from torchvision import transforms
 from PIL import Image
 import torch
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 from api.utils import get_model
 from config import CLASSES
 
