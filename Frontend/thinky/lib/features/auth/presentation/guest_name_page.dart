@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/models/auth_response.dart';
+import '../../../../core/widgets/animated_widgets.dart';
+import '../../welcome/presentation/welcome_page.dart';
 
 class GuestNamePage extends StatefulWidget {
   const GuestNamePage({super.key});
@@ -39,14 +41,13 @@ class _GuestNamePageState extends State<GuestNamePage> {
       );
 
       if (mounted) {
-        // Navigate to home or main screen
-        // TODO: Implement home screen and routing
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Welcome, ${response.guestName ?? 'Guest'}!'),
-            backgroundColor: Colors.green,
+        // Navigate to welcome page
+        Navigator.of(context).pushAndRemoveUntil(
+          SlidePageRoute(
+            page: WelcomePage(),
+            direction: SlideDirection.right,
           ),
+          (route) => false,
         );
       }
     } on AuthError catch (e) {
