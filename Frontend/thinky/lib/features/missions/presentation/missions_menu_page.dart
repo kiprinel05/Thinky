@@ -1,10 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 import '../../../core/widgets/animated_widgets.dart';
+import '../../../core/models/mission_models.dart';
+import '../../../core/services/mission_service.dart';
 import 'quiz_page.dart';
 
-class MissionsMenuPage extends StatelessWidget {
+class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
+
+  @override
+  State<MissionsMenuPage> createState() => _MissionsMenuPageState();
+}
+
+class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProviderStateMixin {
+  List<Mission> _missions = [];
+  bool _isLoading = true;
+  Set<int> _unlockedMissions = {}; // Track newly unlocked missions for animation
+  late AnimationController _unlockAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _unlockAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _loadMissions();
+  }
+
+  @override
+  void dispose() {
+    _unlockAnimationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadMissions() async {
+    try {
+      final response = await MissionService.getMissions();
+      setState(() {
+        _missions = response.missions;
+        _isLoading = false;
+        // Check for newly unlocked missions and trigger animation
+        final previouslyLocked = _unlockedMissions;
+        _unlockedMissions.clear();
+        for (var mission in _missions) {
+          if (!mission.isLocked && mission.progress?.isCompleted != true) {
+            _unlockedMissions.add(mission.id);
+            // If mission was previously locked and now unlocked, animate
+            if (!previouslyLocked.contains(mission.id) && _missions.length > 1) {
+              _unlockAnimationController.forward(from: 0.0);
+            }
+          }
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading missions: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +133,11 @@ class MissionsMenuPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  _buildMissionsGrid(context),
+                  _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : _buildMissionsGrid(context),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -87,67 +154,14 @@ class MissionsMenuPage extends StatelessWidget {
     final spacing = 16.0;
     final cardWidth = (screenWidth - horizontalPadding * 2 - spacing) / 2;
 
-      final missions = [
-        {
-          'type': 'mission',
-          'title': 'Introduction Quiz',
-          'backgroundColor': const Color(0xFF8E97FD),
-          'missionPath': 'quiz',
-          'height': 220.0,
-          'locked': false,
-        },
-        {
-          'type': 'mission',
-          'title': 'Geometric Shapes',
-          'backgroundColor': const Color(0xFF9B59B6),
-          'missionPath': 'geometric_shapes',
-          'height': 200.0,
-          'locked': true,
-        },
-        {
-          'type': 'placeholder',
-          'title': 'Improve Performance',
-          'backgroundColor': Colors.red.shade300,
-          'height': 180.0,
-          'locked': true,
-        },
-      {
-        'type': 'placeholder',
-        'title': 'Increase Happiness',
-        'backgroundColor': Colors.orange.shade300,
-        'height': 200.0,
-        'locked': true,
-      },
-      {
-        'type': 'placeholder',
-        'title': 'Reduce Anxiety',
-        'backgroundColor': Colors.yellow.shade300,
-        'height': 190.0,
-        'locked': true,
-      },
-      {
-        'type': 'placeholder',
-        'title': 'Personal Growth',
-        'backgroundColor': Colors.green.shade300,
-        'height': 210.0,
-        'locked': true,
-      },
-      {
-        'type': 'placeholder',
-        'title': 'Better Sleep',
-        'backgroundColor': Colors.blueGrey.shade300,
-        'height': 195.0,
-        'locked': true,
-      },
-    ];
-
     final List<Map<String, double>> positions = [];
     final List<double> columnHeights = [0.0, 0.0];
 
     final double gap = spacing;
 
-    for (int i = 0; i < missions.length; i++) {
-      final height = missions[i]['height'] as double;
+    for (int i = 0; i < _missions.length; i++) {
+      final mission = _missions[i];
+      final height = mission.height ?? 200.0;
 
       final columnIndex = columnHeights[0] <= columnHeights[1] ? 0 : 1;
 
@@ -166,43 +180,38 @@ class MissionsMenuPage extends StatelessWidget {
     return SizedBox(
       height: totalHeight,
       child: Stack(
-        children: List.generate(missions.length, (index) {
-          final mission = missions[index];
+        children: List.generate(_missions.length, (index) {
+          final mission = _missions[index];
           final position = positions[index];
-
-          final isLocked = mission['locked'] as bool? ?? false;
+          final isNewlyUnlocked = _unlockedMissions.contains(mission.id);
 
           return Positioned(
             left: position['x'],
             top: position['y'],
             width: position['width'],
             height: position['height'],
-            child: mission['type'] == 'mission'
-                ? _buildMissionCard(
-                    context: context,
-                    title: mission['title'] as String,
-                    backgroundColor: mission['backgroundColor'] as Color,
-                    missionPath: mission['missionPath'] as String,
-                    isLocked: isLocked,
-                    onTap: isLocked
-                        ? null
-                        : () {
-                            if (mission['missionPath'] == 'quiz') {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const QuizPage(),
-                                ),
-                              );
-                            } else if (mission['missionPath'] == 'geometric_shapes') {
-                              // TODO: Navigate to Geometric Shapes mission
-                            }
-                          },
-                  )
-                : _buildPlaceholderCard(
-                    title: mission['title'] as String,
-                    backgroundColor: mission['backgroundColor'] as Color,
-                    isLocked: isLocked,
-                  ),
+            child: _buildMissionCard(
+              context: context,
+              mission: mission,
+              isLocked: mission.isLocked,
+              isNewlyUnlocked: isNewlyUnlocked,
+              onTap: mission.isLocked
+                  ? null
+                  : () {
+                      if (mission.missionPath == 'quiz') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const QuizPage(),
+                          ),
+                        ).then((_) {
+                          // Reload missions when returning from quiz
+                          _loadMissions();
+                        });
+                      } else if (mission.missionPath == 'geometric_shapes') {
+                        // TODO: Navigate to Geometric Shapes mission
+                      }
+                    },
+            ),
           );
         }),
       ),
@@ -211,14 +220,16 @@ class MissionsMenuPage extends StatelessWidget {
 
   Widget _buildMissionCard({
     required BuildContext context,
-    required String title,
-    required Color backgroundColor,
-    required String missionPath,
+    required Mission mission,
     required bool isLocked,
+    required bool isNewlyUnlocked,
     VoidCallback? onTap,
   }) {
-    return ScaleInWidget(
-      delay: const Duration(milliseconds: 400),
+    final backgroundColor = mission.backgroundColorAsColor;
+    final missionPath = mission.missionPath;
+    
+    Widget cardWidget = ScaleInWidget(
+      delay: Duration(milliseconds: 400 + (mission.orderIndex * 100)),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -302,7 +313,7 @@ class MissionsMenuPage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    title,
+                    mission.title,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 14,
@@ -344,6 +355,22 @@ class MissionsMenuPage extends StatelessWidget {
         ),
       ),
     );
+    
+    // Add unlock animation if mission is newly unlocked
+    if (isNewlyUnlocked) {
+      return AnimatedBuilder(
+        animation: _unlockAnimationController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: 1.0 + (_unlockAnimationController.value * 0.15),
+            child: child,
+          );
+        },
+        child: cardWidget,
+      );
+    }
+    
+    return cardWidget;
   }
 
   Widget _buildPlaceholderCard({

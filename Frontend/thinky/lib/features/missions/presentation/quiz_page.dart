@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/services/api_client.dart';
+import '../../../core/services/mission_service.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -132,6 +133,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
           _showResult = true;
           _isSubmitting = false;
         });
+        
+        // Mark quiz mission as completed (assuming quiz is the first mission with order_index 0)
+        try {
+          await MissionService.completeMission(1, score: _quizResult!.percentage);
+        } catch (e) {
+          // Log error but don't block UI
+          print('Error completing mission: $e');
+        }
       }
     } catch (e) {
       setState(() {
@@ -881,7 +890,8 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          // Navigate back to missions menu and refresh
+                          Navigator.of(context).pop(true);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

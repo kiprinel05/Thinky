@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import shape_router, color_router, auth_router, quiz_router
+from api.routers import shape_router, color_router, auth_router, quiz_router, mission_router
 from api.utils import init_models
 from database import init_db
+# Import all models to ensure they are registered with SQLAlchemy Base before init_db()
+from models.user_model import User
+from models.mission_model import Mission, MissionProgress, QuizResult
 
 app = FastAPI(title="Thinky Classification API")
 
@@ -23,7 +26,8 @@ app.include_router(auth_router.router)
 app.include_router(shape_router.router)
 app.include_router(color_router.router)
 app.include_router(quiz_router.router)
+app.include_router(mission_router.router)
 
 @app.get("/")
 def root():
-    return {"message": "Thinky API is running with Shape + Color Models + Authentication + Quiz!"}
+    return {"message": "Thinky API is running with Shape + Color Models + Authentication + Quiz + Missions!"}

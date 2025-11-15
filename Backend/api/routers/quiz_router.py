@@ -5,7 +5,10 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 from database import get_db
+from models.user_model import User
+from models.mission_model import QuizResult as QuizResultModel
 from api.schemas.quiz_schemas import QuizResponse, QuizSubmission, QuizResult, Question, AnswerOption
+from api.dependencies import get_current_user
 
 router = APIRouter(prefix="/quiz", tags=["Quiz"])
 
@@ -91,7 +94,11 @@ async def get_quiz_questions():
     )
 
 @router.post("/submit", response_model=QuizResult)
-async def submit_quiz(submission: QuizSubmission, db: Session = Depends(get_db)):
+async def submit_quiz(
+    submission: QuizSubmission,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Submit quiz answers and get results"""
     correct_count = 0
     total = len(QUIZ_QUESTIONS)
@@ -106,6 +113,21 @@ async def submit_quiz(submission: QuizSubmission, db: Session = Depends(get_db))
     score = correct_count
     percentage = (correct_count / total) * 100 if total > 0 else 0
     incorrect_count = total - correct_count
+    
+    # Save quiz result to database
+    quiz_result = QuizResultModel(
+        user_id=current_user.id,
+        quiz_type="introduction",
+        score=score,
+        total_questions=total,
+        percentage=percentage,
+        correct_answers=correct_count,
+        incorrect_answers=incorrect_count
+    )
+    
+    db.add(quiz_result)
+    db.commit()
+    db.refresh(quiz_result)
     
     return QuizResult(
         score=score,
