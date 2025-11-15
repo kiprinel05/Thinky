@@ -162,6 +162,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: const Color(0xFF9AA2FD),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -194,6 +202,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     if (_questions.isEmpty) {
       return Scaffold(
         backgroundColor: const Color(0xFF9AA2FD),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         body: Center(
           child: Text(
             'No questions available',
@@ -205,6 +221,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: const Color(0xFF9AA2FD),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -255,6 +279,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   Widget _buildIntroductionScreen() {
     return Scaffold(
       backgroundColor: const Color(0xFF9AA2FD),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -756,6 +788,14 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: const Color(0xFF9AA2FD),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
