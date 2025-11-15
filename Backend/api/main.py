@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import shape_router, color_router, auth_router
+from api.routers import shape_router, color_router, auth_router, quiz_router
 from api.utils import init_models
 from database import init_db
 
@@ -22,7 +22,8 @@ def startup_event():
 app.include_router(auth_router.router)
 app.include_router(shape_router.router)
 app.include_router(color_router.router)
+app.include_router(quiz_router.router)
 
 @app.get("/")
 def root():
-    return {"message": "Thinky API is running with Shape + Color Models + Authentication!"}
+    return {"message": "Thinky API is running with Shape + Color Models + Authentication + Quiz!"}

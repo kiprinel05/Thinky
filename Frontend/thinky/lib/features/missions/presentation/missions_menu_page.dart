@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/animated_widgets.dart';
+import 'quiz_page.dart';
 
 class MissionsMenuPage extends StatelessWidget {
   const MissionsMenuPage({super.key});
@@ -86,22 +87,30 @@ class MissionsMenuPage extends StatelessWidget {
     final spacing = 16.0;
     final cardWidth = (screenWidth - horizontalPadding * 2 - spacing) / 2;
 
-    final missions = [
-      {
-        'type': 'mission',
-        'title': 'Geometric Shapes',
-        'backgroundColor': const Color(0xFF8E97FD),
-        'missionPath': 'geometric_shapes',
-        'height': 220.0,
-        'locked': false,
-      },
-      {
-        'type': 'placeholder',
-        'title': 'Improve Performance',
-        'backgroundColor': Colors.red.shade300,
-        'height': 180.0,
-        'locked': true,
-      },
+      final missions = [
+        {
+          'type': 'mission',
+          'title': 'Introduction Quiz',
+          'backgroundColor': const Color(0xFF8E97FD),
+          'missionPath': 'quiz',
+          'height': 220.0,
+          'locked': false,
+        },
+        {
+          'type': 'mission',
+          'title': 'Geometric Shapes',
+          'backgroundColor': const Color(0xFF9B59B6),
+          'missionPath': 'geometric_shapes',
+          'height': 200.0,
+          'locked': true,
+        },
+        {
+          'type': 'placeholder',
+          'title': 'Improve Performance',
+          'backgroundColor': Colors.red.shade300,
+          'height': 180.0,
+          'locked': true,
+        },
       {
         'type': 'placeholder',
         'title': 'Increase Happiness',
@@ -178,7 +187,15 @@ class MissionsMenuPage extends StatelessWidget {
                     onTap: isLocked
                         ? null
                         : () {
-                            // TODO: Navigate to Geometric Shapes mission
+                            if (mission['missionPath'] == 'quiz') {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const QuizPage(),
+                                ),
+                              );
+                            } else if (mission['missionPath'] == 'geometric_shapes') {
+                              // TODO: Navigate to Geometric Shapes mission
+                            }
                           },
                   )
                 : _buildPlaceholderCard(
