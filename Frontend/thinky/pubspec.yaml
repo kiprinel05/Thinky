@@ -29,3 +29,4 @@ flutter:
     - assets/auth/icons/
     - assets/auth/guest/
     - assets/welcome/
+    - assets/missions/

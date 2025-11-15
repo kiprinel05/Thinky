@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/services/auth_service.dart';
 import '../../onboarding/presentation/intro_page.dart';
+import '../../missions/presentation/missions_menu_page.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -30,7 +31,7 @@ class _WelcomePageState extends State<WelcomePage> {
     } else {
       Navigator.of(
         context,
-      ).pushReplacement(FadePageRoute(page: const IntroPage()));
+      ).pushReplacement(FadePageRoute(page: const MissionsMenuPage()));
     }
   }
 
