@@ -7,11 +7,11 @@ class Mission(Base):
     __tablename__ = "missions"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    mission_path = Column(String, unique=True, nullable=False, index=True)
+    title = Column(String(200), nullable=False)
+    mission_path = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(Text, nullable=True)
     order_index = Column(Integer, nullable=False, default=0)
-    background_color = Column(String, nullable=True)  # Hex color
+    background_color = Column(String(20), nullable=True)  # Hex color
     height = Column(Float, nullable=True, default=200.0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -44,7 +44,7 @@ class QuizResult(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    quiz_type = Column(String, nullable=False, default="introduction")  # e.g., "introduction", "assessment"
+    quiz_type = Column(String(50), nullable=False, default="introduction")  # e.g., "introduction", "assessment"
     score = Column(Integer, nullable=False)
     total_questions = Column(Integer, nullable=False)
     percentage = Column(Float, nullable=False)

@@ -5,6 +5,7 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/models/mission_models.dart';
 import '../../../core/services/mission_service.dart';
 import 'quiz_page.dart';
+import 'pixy_learns_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
@@ -206,6 +207,16 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                         ).then((_) {
                           // Reload missions when returning from quiz
                           _loadMissions();
+                        });
+                      } else if (mission.missionPath == 'pixy_learns') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PixyLearnsPage(),
+                          ),
+                        ).then((shouldReload) {
+                          if (shouldReload == true) {
+                            _loadMissions();
+                          }
                         });
                       } else if (mission.missionPath == 'geometric_shapes') {
                         // TODO: Navigate to Geometric Shapes mission

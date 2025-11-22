@@ -5,22 +5,24 @@ import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/services/api_client.dart';
 import '../../../core/services/mission_service.dart';
 
-class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+class PixyLearnsPage extends StatefulWidget {
+  const PixyLearnsPage({super.key});
 
   @override
-  State<QuizPage> createState() => _QuizPageState();
+  State<PixyLearnsPage> createState() => _PixyLearnsPageState();
 }
 
-class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
-  List<Question> _questions = [];
-  int _currentQuestionIndex = 0;
-  Map<int, int> _selectedAnswers = {};
+class _PixyLearnsPageState extends State<PixyLearnsPage>
+    with TickerProviderStateMixin {
+  List<LearningImage> _images = [];
+  Map<String, String> _labels = {};
   bool _isLoading = true;
   bool _showIntroduction = true;
-  bool _showResult = false;
-  QuizResult? _quizResult;
-  bool _isSubmitting = false;
+  bool _showCompletion = false;
+  int _learnedExamples = 0;
+  int _totalExamples = 0;
+  double _progressPercentage = 0.0;
+  List<String> _categories = [];
   late AnimationController _pixyAnimationController;
   late Animation<double> _pixyScaleAnimation;
 
@@ -39,7 +41,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
       ),
     );
 
-    _loadQuestions();
+    _loadImages();
   }
 
   @override
@@ -48,108 +50,131 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _loadQuestions() async {
+  Future<void> _loadImages() async {
     try {
-      final response = await ApiClient.get('/quiz/questions');
+      final response = await ApiClient.get('/pixy-learns/images');
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _questions = (data['questions'] as List)
-              .map((q) => Question.fromJson(q))
+          _images = (data['images'] as List)
+              .map((img) => LearningImage.fromJson(img))
               .toList();
+          _totalExamples = data['total'] ?? _images.length;
+          _isLoading = false;
+        });
+      } else {
+        // Fallback: use hardcoded images if API fails
+        setState(() {
+          _images = [
+            LearningImage(id: 'apple1', url: 'apple'),
+            LearningImage(id: 'apple2', url: 'apple'),
+            LearningImage(id: 'cat1', url: 'cat'),
+            LearningImage(id: 'cat2', url: 'cat'),
+            LearningImage(id: 'apple3', url: 'apple'),
+            LearningImage(id: 'cat3', url: 'cat'),
+          ];
+          _totalExamples = _images.length;
           _isLoading = false;
         });
       }
     } catch (e) {
+      // Fallback: use hardcoded images if API fails
       setState(() {
+        _images = [
+          LearningImage(id: 'apple1', url: 'apple'),
+          LearningImage(id: 'apple2', url: 'apple'),
+          LearningImage(id: 'cat1', url: 'cat'),
+          LearningImage(id: 'cat2', url: 'cat'),
+          LearningImage(id: 'apple3', url: 'apple'),
+          LearningImage(id: 'cat3', url: 'cat'),
+        ];
+        _totalExamples = _images.length;
         _isLoading = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading questions: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
-  void _selectAnswer(int answerId) {
+  void _selectLabel(String imageId, String label) {
     setState(() {
-      _selectedAnswers[_currentQuestionIndex] = answerId;
+      _labels[imageId] = label;
     });
-    _pixyAnimationController.forward(from: 0.0);
   }
 
-  void _startQuiz() {
+  void _startMission() {
     setState(() {
       _showIntroduction = false;
     });
   }
 
-  void _nextQuestion() {
-    if (_currentQuestionIndex < _questions.length - 1) {
-      setState(() {
-        _currentQuestionIndex++;
-      });
-    } else {
-      _submitQuiz();
+  Future<void> _submitLabels() async {
+    if (_labels.length < _images.length) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please label all images before submitting'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
     }
-  }
-
-  void _previousQuestion() {
-    if (_currentQuestionIndex > 0) {
-      setState(() {
-        _currentQuestionIndex--;
-      });
-    }
-  }
-
-  Future<void> _submitQuiz() async {
-    setState(() {
-      _isSubmitting = true;
-    });
 
     try {
-      final answers = _questions.asMap().entries.map((entry) {
-        final questionIndex = entry.key;
-        final question = entry.value;
-        final selectedAnswerId = _selectedAnswers[questionIndex] ?? 0;
-        return {'question_id': question.id, 'answer_id': selectedAnswerId};
-      }).toList();
+      final labels = _labels.entries
+          .map((entry) => {'image_id': entry.key, 'label': entry.value})
+          .toList();
 
-      final response = await ApiClient.post('/quiz/submit', {
-        'answers': answers,
+      final response = await ApiClient.post('/pixy-learns/label', {
+        'labels': labels,
       });
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _quizResult = QuizResult.fromJson(data);
-          _showResult = true;
-          _isSubmitting = false;
+          _learnedExamples = data['learned_examples'];
+          _progressPercentage = data['progress_percentage'].toDouble();
+          _categories = List<String>.from(data['categories']);
+
+          if (_learnedExamples == _totalExamples) {
+            _showCompletion = true;
+          }
         });
 
-        // Mark quiz mission as completed (assuming quiz is the first mission with order_index 0)
-        try {
-          await MissionService.completeMission(
-            1,
-            score: _quizResult!.percentage,
+        // Show feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Pixy learned ${data['learned_examples']} examples!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Endpoint not found. Please restart the backend server.',
+              ),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
           );
-        } catch (e) {
-          // Log error but don't block UI
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${response.statusCode} - ${response.body}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
         }
       }
-    } catch (e) {
-      setState(() {
-        _isSubmitting = false;
-      });
+    } catch (e, stackTrace) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error submitting quiz: $e'),
+            content: Text('Error submitting labels: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -160,7 +185,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: const Color(0xFF9AA2FD),
+        backgroundColor: const Color(0xFFFF6B6B),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -178,7 +203,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 24),
               Text(
-                'Loading questions...',
+                'Loading images...',
                 style: GoogleFonts.alata(color: Colors.white, fontSize: 16),
               ),
             ],
@@ -191,32 +216,12 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
       return _buildIntroductionScreen();
     }
 
-    if (_showResult && _quizResult != null) {
-      return _buildResultScreen();
-    }
-
-    if (_questions.isEmpty) {
-      return Scaffold(
-        backgroundColor: const Color(0xFF9AA2FD),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
-        body: Center(
-          child: Text(
-            'No questions available',
-            style: GoogleFonts.alata(color: Colors.white),
-          ),
-        ),
-      );
+    if (_showCompletion) {
+      return _buildCompletionScreen();
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF9AA2FD),
+      backgroundColor: const Color(0xFFFF6B6B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -226,45 +231,32 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
         ),
       ),
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            // Background decoration
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Image.asset(
-                'welcome/page1/background_welcome.png',
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.bottomCenter,
-                width: double.infinity,
-              ),
-            ),
-            // Pixy mascot as background
-            _buildPixyMascot(),
+            // Progress section
+            _buildProgressSection(),
             // Main content
-            Column(
-              children: [
-                // Progress bar
-                _buildProgressBar(),
-                // Main content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 180),
-                        // Question card
-                        _buildQuestionCard(),
-                        const SizedBox(height: 24),
-                        // Navigation buttons
-                        _buildNavigationButtons(),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    // Pixy mascot
+                    _buildPixyMascot(),
+                    const SizedBox(height: 24),
+                    // Instructions
+                    _buildInstructions(),
+                    const SizedBox(height: 24),
+                    // Images grid
+                    _buildImagesGrid(),
+                    const SizedBox(height: 24),
+                    // Submit button
+                    _buildSubmitButton(),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -274,7 +266,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
 
   Widget _buildIntroductionScreen() {
     return Scaffold(
-      backgroundColor: const Color(0xFF9AA2FD),
+      backgroundColor: const Color(0xFFFF6B6B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -304,7 +296,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   const SizedBox(height: 40),
-                  // Pixy mascot with enhanced styling
+                  // Pixy mascot
                   ScaleInWidget(
                     delay: const Duration(milliseconds: 300),
                     child: Container(
@@ -336,7 +328,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 48),
-                  // Introduction text with enhanced styling
+                  // Introduction text
                   FadeInWidget(
                     delay: const Duration(milliseconds: 400),
                     child: Container(
@@ -353,7 +345,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                         ),
                       ),
                       child: Text(
-                        "Let's see what you know about AI!",
+                        "How does Pixy learn?",
                         textAlign: TextAlign.center,
                         style: GoogleFonts.alata(
                           fontSize: 26,
@@ -371,7 +363,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        "This is just a quick introduction to understand your knowledge. Don't worry, there are no wrong answers!",
+                        "Help Pixy learn by labeling images! Show Pixy examples of apples and cats, and watch as it learns from them.",
                         textAlign: TextAlign.center,
                         style: GoogleFonts.alata(
                           fontSize: 15,
@@ -383,7 +375,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 60),
-                  // Start button with enhanced styling
+                  // Start button
                   FadeInWidget(
                     delay: const Duration(milliseconds: 600),
                     child: Container(
@@ -401,7 +393,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _startQuiz,
+                          onPressed: _startMission,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 22),
@@ -414,9 +406,9 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'START QUIZ',
+                                'START TEACHING',
                                 style: GoogleFonts.alata(
-                                  color: const Color(0xFF8E97FD),
+                                  color: const Color(0xFFFF6B6B),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 17,
                                   letterSpacing: 1,
@@ -425,7 +417,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                               const SizedBox(width: 12),
                               Icon(
                                 Icons.arrow_forward_rounded,
-                                color: const Color(0xFF8E97FD),
+                                color: const Color(0xFFFF6B6B),
                                 size: 20,
                               ),
                             ],
@@ -444,17 +436,16 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildProgressBar() {
-    final progress = (_currentQuestionIndex + 1) / _questions.length;
+  Widget _buildProgressSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+                'Learning Progress',
                 style: GoogleFonts.alata(
                   color: Colors.white,
                   fontSize: 14,
@@ -471,7 +462,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${(progress * 100).toInt()}%',
+                  '${_learnedExamples}/${_totalExamples}',
                   style: GoogleFonts.alata(
                     color: Colors.white,
                     fontSize: 12,
@@ -494,7 +485,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                   ),
                 ),
                 FractionallySizedBox(
-                  widthFactor: progress,
+                  widthFactor: _progressPercentage / 100,
                   child: Container(
                     height: 10,
                     decoration: BoxDecoration(
@@ -521,271 +512,206 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   }
 
   Widget _buildPixyMascot() {
-    return Positioned(
-      top: 40,
-      left: 0,
-      right: 0,
-      child: IgnorePointer(
-        child: Center(
-          child: FadeInWidget(
-            delay: const Duration(milliseconds: 400),
-            child: Image.asset(
-              'welcome/page2/thinking.png',
-              height: MediaQuery.of(context).size.height * 0.4,
-              fit: BoxFit.contain,
-            ),
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 200),
+      child: Image.asset(
+        'welcome/page2/thinking.png',
+        height: 120,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 300),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        ),
+        child: Text(
+          'Label each image as "apple" or "cat" to help Pixy learn!',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.alata(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+            height: 1.4,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildQuestionCard() {
-    final question = _questions[_currentQuestionIndex];
-    final selectedAnswerId = _selectedAnswers[_currentQuestionIndex];
+  Widget _buildImagesGrid() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.85,
+      ),
+      itemCount: _images.length,
+      itemBuilder: (context, index) {
+        final image = _images[index];
+        final selectedLabel = _labels[image.id];
+        return _buildImageCard(image, selectedLabel);
+      },
+    );
+  }
 
+  Widget _buildImageCard(LearningImage image, String? selectedLabel) {
     return FadeInWidget(
-      delay: const Duration(milliseconds: 200),
+      delay: Duration(milliseconds: 400 + (image.id.hashCode % 200)),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-              spreadRadius: 0,
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Question number badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: const Color(0xFF8E97FD).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                'Question ${_currentQuestionIndex + 1}',
-                style: GoogleFonts.alata(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF8E97FD),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Question text
-            Text(
-              question.question,
-              style: GoogleFonts.alata(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF222222),
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Answer options
-            ...question.options.asMap().entries.map((entry) {
-              final index = entry.key;
-              final option = entry.value;
-              final isSelected = selectedAnswerId == option.id;
-
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 300 + (index * 100)),
-                curve: Curves.easeOut,
-                builder: (context, value, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Opacity(opacity: value, child: child),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
-                    onTap: () => _selectAnswer(option.id),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: isSelected
-                            ? LinearGradient(
-                                colors: [
-                                  const Color(0xFF8E97FD),
-                                  const Color(0xFF9AA2FD),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
-                        color: isSelected ? null : const Color(0xFFF2F3F7),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.transparent
-                              : const Color(0xFFE6E7EB),
-                          width: 2,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFF8E97FD,
-                                  ).withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
-                                  spreadRadius: 0,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Row(
-                        children: [
-                          // Radio button indicator
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFFB7BAC3),
-                                width: 2.5,
-                              ),
-                            ),
-                            child: isSelected
-                                ? const Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: Color(0xFF8E97FD),
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 16),
-                          // Answer text
-                          Expanded(
-                            child: Text(
-                              option.text,
-                              style: GoogleFonts.alata(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF222222),
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+            // Image
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
                 ),
-              );
-            }).toList(),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  child: Image.asset(
+                    'missions/pixy_learns/images/${image.id}.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback to text if image not found
+                      return Center(
+                        child: Text(
+                          image.url.toUpperCase(),
+                          style: GoogleFonts.alata(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            // Label buttons
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildLabelButton(
+                      'apple',
+                      selectedLabel == 'apple',
+                      () => _selectLabel(image.id, 'apple'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildLabelButton(
+                      'cat',
+                      selectedLabel == 'cat',
+                      () => _selectLabel(image.id, 'cat'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavigationButtons() {
-    final hasSelection = _selectedAnswers.containsKey(_currentQuestionIndex);
-    final isLastQuestion = _currentQuestionIndex == _questions.length - 1;
-    final showPrevious = _currentQuestionIndex > 0;
-
-    return Row(
-      children: [
-        if (showPrevious) ...[
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _previousQuestion,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                side: const BorderSide(color: Colors.white, width: 2.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                'PREVIOUS',
-                style: GoogleFonts.alata(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-        ],
-        Expanded(
-          child: ElevatedButton(
-            onPressed: hasSelection
-                ? (_isSubmitting ? null : _nextQuestion)
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: hasSelection
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.5),
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              elevation: hasSelection ? 8 : 0,
-              shadowColor: Colors.white.withOpacity(0.3),
-            ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFF8E97FD),
-                      ),
-                    ),
-                  )
-                : Text(
-                    isLastQuestion ? 'SUBMIT' : 'NEXT',
-                    style: GoogleFonts.alata(
-                      color: hasSelection
-                          ? const Color(0xFF8E97FD)
-                          : Colors.white.withOpacity(0.7),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+  Widget _buildLabelButton(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFF6B6B) : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFF6B6B) : Colors.grey.shade300,
+            width: 2,
           ),
         ),
-      ],
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.alata(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : Colors.grey.shade700,
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildResultScreen() {
-    final result = _quizResult!;
-    final percentage = result.percentage;
-    final isExcellent = percentage >= 80;
-    final isGood = percentage >= 60;
+  Widget _buildSubmitButton() {
+    final allLabeled = _labels.length == _images.length;
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 500),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: allLabeled ? _submitLabels : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: allLabeled
+                ? Colors.white
+                : Colors.white.withOpacity(0.5),
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            elevation: allLabeled ? 8 : 0,
+            shadowColor: Colors.white.withOpacity(0.3),
+          ),
+          child: Text(
+            'TEACH PIXY',
+            style: GoogleFonts.alata(
+              color: allLabeled
+                  ? const Color(0xFFFF6B6B)
+                  : Colors.grey.shade400,
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget _buildCompletionScreen() {
     return Scaffold(
-      backgroundColor: const Color(0xFF9AA2FD),
+      backgroundColor: const Color(0xFFFF6B6B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -815,39 +741,26 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   const SizedBox(height: 60),
-                  // Pixy mascot - simple and clean
+                  // Pixy mascot
                   ScaleInWidget(
                     delay: const Duration(milliseconds: 300),
                     child: Image.asset(
-                      isExcellent
-                          ? 'welcome/page1/hello.png'
-                          : 'welcome/page2/thinking.png',
+                      'welcome/page1/hello.png',
                       height: 180,
                       fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Result title - simple text
+                  // Success message
                   FadeInWidget(
                     delay: const Duration(milliseconds: 400),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          isExcellent
-                              ? '🎉'
-                              : isGood
-                              ? '👍'
-                              : '💪',
-                          style: const TextStyle(fontSize: 32),
-                        ),
+                        const Text('🎉', style: TextStyle(fontSize: 32)),
                         const SizedBox(width: 12),
                         Text(
-                          isExcellent
-                              ? 'Excellent!'
-                              : isGood
-                              ? 'Good Job!'
-                              : 'Keep Learning!',
+                          'Great Job!',
                           style: GoogleFonts.alata(
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
@@ -858,7 +771,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Score display - clean white card
+                  // Progress display
                   FadeInWidget(
                     delay: const Duration(milliseconds: 500),
                     child: Container(
@@ -881,11 +794,11 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                       child: Column(
                         children: [
                           Text(
-                            '${percentage.toInt()}%',
+                            'Pixy learned ${_learnedExamples} examples!',
                             style: GoogleFonts.alata(
-                              fontSize: 56,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF8E97FD),
+                              color: const Color(0xFFFF6B6B),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -895,15 +808,15 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF2F3F7),
+                              color: const Color(0xFFFF6B6B).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              '${result.correctAnswers} out of ${result.totalQuestions} correct',
+                              'Categories: ${_categories.join(", ")}',
                               style: GoogleFonts.alata(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF60646D),
+                                color: const Color(0xFFFF6B6B),
                               ),
                             ),
                           ),
@@ -912,11 +825,11 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // Message text
+                  // Message
                   FadeInWidget(
                     delay: const Duration(milliseconds: 600),
                     child: Text(
-                      'Great! Now we know what you already know about AI. Let\'s start learning together!',
+                      'Pixy now understands the difference between apples and cats! This is how AI learns from examples.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.alata(
                         fontSize: 15,
@@ -934,7 +847,6 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigate back to missions menu and refresh
                           Navigator.of(context).pop(true);
                         },
                         style: ElevatedButton.styleFrom(
@@ -951,7 +863,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                             Text(
                               'CONTINUE TO MISSIONS',
                               style: GoogleFonts.alata(
-                                color: const Color(0xFF8E97FD),
+                                color: const Color(0xFFFF6B6B),
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                                 letterSpacing: 0.5,
@@ -960,7 +872,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                             const SizedBox(width: 10),
                             Icon(
                               Icons.arrow_forward_rounded,
-                              color: const Color(0xFF8E97FD),
+                              color: const Color(0xFFFF6B6B),
                               size: 18,
                             ),
                           ],
@@ -980,69 +892,16 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
 }
 
 // Data models
-class Question {
-  final int id;
-  final String question;
-  final List<AnswerOption> options;
-  final int correctAnswerId;
-  final String explanation;
+class LearningImage {
+  final String id;
+  final String url;
 
-  Question({
-    required this.id,
-    required this.question,
-    required this.options,
-    required this.correctAnswerId,
-    required this.explanation,
-  });
+  LearningImage({required this.id, required this.url});
 
-  factory Question.fromJson(Map<String, dynamic> json) {
-    return Question(
-      id: json['id'],
-      question: json['question'],
-      options: (json['options'] as List)
-          .map((o) => AnswerOption.fromJson(o))
-          .toList(),
-      correctAnswerId: json['correct_answer_id'],
-      explanation: json['explanation'],
-    );
+  factory LearningImage.fromJson(Map<String, dynamic> json) {
+    return LearningImage(id: json['id'], url: json['url']);
   }
 }
 
-class AnswerOption {
-  final int id;
-  final String text;
-
-  AnswerOption({required this.id, required this.text});
-
-  factory AnswerOption.fromJson(Map<String, dynamic> json) {
-    return AnswerOption(id: json['id'], text: json['text']);
-  }
-}
-
-class QuizResult {
-  final int score;
-  final int totalQuestions;
-  final double percentage;
-  final int correctAnswers;
-  final int incorrectAnswers;
-
-  QuizResult({
-    required this.score,
-    required this.totalQuestions,
-    required this.percentage,
-    required this.correctAnswers,
-    required this.incorrectAnswers,
-  });
-
-  factory QuizResult.fromJson(Map<String, dynamic> json) {
-    return QuizResult(
-      score: json['score'],
-      totalQuestions: json['total_questions'],
-      percentage: json['percentage'].toDouble(),
-      correctAnswers: json['correct_answers'],
-      incorrectAnswers: json['incorrect_answers'],
-    );
-  }
-}
-
-// FA PAGINA DE RASPUNSURI SI TRY AGAIN + EXPLICATIE
+// PROFESORUL dupa teaches
+// de studiat daca nu e nici mar nici pisica? ce face pixy?

@@ -39,7 +39,6 @@ class _GuestNamePageState extends State<GuestNamePage> {
       final response = await AuthService.registerGuest(
         name: _nameController.text.trim(),
       );
-
       if (mounted) {
         // Navigate to welcome page
         Navigator.of(context).pushAndRemoveUntil(
@@ -51,13 +50,37 @@ class _GuestNamePageState extends State<GuestNamePage> {
         );
       }
     } on AuthError catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      });
+      if (mounted) {
+        String displayMessage = e.message;
+        if (e.message.contains('timeout') || e.message.contains('not responding')) {
+          displayMessage = 'Backend-ul nu răspunde. Verifică dacă serverul rulează pe http://localhost:8000';
+        }
+        setState(() {
+          _errorMessage = displayMessage;
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(displayMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 8),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An unexpected error occurred: ${e.toString()}';
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {

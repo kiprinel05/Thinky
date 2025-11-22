@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,11 +31,27 @@ class ApiClient {
 
   static Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
     final headers = await _getHeaders();
-    return await http.post(
-      Uri.parse('${AppConfig.apiBaseUrl}$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    final url = '${AppConfig.apiBaseUrl}$endpoint';
+    final bodyJson = jsonEncode(body);
+    
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: bodyJson,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException('Request timeout after 10 seconds');
+        },
+      );
+      
+      return response;
+    } on TimeoutException {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   static Future<http.Response> put(String endpoint, Map<String, dynamic> body) async {

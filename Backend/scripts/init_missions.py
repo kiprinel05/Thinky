@@ -17,12 +17,6 @@ def init_missions():
     db = SessionLocal()
     
     try:
-        # Check if missions already exist
-        existing = db.query(Mission).first()
-        if existing:
-            print("Missions already initialized. Skipping...")
-            return
-        
         missions_data = [
             {
                 "title": "Introduction Quiz",
@@ -34,22 +28,36 @@ def init_missions():
                 "is_active": True
             },
             {
-                "title": "Geometric Shapes",
-                "mission_path": "geometric_shapes",
-                "description": "Learn to recognize geometric shapes",
+                "title": "How does Pixy learn?",
+                "mission_path": "pixy_learns",
+                "description": "Explain how AI models learn from examples",
                 "order_index": 1,
-                "background_color": "#9B59B6",
+                "background_color": "#FF6B6B",
                 "height": 200.0,
                 "is_active": True
             },
         ]
         
+        added_count = 0
         for mission_data in missions_data:
-            mission = Mission(**mission_data)
-            db.add(mission)
+            # Check if mission with this path already exists
+            existing = db.query(Mission).filter(
+                Mission.mission_path == mission_data["mission_path"]
+            ).first()
+            
+            if not existing:
+                mission = Mission(**mission_data)
+                db.add(mission)
+                added_count += 1
+                print(f"Added mission: {mission_data['title']}")
+            else:
+                print(f"Mission '{mission_data['title']}' already exists. Skipping...")
         
         db.commit()
-        print(f"Successfully initialized {len(missions_data)} missions!")
+        if added_count > 0:
+            print(f"Successfully added {added_count} new mission(s)!")
+        else:
+            print("All missions already exist in database.")
         
     except Exception as e:
         print(f"Error initializing missions: {e}")

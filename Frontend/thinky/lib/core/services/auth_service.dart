@@ -129,6 +129,11 @@ class AuthService {
         {
           'name': name,
         },
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw AuthError.fromString('Request timeout: Server is not responding');
+        },
       );
 
       if (response.statusCode == 201) {
@@ -136,11 +141,22 @@ class AuthService {
         await saveAuthData(authResponse);
         return authResponse;
       } else {
-        final errorData = jsonDecode(response.body);
-        throw AuthError.fromJson(errorData);
+        String errorMessage = 'Unknown error';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['detail'] ?? errorData.toString();
+        } catch (e) {
+          errorMessage = 'Server error: ${response.statusCode}';
+        }
+        throw AuthError.fromString(errorMessage);
       }
     } catch (e) {
-      if (e is AuthError) rethrow;
+      if (e is AuthError) {
+        rethrow;
+      }
+      if (e.toString().contains('timeout') || e.toString().contains('TimeoutException')) {
+        throw AuthError.fromString('Server is not responding');
+      }
       throw AuthError.fromString('Network error: ${e.toString()}');
     }
   }
