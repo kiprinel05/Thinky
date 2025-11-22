@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../models/auth_response.dart';
 import 'api_client.dart';
+import 'app_state_service.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
@@ -60,6 +61,9 @@ class AuthService {
     await prefs.remove(_emailKey);
     await prefs.remove(_isGuestKey);
     await prefs.remove(_guestNameKey);
+    // Șterge și starea aplicației pentru a forța welcome pages la următoarea autentificare
+    // (opțional - poți comenta dacă vrei să păstrezi că utilizatorul a văzut welcome)
+    // await AppStateService.clearAppState();
   }
 
   static Future<AuthResponse> register({

@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/models/mission_models.dart';
 import '../../../core/services/mission_service.dart';
+import '../../../core/services/app_state_service.dart';
+import '../../auth/presentation/profile_page.dart';
 import 'quiz_page.dart';
 import 'pixy_learns_page.dart';
 
@@ -109,29 +111,72 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 200),
-                    child: Text(
-                      "Let's start teaching Pixy simple things!",
-                      style: GoogleFonts.alata(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF222222),
-                        height: 1.2,
+                  // Header with title and profile button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FadeInWidget(
+                              delay: const Duration(milliseconds: 200),
+                              child: Text(
+                                "Let's start teaching Pixy simple things!",
+                                style: GoogleFonts.alata(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF222222),
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            FadeInWidget(
+                              delay: const Duration(milliseconds: 300),
+                              child: Text(
+                                "choose a topic to teach:",
+                                style: GoogleFonts.alata(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF8A8A8F),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 300),
-                    child: Text(
-                      "choose a topic to teach:",
-                      style: GoogleFonts.alata(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF8A8A8F),
+                      const SizedBox(width: 16),
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 400),
+                        child: IconButton(
+                          onPressed: () async {
+                            await AppStateService.setLastRoute('missions');
+                            if (mounted) {
+                              Navigator.of(context).push(
+                                SlidePageRoute(
+                                  page: const ProfilePage(),
+                                  direction: SlideDirection.left,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F3F7),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              color: Color(0xFF8E97FD),
+                              size: 24,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 32),
                   _isLoading

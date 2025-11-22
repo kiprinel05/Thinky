@@ -13,7 +13,6 @@ class IntroPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Top decorative background over white base
           Positioned(
             top: 0,
             left: 0,

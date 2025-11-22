@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/animated_widgets.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/app_state_service.dart';
 import '../../onboarding/presentation/intro_page.dart';
 import '../../missions/presentation/missions_menu_page.dart';
 
@@ -22,16 +23,22 @@ class _WelcomePageState extends State<WelcomePage> {
     super.dispose();
   }
 
-  void _nextPage() {
+  void _nextPage() async {
     if (_currentPage < 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.of(
-        context,
-      ).pushReplacement(FadePageRoute(page: const MissionsMenuPage()));
+      // Salvează că utilizatorul a văzut welcome pages
+      await AppStateService.setHasSeenWelcome(true);
+      await AppStateService.setLastRoute('missions');
+
+      if (mounted) {
+        Navigator.of(
+          context,
+        ).pushReplacement(FadePageRoute(page: const MissionsMenuPage()));
+      }
     }
   }
 
@@ -175,7 +182,6 @@ class _WelcomePage1State extends State<WelcomePage1> {
                 ),
               ),
             ),
-            // Mascot - positioned to overlap with background
             ScaleInWidget(
               delay: const Duration(milliseconds: 600),
               child: Image.asset(
@@ -243,7 +249,6 @@ class _WelcomePage2State extends State<WelcomePage2> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Background image pe jumătatea de jos
         Positioned(
           bottom: 0,
           left: 0,
