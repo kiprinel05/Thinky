@@ -6,7 +6,7 @@ import '../../../core/models/mission_models.dart';
 import '../../../core/services/mission_service.dart';
 import '../../../core/services/app_state_service.dart';
 import '../../auth/presentation/profile_page.dart';
-import 'quiz_page.dart';
+import '../quiz/quiz_page.dart';
 import 'pixy_learns_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
