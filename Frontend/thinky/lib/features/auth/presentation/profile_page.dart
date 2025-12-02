@@ -177,6 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  // Settings Section
                   FadeInWidget(
                     delay: const Duration(milliseconds: 200),
                     child: Column(
@@ -193,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 16),
                         _buildSettingItem(
                           icon: Icons.info_outline,
-                          title: 'About app',
+                          title: 'About Thinky',
                           onTap: () {
                             showDialog(
                               context: context,
@@ -243,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                                 content: Text(
-                                  'TBD',
+                                  'TBI Soon',
                                   style: GoogleFonts.alata(),
                                 ),
                                 shape: RoundedRectangleBorder(

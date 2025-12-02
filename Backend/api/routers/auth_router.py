@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 import sys
 from pathlib import Path
+import uuid
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 from database import get_db
@@ -102,11 +103,15 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/guest", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register_guest(guest_data: GuestRegister, db: Session = Depends(get_db)):
+    unique_suffix = uuid.uuid4().hex
+    generated_username = f"guest_{unique_suffix[:8]}"
+    generated_email = f"{generated_username}@thinky.local"
+
     new_guest = User(
         guest_name=guest_data.name,
         is_guest=True,
-        username=None,
-        email=None,
+        username=generated_username,
+        email=generated_email,
         hashed_password=None
     )
     

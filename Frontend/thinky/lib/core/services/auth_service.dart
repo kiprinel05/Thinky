@@ -164,5 +164,26 @@ class AuthService {
       throw AuthError.fromString('Network error: ${e.toString()}');
     }
   }
+
+  /// Offline guest registration fallback.
+  /// Generates a local guest profile and stores it in SharedPreferences
+  /// so the app can continue without contacting the backend.
+  static Future<AuthResponse> registerGuestOffline({
+    required String name,
+  }) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final authResponse = AuthResponse(
+      accessToken: 'guest_local_token_$timestamp',
+      tokenType: 'guest',
+      userId: timestamp,
+      username: name,
+      email: null,
+      isGuest: true,
+      guestName: name,
+    );
+
+    await saveAuthData(authResponse);
+    return authResponse;
+  }
 }
 

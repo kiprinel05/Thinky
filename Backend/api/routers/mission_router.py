@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
-from typing import List
+from typing import List, Optional
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -17,13 +17,14 @@ from api.schemas.mission_schemas import (
     MissionCompleteRequest,
     MissionProgressResponse
 )
-from api.dependencies import get_current_user
+from api.dependencies import get_current_user, get_current_user_optional
+from typing import Optional
 
 router = APIRouter(prefix="/missions", tags=["Missions"])
 
 @router.get("", response_model=MissionListResponse)
 async def get_missions(
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     """Get all missions with user progress"""
@@ -33,34 +34,35 @@ async def get_missions(
     completed_mission_ids = set()
     
     # Get all user progress
-    user_progress = db.query(MissionProgress).filter(
-        MissionProgress.user_id == current_user.id,
-        MissionProgress.is_completed == True
-    ).all()
-    
-    completed_mission_ids = {p.mission_id for p in user_progress}
-    
-    # Get progress for each mission
     progress_map = {}
-    all_progress = db.query(MissionProgress).filter(
-        MissionProgress.user_id == current_user.id
-    ).all()
-    
-    for progress in all_progress:
-        progress_map[progress.mission_id] = MissionProgressResponse(
-            mission_id=progress.mission_id,
-            is_completed=progress.is_completed,
-            completed_at=progress.completed_at,
-            score=progress.score
-        )
+    if current_user:
+        user_progress = db.query(MissionProgress).filter(
+            MissionProgress.user_id == current_user.id,
+            MissionProgress.is_completed == True
+        ).all()
+        completed_mission_ids = {p.mission_id for p in user_progress}
+        
+        all_progress = db.query(MissionProgress).filter(
+            MissionProgress.user_id == current_user.id
+        ).all()
+        
+        for progress in all_progress:
+            progress_map[progress.mission_id] = MissionProgressResponse(
+                mission_id=progress.mission_id,
+                is_completed=progress.is_completed,
+                completed_at=progress.completed_at,
+                score=progress.score
+            )
     
     # Determine locked status
     for i, mission in enumerate(missions):
         is_locked = False
-        if i > 0:
-            # Check if previous mission is completed
-            previous_mission = missions[i - 1]
-            is_locked = previous_mission.id not in completed_mission_ids
+        if current_user:
+            if i > 0:
+                previous_mission = missions[i - 1]
+                is_locked = previous_mission.id not in completed_mission_ids
+        else:
+            is_locked = i > 0
         
         progress = progress_map.get(mission.id)
         

@@ -15,63 +15,63 @@ router = APIRouter(prefix="/quiz", tags=["Quiz"])
 QUIZ_QUESTIONS = [
     {
         "id": 1,
-        "question": "Can AI recognize objects in images?",
+        "question": "What is Artificial Intelligence, really?",
         "options": [
-            {"id": 1, "text": "Yes, AI can identify and classify objects in photos"},
-            {"id": 2, "text": "No, AI cannot see or understand images"},
-            {"id": 3, "text": "Only sometimes, depending on the image quality"},
-            {"id": 4, "text": "AI can only recognize text, not objects"}
+            {"id": 1, "text": "An invisible robot that lives inside your phone."},
+            {"id": 2, "text": "A kind of magic that guesses what you think."},
+            {"id": 3, "text": "A smart computer program that can learn to do new things."},
+            {"id": 4, "text": "A very powerful battery."}
         ],
-        "correct_answer_id": 1,
-        "explanation": "Yes! AI uses computer vision to recognize and classify objects in images. This is how photo apps can identify people, animals, and objects."
+        "correct_answer_id": 3,
+        "explanation": "Exactly! AI is like a very fast student. It is a set of instructions (code) written by people, which can learn from examples."
     },
     {
         "id": 2,
-        "question": "Can AI understand human emotions?",
+        "question": "How does Artificial Intelligence learn to recognize a cat in a picture?",
         "options": [
-            {"id": 1, "text": "Yes, AI can fully understand all human emotions"},
-            {"id": 2, "text": "No, AI cannot feel or understand emotions"},
-            {"id": 3, "text": "AI can detect emotions from facial expressions and text, but doesn't feel them"},
-            {"id": 4, "text": "AI can only understand happy emotions"}
+            {"id": 1, "text": "It looks at thousands of pictures of cats until it understands what a cat looks like."},
+            {"id": 2, "text": "It asks another cat."},
+            {"id": 3, "text": "It just guesses and gets lucky every time."},
+            {"id": 4, "text": "It has real eyes and sees exactly like we do."}
         ],
-        "correct_answer_id": 3,
-        "explanation": "AI can detect and analyze emotions from facial expressions, voice tone, and text, but it doesn't actually feel emotions itself. It's like recognizing patterns!"
+        "correct_answer_id": 1,
+        "explanation": "Correct! This is called \"training\". The more examples (data) it sees, the smarter it becomes."
     },
     {
         "id": 3,
-        "question": "Can AI learn from examples?",
+        "question": "Where have you already met Artificial Intelligence, maybe without knowing?",
         "options": [
-            {"id": 1, "text": "No, AI needs to be programmed for everything"},
-            {"id": 2, "text": "Yes, AI can learn patterns from many examples"},
-            {"id": 3, "text": "Only if the examples are perfect"},
-            {"id": 4, "text": "AI can only learn from text, not images"}
+            {"id": 1, "text": "When you tie your shoelaces."},
+            {"id": 2, "text": "When you eat cereal in the morning."},
+            {"id": 3, "text": "When YouTube or TikTok recommends a video you like."},
+            {"id": 4, "text": "When you write with a pen on paper."}
         ],
-        "correct_answer_id": 2,
-        "explanation": "Yes! This is called machine learning. AI learns by seeing many examples and finding patterns, just like how you learn to recognize cats after seeing many pictures of cats!"
+        "correct_answer_id": 3,
+        "explanation": "Bingo! Recommendation algorithms are AI. They \"learn\" what you like and try to show you more similar things."
     },
     {
         "id": 4,
-        "question": "Can AI make decisions on its own?",
+        "question": "What can Artificial Intelligence NOT do (yet)?",
         "options": [
-            {"id": 1, "text": "Yes, AI can think and decide like humans"},
-            {"id": 2, "text": "No, AI only follows instructions"},
-            {"id": 3, "text": "AI can make decisions based on patterns it learned, but within programmed limits"},
-            {"id": 4, "text": "AI can only make simple decisions"}
+            {"id": 1, "text": "Play chess better than a human."},
+            {"id": 2, "text": "Write a poem or a short story."},
+            {"id": 3, "text": "Draw a colorful picture."},
+            {"id": 4, "text": "Have real feelings (to be happy or sad)."}
         ],
-        "correct_answer_id": 3,
-        "explanation": "AI can make decisions based on what it learned, but it works within the rules and limits that humans programmed. It's like a very smart assistant that follows guidelines!"
+        "correct_answer_id": 4,
+        "explanation": "Very good! AI can imitate emotions, but it doesn’t feel anything. It has no heart or consciousness; it is just math and code."
     },
     {
         "id": 5,
-        "question": "Can AI create original art?",
+        "question": "What is the best way to use Artificial Intelligence?",
         "options": [
-            {"id": 1, "text": "No, AI can only copy existing art"},
-            {"id": 2, "text": "Yes, AI can create completely original art from scratch"},
-            {"id": 3, "text": "AI can create new combinations based on learned patterns"},
-            {"id": 4, "text": "AI can only create simple drawings"}
+            {"id": 1, "text": "Let it do all our homework so we don’t have to learn anything."},
+            {"id": 2, "text": "Be afraid of it and shut it down."},
+            {"id": 3, "text": "Use it as a helper (copilot) to be more creative and faster."},
+            {"id": 4, "text": "Let it rule the world by itself."}
         ],
         "correct_answer_id": 3,
-        "explanation": "AI can create new art by combining patterns it learned from many examples. It's like learning different art styles and then creating something new that combines them!"
+        "explanation": "Great attitude! AI is a tool. The best results happen when humans and AI work together as a team."
     }
 ]
 

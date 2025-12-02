@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/services/auth_service.dart';
 import '../../../../core/models/auth_response.dart';
+import '../../../../core/services/auth_service.dart';
 import '../../../../core/widgets/animated_widgets.dart';
 import '../../welcome/presentation/welcome_page.dart';
 
@@ -35,58 +35,55 @@ class _GuestNamePageState extends State<GuestNamePage> {
       _errorMessage = null;
     });
 
+    bool usedOffline = false;
+
     try {
-      final response = await AuthService.registerGuest(
+      await AuthService.registerGuest(
         name: _nameController.text.trim(),
       );
+    } on AuthError catch (_) {
+      usedOffline = true;
+      await AuthService.registerGuestOffline(
+        name: _nameController.text.trim(),
+      );
+    } catch (e) {
       if (mounted) {
-        // Navigate to welcome page
-        Navigator.of(context).pushAndRemoveUntil(
-          SlidePageRoute(
-            page: WelcomePage(),
-            direction: SlideDirection.right,
-          ),
-          (route) => false,
-        );
-      }
-    } on AuthError catch (e) {
-      if (mounted) {
-        String displayMessage = e.message;
-        if (e.message.contains('timeout') || e.message.contains('not responding')) {
-          displayMessage = 'Backend-ul nu răspunde. Verifică dacă serverul rulează pe http://localhost:8000';
-        }
         setState(() {
-          _errorMessage = displayMessage;
-          _isLoading = false;
+          _errorMessage = 'Could not create guest profile: $e';
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(displayMessage),
+            content: Text(_errorMessage!),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 8),
           ),
         );
       }
-    } catch (e, stackTrace) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
+      return;
     } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
+    }
+
+    if (mounted) {
+      if (usedOffline) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Server indisponibil. Continuăm în modul offline.'),
+            backgroundColor: Colors.orange.shade600,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+      Navigator.of(context).pushAndRemoveUntil(
+        SlidePageRoute(
+          page: WelcomePage(),
+          direction: SlideDirection.right,
+        ),
+        (route) => false,
+      );
     }
   }
 
