@@ -998,190 +998,412 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     final isExcellent = percentage >= 80;
     final isGood = percentage >= 60;
 
+     return Scaffold(
+       backgroundColor: const Color(0xFFF5F6FA),
+       appBar: AppBar(
+         backgroundColor: Colors.transparent,
+         elevation: 0,
+         leading: IconButton(
+           icon: const Icon(Icons.arrow_back, color: Color(0xFF8E97FD)),
+           onPressed: () => Navigator.of(context).pop(true),
+         ),
+       ),
+       body: SafeArea(
+         child: Column(
+           children: [
+             // Top gradient header
+             Container(
+               width: double.infinity,
+               decoration: const BoxDecoration(
+                 gradient: LinearGradient(
+                   begin: Alignment.topCenter,
+                   end: Alignment.bottomCenter,
+                   colors: [Color(0xFF8E97FD), Color(0xFF9AA2FD)],
+                 ),
+               ),
+               padding:
+                   const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+               child: Column(
+                 children: [
+                   ScaleInWidget(
+                     delay: const Duration(milliseconds: 200),
+                     child: Image.asset(
+                       isExcellent
+                           ? 'welcome/page1/hello.png'
+                           : 'welcome/page2/thinking.png',
+                       height: 120,
+                       fit: BoxFit.contain,
+                     ),
+                   ),
+                   const SizedBox(height: 16),
+                   Row(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                     children: [
+                       Text(
+                         isExcellent
+                             ? '🎉'
+                             : isGood
+                                 ? '👍'
+                                 : '💪',
+                         style: const TextStyle(fontSize: 26),
+                       ),
+                       const SizedBox(width: 8),
+                       Text(
+                         isExcellent
+                             ? 'Excellent!'
+                             : isGood
+                                 ? 'Good job!'
+                                 : 'Keep learning!',
+                         style: GoogleFonts.alata(
+                           fontSize: 20,
+                           fontWeight: FontWeight.w600,
+                           color: Colors.white,
+                         ),
+                       ),
+                     ],
+                   ),
+                 ],
+               ),
+             ),
+             const SizedBox(height: 16),
+             Expanded(
+               child: SingleChildScrollView(
+                 padding: const EdgeInsets.symmetric(horizontal: 24),
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                   children: [
+                     // Score card
+                     FadeInWidget(
+                       delay: const Duration(milliseconds: 300),
+                       child: Container(
+                         padding: const EdgeInsets.symmetric(
+                           vertical: 24,
+                           horizontal: 20,
+                         ),
+                         decoration: BoxDecoration(
+                           color: Colors.white,
+                           borderRadius: BorderRadius.circular(24),
+                           boxShadow: [
+                             BoxShadow(
+                               color: Colors.black.withOpacity(0.06),
+                               blurRadius: 16,
+                               offset: const Offset(0, 8),
+                             ),
+                           ],
+                         ),
+                         child: Column(
+                           children: [
+                             Text(
+                               '${percentage.toInt()}%',
+                               style: GoogleFonts.alata(
+                                 fontSize: 48,
+                                 fontWeight: FontWeight.w700,
+                                 color: const Color(0xFF8E97FD),
+                               ),
+                             ),
+                             const SizedBox(height: 8),
+                             Text(
+                               '${result.correctAnswers} out of ${result.totalQuestions} correct',
+                               style: GoogleFonts.alata(
+                                 fontSize: 14,
+                                 fontWeight: FontWeight.w500,
+                                 color: const Color(0xFF60646D),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                     const SizedBox(height: 24),
+                     // Helper text
+                     FadeInWidget(
+                       delay: const Duration(milliseconds: 350),
+                       child: Text(
+                         'Nice work! You can review each question and see the correct answers.',
+                         textAlign: TextAlign.center,
+                         style: GoogleFonts.alata(
+                           fontSize: 14,
+                           color: const Color(0xFF666666),
+                           height: 1.4,
+                         ),
+                       ),
+                     ),
+                     const SizedBox(height: 32),
+                     // Show results button
+                     FadeInWidget(
+                       delay: const Duration(milliseconds: 400),
+                       child: SizedBox(
+                         width: double.infinity,
+                         child: OutlinedButton(
+                           onPressed: () {
+                             Navigator.of(context).push(
+                               MaterialPageRoute(
+                                 builder: (_) => QuizResultsDetailsPage(
+                                   questions: _questions,
+                                   selectedAnswers:
+                                       Map<int, int>.from(_selectedAnswers),
+                                 ),
+                               ),
+                             );
+                           },
+                           style: OutlinedButton.styleFrom(
+                             padding:
+                                 const EdgeInsets.symmetric(vertical: 16),
+                             side: const BorderSide(
+                               color: Color(0xFF8E97FD),
+                               width: 2,
+                             ),
+                             shape: RoundedRectangleBorder(
+                               borderRadius: BorderRadius.circular(28),
+                             ),
+                           ),
+                           child: Text(
+                             'SHOW DETAILED RESULTS',
+                             style: GoogleFonts.alata(
+                               color: const Color(0xFF8E97FD),
+                               fontWeight: FontWeight.w700,
+                               fontSize: 14,
+                               letterSpacing: 0.5,
+                             ),
+                           ),
+                         ),
+                       ),
+                     ),
+                     const SizedBox(height: 16),
+                     // Continue button
+                     FadeInWidget(
+                       delay: const Duration(milliseconds: 450),
+                       child: SizedBox(
+                         width: double.infinity,
+                         child: ElevatedButton(
+                           onPressed: () {
+                             Navigator.of(context).pop(true);
+                           },
+                           style: ElevatedButton.styleFrom(
+                             backgroundColor: const Color(0xFF8E97FD),
+                             padding:
+                                 const EdgeInsets.symmetric(vertical: 16),
+                             shape: RoundedRectangleBorder(
+                               borderRadius: BorderRadius.circular(28),
+                             ),
+                             elevation: 0,
+                           ),
+                           child: Text(
+                             'CONTINUE TO MISSIONS',
+                             style: GoogleFonts.alata(
+                               color: Colors.white,
+                               fontWeight: FontWeight.w700,
+                               fontSize: 15,
+                               letterSpacing: 0.5,
+                             ),
+                           ),
+                         ),
+                       ),
+                     ),
+                     const SizedBox(height: 32),
+                   ],
+                 ),
+               ),
+             ),
+           ],
+         ),
+       ),
+     );
+  }
+}
+
+class QuizResultsDetailsPage extends StatelessWidget {
+  final List<Question> questions;
+  final Map<int, int> selectedAnswers;
+
+  const QuizResultsDetailsPage({
+    super.key,
+    required this.questions,
+    required this.selectedAnswers,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF9AA2FD),
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(true),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        iconTheme: const IconThemeData(color: Color(0xFF222222)),
+        title: Text(
+          'Quiz answers',
+          style: GoogleFonts.alata(
+            color: const Color(0xFF222222),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
         ),
+        centerTitle: true,
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            // Background decoration
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Image.asset(
-                'welcome/page1/background_welcome.png',
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.bottomCenter,
-                width: double.infinity,
-              ),
-            ),
-            // Main content
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 60),
-                  ScaleInWidget(
-                    delay: const Duration(milliseconds: 300),
-                    child: Image.asset(
-                      isExcellent
-                          ? 'welcome/page1/hello.png'
-                          : 'welcome/page2/thinking.png',
-                      height: 180,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 400),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isExcellent
-                              ? '🎉'
-                              : isGood
-                              ? '👍'
-                              : '💪',
-                          style: const TextStyle(fontSize: 32),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            children: [
+              ...questions.asMap().entries.map((entry) {
+                final index = entry.key;
+                final question = entry.value;
+                final userAnswerId = selectedAnswers[index];
+                final userOption = question.options
+                    .where((o) => o.id == userAnswerId)
+                    .cast<AnswerOption?>()
+                    .firstOrNull;
+                final correctOption = question.options
+                    .firstWhere((o) => o.id == question.correctAnswerId);
+                final bool isCorrect =
+                    userAnswerId != null && userAnswerId == correctOption.id;
+
+                final Color statusColor =
+                    isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF7043);
+                final String statusText =
+                    isCorrect ? 'Correct' : 'Incorrect';
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                        const SizedBox(width: 12),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Question ${index + 1}',
+                              style: GoogleFonts.alata(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF8E97FD),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isCorrect
+                                        ? Icons.check_circle_rounded
+                                        : Icons.error_rounded,
+                                    size: 14,
+                                    color: statusColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    statusText,
+                                    style: GoogleFonts.alata(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: statusColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         Text(
-                          isExcellent
-                              ? 'Excellent!'
-                              : isGood
-                              ? 'Good Job!'
-                              : 'Keep Learning!',
+                          question.question,
                           style: GoogleFonts.alata(
-                            fontSize: 24,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: const Color(0xFF222222),
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Your answer
+                        Text(
+                          'Your answer',
+                          style: GoogleFonts.alata(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF888888),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: userOption == null
+                                ? const Color(0xFFF2F3F7)
+                                : isCorrect
+                                    ? const Color(0xFFE8F5E9)
+                                    : const Color(0xFFFFEBEE),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            userOption?.text ?? 'Not answered',
+                            style: GoogleFonts.alata(
+                              fontSize: 13,
+                              color: userOption == null
+                                  ? const Color(0xFF999999)
+                                  : isCorrect
+                                      ? const Color(0xFF2E7D32)
+                                      : const Color(0xFFC62828),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Correct answer
+                        Text(
+                          'Correct answer',
+                          style: GoogleFonts.alata(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF888888),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            correctOption.text,
+                            style: GoogleFonts.alata(
+                              fontSize: 13,
+                              color: const Color(0xFF2E7D32),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 500),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 32,
-                        horizontal: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${percentage.toInt()}%',
-                            style: GoogleFonts.alata(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF8E97FD),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF2F3F7),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '${result.correctAnswers} out of ${result.totalQuestions} correct',
-                              style: GoogleFonts.alata(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF60646D),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  // Message text
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 600),
-                    child: Text(
-                      'Great! Now we know what you already know about AI. Let\'s start learning together!',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.alata(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                  FadeInWidget(
-                    delay: const Duration(milliseconds: 700),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'CONTINUE TO MISSIONS',
-                              style: GoogleFonts.alata(
-                                color: const Color(0xFF8E97FD),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Icon(
-                              Icons.arrow_forward_rounded,
-                              color: const Color(0xFF8E97FD),
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ],
+                );
+              }).toList(),
+            ],
+          ),
         ),
       ),
     );
