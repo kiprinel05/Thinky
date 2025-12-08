@@ -1,10 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from api.utils import init_models
 from database import init_db
 # Import all models to ensure they are registered with SQLAlchemy Base before init_db()
 from models.user_model import User
 from models.mission_model import Mission, MissionProgress, QuizResult
+from models.password_reset_model import PasswordResetCode
+import traceback
 
 app = FastAPI(title="Thinky Classification API")
 
@@ -20,13 +25,64 @@ app.add_middleware(
     max_age=3600,
 )
 
+# Global exception handler to ensure CORS headers are always present
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Handle all exceptions and ensure CORS headers are present"""
+    print(f"[ERROR] Unhandled exception: {exc}")
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal server error", "error": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions with CORS headers"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors with CORS headers"""
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": exc.errors()},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
 @app.on_event("startup")
 def startup_event():
     try:
         init_db()
+        # Ensure password_reset_codes table exists
+        try:
+            from database import engine
+            PasswordResetCode.__table__.create(bind=engine, checkfirst=True)
+            print("[OK] Password reset codes table verified")
+        except Exception as e:
+            print(f"[WARNING] Could not verify password_reset_codes table: {e}")
     except Exception as e:
         print(f"[WARNING] Database initialization failed: {e}")
         print("[INFO] Application will start but database features may not work")
+        import traceback
+        traceback.print_exc()
     
     try:
         init_models()

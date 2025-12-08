@@ -3,23 +3,29 @@ from sqlalchemy.orm import Session
 import sys
 from pathlib import Path
 import uuid
+import random
+from datetime import datetime, timedelta, timezone
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 from database import get_db
 from models.user_model import User
+from models.password_reset_model import PasswordResetCode
 from api.schemas.auth_schemas import (
     UserRegister, 
     UserLogin, 
     GuestRegister, 
     TokenResponse,
-    UserResponse
+    UserResponse,
+    PasswordResetRequest,
+    PasswordResetVerify,
+    PasswordResetConfirm
 )
 from api.auth_utils import (
     get_password_hash, 
     verify_password, 
     create_access_token
 )
-from datetime import timedelta
+from api.services.email_service import email_service
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -142,4 +148,151 @@ async def get_current_user(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
         detail="Endpoint not yet implemented"
     )
+
+@router.post("/forgot-password/request")
+async def request_password_reset(
+    request: PasswordResetRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Request password reset - sends a 6-digit code to the user's email.
+    """
+    try:
+        user = db.query(User).filter(User.email == request.email).first()
+        
+        # For security, don't reveal if email exists or not
+        # Always return success message
+        if not user:
+            return {"message": "If the email exists, a reset code has been sent."}
+        
+        if user.is_guest:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Guest users cannot reset password"
+            )
+        
+        # Generate 6-digit code
+        code = f"{random.randint(100000, 999999)}"
+        
+        # Expires in 10 minutes
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        
+        # Invalidate any existing unused codes for this user
+        try:
+            existing_codes = db.query(PasswordResetCode).filter(
+                PasswordResetCode.user_id == user.id,
+                PasswordResetCode.is_used == 0,
+                PasswordResetCode.expires_at > datetime.now(timezone.utc)
+            ).all()
+            
+            for existing_code in existing_codes:
+                existing_code.is_used = 1
+        except Exception as e:
+            print(f"[WARNING] Error invalidating existing codes: {e}")
+            # Continue anyway - not critical
+        
+        # Create new reset code
+        reset_code = PasswordResetCode(
+            user_id=user.id,
+            code=code,
+            email=user.email,
+            expires_at=expires_at,
+            is_used=0
+        )
+        
+        db.add(reset_code)
+        db.commit()
+        
+        # Send email
+        email_service.send_password_reset_code(user.email, code)
+        
+        return {"message": "If the email exists, a reset code has been sent."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Error in request_password_reset: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+
+@router.post("/forgot-password/verify")
+async def verify_reset_code(
+    request: PasswordResetVerify,
+    db: Session = Depends(get_db)
+):
+    """
+    Verify the reset code before allowing password reset.
+    """
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Find valid reset code
+    reset_code = db.query(PasswordResetCode).filter(
+        PasswordResetCode.user_id == user.id,
+        PasswordResetCode.code == request.code,
+        PasswordResetCode.is_used == 0,
+        PasswordResetCode.expires_at > datetime.now(timezone.utc)
+    ).first()
+    
+    if not reset_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired code"
+        )
+    
+    return {"message": "Code verified successfully", "valid": True}
+
+@router.post("/forgot-password/reset")
+async def reset_password(
+    request: PasswordResetConfirm,
+    db: Session = Depends(get_db)
+):
+    """
+    Reset password using verified code.
+    """
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.is_guest:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Guest users cannot reset password"
+        )
+    
+    # Find and verify reset code
+    reset_code = db.query(PasswordResetCode).filter(
+        PasswordResetCode.user_id == user.id,
+        PasswordResetCode.code == request.code,
+        PasswordResetCode.is_used == 0,
+        PasswordResetCode.expires_at > datetime.now(timezone.utc)
+    ).first()
+    
+    if not reset_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired code"
+        )
+    
+    # Mark code as used
+    reset_code.is_used = 1
+    
+    # Update password
+    user.hashed_password = get_password_hash(request.new_password)
+    
+    db.commit()
+    
+    return {"message": "Password reset successfully"}
 

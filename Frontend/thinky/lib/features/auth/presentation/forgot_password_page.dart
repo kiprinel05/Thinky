@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/services/api_client.dart';
+import 'verify_code_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -32,16 +34,33 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       _errorMessage = null;
     });
 
-    // TODO: connect la backend
-    // Simulare pentru moment
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await ApiClient.post('/auth/forgot-password/request', {
+        'email': _emailController.text.trim(),
+      });
 
-    if (mounted) {
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _isEmailSent = true;
+          });
+        }
+      }
+    } catch (e) {
       setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
         _isLoading = false;
-        _isEmailSent = true;
       });
     }
+  }
+
+  void _navigateToVerifyCode() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => VerifyCodePage(email: _emailController.text.trim()),
+      ),
+    );
   }
 
   @override
@@ -113,7 +132,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Don\'t worry! Enter your email address and we\'ll send you a link to reset your password.',
+                            'Don\'t worry! Enter your email address and we\'ll send you a 6-digit code to reset your password.',
                             style: GoogleFonts.alata(
                               fontSize: 14,
                               color: const Color(0xFF8A8A8F),
@@ -192,7 +211,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       ),
                                     )
                                   : Text(
-                                      'SEND RESET LINK',
+                                      'SEND CODE',
                                       style: GoogleFonts.alata(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
@@ -258,54 +277,54 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: GoogleFonts.alata(fontSize: 26, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 12),
-        Text(
-          'We\'ve sent a password reset link to\n${_emailController.text}',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.alata(
-            fontSize: 14,
-            color: const Color(0xFF8A8A8F),
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 40),
-        SizedBox(
-          height: 56,
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'BACK TO LOGIN',
-              style: GoogleFonts.alata(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              _isEmailSent = false;
-              _emailController.clear();
-            });
-          },
-          child: Text(
-            'Didn\'t receive the email?',
-            style: GoogleFonts.alata(
-              color: primaryPurple,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+                          Text(
+                            'We\'ve sent a 6-digit code to\n${_emailController.text}',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              color: const Color(0xFF8A8A8F),
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          SizedBox(
+                            height: 56,
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _navigateToVerifyCode,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryPurple,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'ENTER CODE',
+                                style: GoogleFonts.alata(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isEmailSent = false;
+                                _emailController.clear();
+                              });
+                            },
+                            child: Text(
+                              'Didn\'t receive the code?',
+                              style: GoogleFonts.alata(
+                                color: primaryPurple,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
       ],
     );
   }

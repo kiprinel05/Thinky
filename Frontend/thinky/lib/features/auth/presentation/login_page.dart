@@ -3,7 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/models/auth_response.dart';
 import '../../../../core/widgets/animated_widgets.dart';
-import '../../welcome/presentation/welcome_page.dart';
+import '../../../../core/services/app_state_service.dart';
+import '../../missions/presentation/missions_menu_page.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -46,10 +47,12 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (mounted) {
-        // Navigate to welcome page
+        await AppStateService.setHasSeenWelcome(true);
+        await AppStateService.setLastRoute('missions');
+        
         Navigator.of(context).pushAndRemoveUntil(
           SlidePageRoute(
-            page: WelcomePage(),
+            page: const MissionsMenuPage(),
             direction: SlideDirection.right,
           ),
           (route) => false,

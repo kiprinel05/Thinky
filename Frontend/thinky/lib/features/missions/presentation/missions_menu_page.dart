@@ -345,7 +345,9 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Image.asset(
-                      'missions/$missionPath/card_drawing.png',
+                      missionPath == 'quiz'
+                          ? 'missions/quiz/quiz.png'
+                          : 'missions/$missionPath/card_drawing.png',
                       fit: BoxFit.contain,
                     ),
                   ),

@@ -67,3 +67,38 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetVerify(BaseModel):
+    email: EmailStr
+    code: str
+
+    @field_validator('code')
+    @classmethod
+    def validate_code(cls, v):
+        if len(v) != 6 or not v.isdigit():
+            raise ValueError('Code must be exactly 6 digits')
+        return v
+
+class PasswordResetConfirm(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
+    @field_validator('code')
+    @classmethod
+    def validate_code(cls, v):
+        if len(v) != 6 or not v.isdigit():
+            raise ValueError('Code must be exactly 6 digits')
+        return v
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters long')
+        if len(v) > 100:
+            raise ValueError('Password must be less than 100 characters')
+        return v
+
