@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:thinky/features/auth/presentation/guest_name_page.dart';
-import '../../auth/presentation/login_page.dart';
-import '../../auth/presentation/register_page.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/routing/route_names.dart';
 
 class IntroPage extends StatelessWidget {
   const IntroPage({super.key});
@@ -20,7 +19,6 @@ class IntroPage extends StatelessWidget {
             child: Image.asset(
               'assets/backgrounds/background.png',
               fit: BoxFit.cover,
-              // height: 320,
             ),
           ),
           SafeArea(
@@ -31,7 +29,7 @@ class IntroPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SizedBox(height: 8),
-                    // Top section: logo
+                    // Top section: logo & illustration
                     Column(
                       children: [
                         SizedBox(
@@ -42,7 +40,6 @@ class IntroPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Illustration
                         AspectRatio(
                           aspectRatio: 19 / 11,
                           child: ClipRRect(
@@ -86,13 +83,7 @@ class IntroPage extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const RegisterPage(),
-                                ),
-                              );
-                            },
+                            onPressed: () => context.push(RouteNames.register),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF8E97FD),
                               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -114,20 +105,9 @@ class IntroPage extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => const GuestNamePage(),
-                                ),
-                              );
-                            },
+                            onPressed: () => context.push(RouteNames.guestName),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                255,
-                                253,
-                                253,
-                              ),
+                              backgroundColor: const Color(0xFFFFFDFD),
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(38),
@@ -136,7 +116,7 @@ class IntroPage extends StatelessWidget {
                             child: Text(
                               'CONTINUE AS GUEST',
                               style: GoogleFonts.alata(
-                                color: const Color.fromRGBO(142, 151, 253, 1),
+                                color: const Color(0xFF8E97FD),
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
@@ -155,15 +135,8 @@ class IntroPage extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-
                             TextButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => const LoginPage(),
-                                  ),
-                                );
-                              },
+                              onPressed: () => context.push(RouteNames.login),
                               child: Text(
                                 'LOG IN',
                                 style: GoogleFonts.alata(

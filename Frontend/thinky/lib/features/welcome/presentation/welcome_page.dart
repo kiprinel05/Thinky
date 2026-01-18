@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/widgets/animated_widgets.dart';
-import '../../../core/services/auth_service.dart';
-import '../../../core/services/app_state_service.dart';
-import '../../onboarding/presentation/intro_page.dart';
-import '../../missions/presentation/missions_menu_page.dart';
+import 'package:go_router/go_router.dart';
 
-class WelcomePage extends StatefulWidget {
+import '../../../core/widgets/animations/animated_widgets.dart';
+import '../../../core/services/app_state_service.dart'; // Keep for now, or migrate to provider
+import '../../../core/routing/route_names.dart';
+import '../../auth/presentation/controllers/auth_controller.dart';
+
+class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
 
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
+  ConsumerState<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _WelcomePageState extends ConsumerState<WelcomePage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -30,14 +32,12 @@ class _WelcomePageState extends State<WelcomePage> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Salvează că utilizatorul a văzut welcome pages
+      // Mark welcome as seen
       await AppStateService.setHasSeenWelcome(true);
       await AppStateService.setLastRoute('missions');
 
       if (mounted) {
-        Navigator.of(
-          context,
-        ).pushReplacement(FadePageRoute(page: const MissionsMenuPage()));
+        context.go(RouteNames.missions);
       }
     }
   }
@@ -59,7 +59,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   });
                 },
                 children: [
-                  WelcomePage1(
+                   WelcomePage1(
                     onNext: _nextPage,
                     isFirstPage: _currentPage == 0,
                   ),
@@ -77,7 +77,7 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 }
 
-class WelcomePage1 extends StatefulWidget {
+class WelcomePage1 extends ConsumerWidget {
   final VoidCallback onNext;
   final bool isFirstPage;
 
@@ -88,38 +88,19 @@ class WelcomePage1 extends StatefulWidget {
   });
 
   @override
-  State<WelcomePage1> createState() => _WelcomePage1State();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+    final userName = authState.user?.username ?? authState.user?.guestName ?? 'there';
 
-class _WelcomePage1State extends State<WelcomePage1> {
-  String _userName = 'there';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserName();
-  }
-
-  Future<void> _loadUserName() async {
-    final user = await AuthService.getCurrentUser();
-    if (user != null && mounted) {
-      setState(() {
-        _userName = user['username'] ?? user['guestName'] ?? 'there';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Background image pe jumătatea de jos
+        // Background image
         Positioned(
           bottom: 0,
           left: 0,
           right: 0,
           child: Image.asset(
-            'welcome/page1/background_welcome.png',
+            'assets/welcome/page1/background_welcome.png',
             fit: BoxFit.fitWidth,
             alignment: Alignment.bottomCenter,
             width: double.infinity,
@@ -145,7 +126,7 @@ class _WelcomePage1State extends State<WelcomePage1> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Hi $_userName',
+                              'Hi $userName',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 28,
@@ -185,13 +166,13 @@ class _WelcomePage1State extends State<WelcomePage1> {
             ScaleInWidget(
               delay: const Duration(milliseconds: 600),
               child: Image.asset(
-                'welcome/page1/hello.png',
+                'assets/welcome/page1/hello.png',
                 height: MediaQuery.of(context).size.height * 0.55,
                 fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 20),
-            // Button peste background
+            // Button
             Padding(
               padding: const EdgeInsets.only(
                 left: 24,
@@ -202,9 +183,9 @@ class _WelcomePage1State extends State<WelcomePage1> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: widget.onNext,
+                  onPressed: onNext,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(235, 234, 236, 1),
+                    backgroundColor: const Color.fromRGBO(235, 234, 236, 1),
                     minimumSize: const Size.fromHeight(56),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
@@ -230,7 +211,7 @@ class _WelcomePage1State extends State<WelcomePage1> {
   }
 }
 
-class WelcomePage2 extends StatefulWidget {
+class WelcomePage2 extends StatelessWidget {
   final VoidCallback onNext;
   final bool isFirstPage;
 
@@ -241,11 +222,6 @@ class WelcomePage2 extends StatefulWidget {
   });
 
   @override
-  State<WelcomePage2> createState() => _WelcomePage2State();
-}
-
-class _WelcomePage2State extends State<WelcomePage2> {
-  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -254,7 +230,7 @@ class _WelcomePage2State extends State<WelcomePage2> {
           left: 0,
           right: 0,
           child: Image.asset(
-            'welcome/page2/background_welcome.png',
+            'assets/welcome/page2/background_welcome.png',
             fit: BoxFit.fitWidth,
             alignment: Alignment.bottomCenter,
             width: double.infinity,
@@ -269,7 +245,7 @@ class _WelcomePage2State extends State<WelcomePage2> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Text content - perfect centrat
+                    // Text content
                     FadeInWidget(
                       delay: const Duration(milliseconds: 200),
                       child: SlideUpWidget(
@@ -311,7 +287,7 @@ class _WelcomePage2State extends State<WelcomePage2> {
             ScaleInWidget(
               delay: const Duration(milliseconds: 600),
               child: Image.asset(
-                'welcome/page2/thinking.png',
+                'assets/welcome/page2/thinking.png',
                 height: MediaQuery.of(context).size.height * 0.55,
                 fit: BoxFit.contain,
               ),
@@ -322,9 +298,9 @@ class _WelcomePage2State extends State<WelcomePage2> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: widget.onNext,
+                  onPressed: onNext,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(235, 234, 236, 1),
+                    backgroundColor: const Color.fromRGBO(235, 234, 236, 1),
                     minimumSize: const Size.fromHeight(56),
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(

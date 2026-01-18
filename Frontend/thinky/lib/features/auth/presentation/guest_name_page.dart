@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/models/auth_response.dart';
-import '../../../../core/services/auth_service.dart';
-import '../../../../core/widgets/animated_widgets.dart';
-import '../../welcome/presentation/welcome_page.dart';
+import 'package:go_router/go_router.dart';
 
-class GuestNamePage extends StatefulWidget {
+import '../../../../core/routing/route_names.dart';
+import '../../../../core/base/base_page.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../auth/presentation/controllers/auth_state.dart';
+
+class GuestNamePage extends BasePage {
   const GuestNamePage({super.key});
 
   @override
-  State<GuestNamePage> createState() => _GuestNamePageState();
+  Widget buildBody(BuildContext context, WidgetRef ref) {
+    return const _GuestNameForm();
+  }
+  
+  @override
+  // Hide standard BasePage loading/error overlay to use custom UI?
+  // Actually BasePage is Stateless, so we can just use buildBody.
+  // But we want to handle state changes here.
+  // Let's implement _GuestNameForm as ConsumerStatefulWidget
+  Widget? buildAppBar(BuildContext context) => AppBar(
+    backgroundColor: Colors.white,
+    elevation: 0,
+    foregroundColor: Colors.black,
+  );
+  
+  @override
+  Color get backgroundColor => Colors.white;
 }
 
-class _GuestNamePageState extends State<GuestNamePage> {
+class _GuestNameForm extends ConsumerStatefulWidget {
+  const _GuestNameForm();
+
+  @override
+  ConsumerState<_GuestNameForm> createState() => _GuestNameFormState();
+}
+
+class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   
-  bool _isLoading = false;
-  String? _errorMessage;
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -29,67 +52,40 @@ class _GuestNamePageState extends State<GuestNamePage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    final controller = ref.read(authStateProvider.notifier);
+    
+    final success = await controller.registerGuest(
+      name: _nameController.text.trim(),
+    );
 
-    bool usedOffline = false;
-
-    try {
-      await AuthService.registerGuest(
-        name: _nameController.text.trim(),
-      );
-    } on AuthError catch (_) {
-      usedOffline = true;
-      await AuthService.registerGuestOffline(
-        name: _nameController.text.trim(),
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Could not create guest profile: $e';
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_errorMessage!),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (success && mounted) {
+      // Navigate to Welcome
+      context.go(RouteNames.welcome);
     }
-
-    if (mounted) {
-      if (usedOffline) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Server indisponibil. Continuăm în modul offline.'),
-            backgroundColor: Colors.orange.shade600,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-      Navigator.of(context).pushAndRemoveUntil(
-        SlidePageRoute(
-          page: WelcomePage(),
-          direction: SlideDirection.right,
-        ),
-        (route) => false,
-      );
-    }
+    // Error is handled by AuthController state, monitored in build (if we used BasePage listener)
+    // Here we can show a snackbar if error exists in state? 
+    // Ideally BaseController handles showing error if we watch state.
   }
 
   @override
   Widget build(BuildContext context) {
     const Color primaryPurple = Color(0xFF8E97FD);
+    final authState = ref.watch(authStateProvider);
+    final isLoading = authState.isLoading;
+
+    // Listen for error changes to show snackbar manually if not using BasePage's auto error
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
+      final error = next.errorMessage;
+      if (next.isError && error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      }
+    });
 
     InputDecoration inputDecoration(String hint) => InputDecoration(
       hintText: hint,
@@ -118,127 +114,96 @@ class _GuestNamePageState extends State<GuestNamePage> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/auth/guest/background.png',
-              fit: BoxFit.cover,
-            ),
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Image.asset(
+            'assets/auth/guest/background.png',
+            fit: BoxFit.cover,
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 16),
-                    Text(
-                      'Continue as guest',
-                      style: GoogleFonts.alata(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                      ),
+        ),
+        SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 16),
+                  Text(
+                    'Continue as guest',
+                    style: GoogleFonts.alata(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
                     ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Tell us your name. You can change it later.',
-                      style: GoogleFonts.alata(
-                        color: const Color(0xFF8A8A8F),
-                        fontSize: 12,
-                      ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Tell us your name. You can change it later.',
+                    style: GoogleFonts.alata(
+                      color: const Color(0xFF8A8A8F),
+                      fontSize: 12,
                     ),
-                    const SizedBox(height: 16),
-                    if (_errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.red.shade300),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Form Fields
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: inputDecoration('Your name'),
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _handleContinue(),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Name is required';
+                      }
+                      if (value.trim().length > 100) {
+                        return 'Name must be less than 100 characters';
+                      }
+                      return null;
+                    },
+                    enabled: !isLoading,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _handleContinue,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryPurple,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
                         ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.error_outline, color: Colors.red.shade700),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: GoogleFonts.alata(
-                                  color: Colors.red.shade700,
-                                  fontSize: 12,
-                                ),
+                        elevation: 0,
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              'CONTINUE',
+                              style: GoogleFonts.alata(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: inputDecoration('Your name'),
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _handleContinue(),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Name is required';
-                        }
-                        if (value.trim().length > 100) {
-                          return 'Name must be less than 100 characters';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleContinue,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : Text(
-                                'CONTINUE',
-                                style: GoogleFonts.alata(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
