@@ -41,4 +41,6 @@ flutter:
     - assets/auth/icons/
     - assets/auth/guest/
     - assets/welcome/
+    - assets/welcome/page1/
+    - assets/welcome/page2/
     - assets/missions/

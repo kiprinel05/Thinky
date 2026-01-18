@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/routing/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'package:thinky/core_controls/routing/app_router.dart';
+import 'package:thinky/shared_controls/theme/app_theme.dart';
 
 /// ThinkyApp - Main application widget
 /// Uses Riverpod for state management and go_router for navigation
