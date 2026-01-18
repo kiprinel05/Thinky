@@ -45,3 +45,4 @@ flutter:
     - assets/welcome/page1/
     - assets/welcome/page2/
     - assets/missions/
+    - assets/i18n/

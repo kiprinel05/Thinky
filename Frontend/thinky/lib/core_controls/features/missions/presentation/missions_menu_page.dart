@@ -8,6 +8,7 @@ import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/features/auth/presentation/profile_page.dart';
 import '../quiz/quiz_page.dart';
 import 'pixy_learns_page.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
@@ -64,7 +65,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading missions: $e'),
+            content: Text('${Missions.errorLoading} $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -123,7 +124,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                             FadeInWidget(
                               delay: const Duration(milliseconds: 200),
                               child: Text(
-                                "Let's start teaching Pixy simple things!",
+                                Missions.title,
                                 style: GoogleFonts.alata(
                                   fontSize: 26,
                                   fontWeight: FontWeight.w700,
@@ -136,7 +137,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                             FadeInWidget(
                               delay: const Duration(milliseconds: 300),
                               child: Text(
-                                "choose a topic to teach:",
+                                Missions.subtitle,
                                 style: GoogleFonts.alata(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w400,
@@ -396,7 +397,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                           Icon(Icons.lock, size: 40, color: Colors.white),
                           const SizedBox(height: 8),
                           Text(
-                            'Locked',
+                            Missions.locked,
                             style: GoogleFonts.alata(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -483,7 +484,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                         Icon(Icons.lock, size: 40, color: Colors.white),
                         const SizedBox(height: 8),
                         Text(
-                          'Locked',
+                          Missions.locked,
                           style: GoogleFonts.alata(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

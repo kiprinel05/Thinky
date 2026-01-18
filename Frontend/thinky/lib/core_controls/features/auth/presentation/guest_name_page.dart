@@ -7,6 +7,7 @@ import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/base_controls/base_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_state.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class GuestNamePage extends BasePage {
   const GuestNamePage({super.key});
@@ -135,7 +136,7 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                 children: [
                   const SizedBox(height: 16),
                   Text(
-                    'Continue as guest',
+                    Auth.continueGuest,
                     style: GoogleFonts.alata(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
@@ -143,7 +144,7 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Tell us your name. You can change it later.',
+                    Auth.guestNameSubtitle,
                     style: GoogleFonts.alata(
                       color: const Color(0xFF8A8A8F),
                       fontSize: 12,
@@ -154,15 +155,15 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                   // Form Fields
                   TextFormField(
                     controller: _nameController,
-                    decoration: inputDecoration('Your name'),
+                    decoration: inputDecoration(Auth.guestNameHint),
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleContinue(),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Name is required';
+                        return Auth.nameRequired;
                       }
                       if (value.trim().length > 100) {
-                        return 'Name must be less than 100 characters';
+                        return Auth.nameMaxLength;
                       }
                       return null;
                     },
@@ -190,8 +191,8 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                               ),
                             )
                           : Text(
-                              'CONTINUE',
-                              style: GoogleFonts.alata(
+                                Auth.continueAction,
+                                style: GoogleFonts.alata(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
                               ),

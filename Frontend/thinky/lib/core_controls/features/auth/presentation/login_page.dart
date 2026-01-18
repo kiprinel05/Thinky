@@ -6,6 +6,7 @@ import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
 import 'forgot_password_page.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -173,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'OR LOG IN WITH EMAIL',
+              Auth.orLoginEmail,
               style: GoogleFonts.alata(
                 color: const Color(0xFFA3A6AD),
                 fontSize: 12,
@@ -217,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     const SizedBox(height: 16),
                     Text(
-                      'Welcome Back!',
+                      Auth.welcomeBack,
                       style: GoogleFonts.alata(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
@@ -230,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: 20,
                         width: 20,
                       ),
-                      label: 'CONTINUE WITH FACEBOOK',
+                      label: Auth.continueFacebook,
                       filled: true,
                     ),
                     const SizedBox(height: 14),
@@ -240,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: 20,
                         width: 20,
                       ),
-                      label: 'CONTINUE WITH GOOGLE',
+                      label: Auth.continueGoogle,
                       filled: false,
                     ),
                     orDivider(),
@@ -275,14 +276,14 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                     TextFormField(
                       controller: _emailController,
-                      decoration: inputDecoration('Email address'),
+                      decoration: inputDecoration(Auth.emailHint),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Email is required';
+                          return Auth.emailRequired;
                         }
                         if (!value.contains('@') || !value.contains('.')) {
-                          return 'Please enter a valid email';
+                          return Auth.emailInvalid;
                         }
                         return null;
                       },
@@ -290,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _passwordController,
-                      decoration: inputDecoration('Password').copyWith(
+                      decoration: inputDecoration(Auth.passwordHint).copyWith(
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -308,7 +309,7 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password is required';
+                          return Auth.passwordRequired;
                         }
                         return null;
                       },
@@ -337,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               )
                             : Text(
-                                'LOG IN',
+                                Auth.loginButton,
                                 style: GoogleFonts.alata(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -355,7 +356,7 @@ class _LoginPageState extends State<LoginPage> {
                         );
                       },
                       child: Text(
-                        'Forgot Password?',
+                        Auth.forgotPassword,
                         style: GoogleFonts.alata(
                           color: primaryPurple,
                           fontWeight: FontWeight.w600,

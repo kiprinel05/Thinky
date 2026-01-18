@@ -9,6 +9,7 @@ import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart'
 import '../controllers/quiz_controller.dart';
 import '../controllers/quiz_state.dart';
 import 'package:thinky/core_controls/features/missions/quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 // We might need to import these if we extract them or just define here
 // import 'quiz_result_page.dart'; // We will inline or use existing
@@ -20,7 +21,7 @@ class QuizPageNew extends BasePage {
   Color get backgroundColor => const Color(0xFFF5F6FA);
 
   @override
-  String? get title => 'Quiz';
+  String? get title => Quiz.title;
 
   // Specific implementation for Quiz - we want custom background handling perhaps?
   // BasePage provides Scaffold. The original page had a specific gradient background for header.
@@ -114,7 +115,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
     
     // Check if questions empty
     if (widget.state.questions.isEmpty) {
-        return Center(child: Text('No questions available', style: GoogleFonts.alata()));
+        return Center(child: Text(Quiz.noQuestions, style: GoogleFonts.alata()));
     }
 
     return Stack(
@@ -189,7 +190,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Question $current of $total',
+                '${Quiz.questionLabel} $current ${Quiz.ofLabel} $total',
                 style: GoogleFonts.alata(
                   color: Colors.white,
                   fontSize: 14,
@@ -310,7 +311,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
                  borderRadius: BorderRadius.circular(16),
                ),
                child: Text(
-                 'Question ${state.currentQuestionIndex + 1}',
+                 '${Quiz.questionLabel} ${state.currentQuestionIndex + 1}',
                  style: GoogleFonts.alata(
                    fontSize: 11,
                    fontWeight: FontWeight.w500,
@@ -422,7 +423,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                ),
                child: Text(
-                 'PREVIOUS',
+                 Quiz.previous,
                  style: GoogleFonts.alata(
                    color: const Color(0xFF8E97FD),
                    fontWeight: FontWeight.w700,
@@ -454,7 +455,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                    )
                  : Text(
-                     isLast ? 'SEE RESULT' : 'NEXT',
+                     isLast ? Quiz.seeResult : Quiz.next,
                      style: GoogleFonts.alata(
                        color: Colors.white,
                        fontWeight: FontWeight.w700,
@@ -472,7 +473,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
     final state = widget.state;
     final isCorrect = state.isLastAnswerCorrect;
     final Color accentColor = isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF7043);
-    final String titleText = isCorrect ? 'Professor Pixy says:' : 'Professor Pixy explains:';
+    final String titleText = isCorrect ? Quiz.feedbackCorrectTitle : Quiz.feedbackIncorrectTitle;
     
     return Stack(
       children: [
@@ -521,7 +522,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
                            child: ElevatedButton(
                              onPressed: widget.controller.goToNextAfterFeedback,
                              style: ElevatedButton.styleFrom(backgroundColor: accentColor, shape: const StadiumBorder(), padding: const EdgeInsets.symmetric(vertical: 14)),
-                             child: Text('CONTINUE', style: GoogleFonts.alata(color: Colors.white, fontWeight: FontWeight.bold)),
+                             child: Text(Quiz.continueAction, style: GoogleFonts.alata(color: Colors.white, fontWeight: FontWeight.bold)),
                            ),
                          )
                        ],
@@ -551,12 +552,12 @@ class _QuizResultView extends StatelessWidget {
           const Icon(Icons.emoji_events, size: 80, color: Color(0xFFFFCA28)),
           const SizedBox(height: 24),
           Text(
-            'Quiz Completed!',
+            Quiz.completedTitle,
             style: GoogleFonts.alata(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
-            'Your Score: ${(result.percentage).toInt()}%',
+            '${Quiz.scoreLabel} ${(result.percentage).toInt()}%',
             style: GoogleFonts.alata(fontSize: 48, fontWeight: FontWeight.bold, color: const Color(0xFF8E97FD)),
           ),
           const SizedBox(height: 32),
@@ -567,7 +568,7 @@ class _QuizResultView extends StatelessWidget {
               shape: const StadiumBorder(),
               backgroundColor: const Color(0xFF8E97FD),
             ),
-            child: Text('COMPLETE MISSION', style: GoogleFonts.alata(color: Colors.white)),
+            child: Text(Quiz.completeMission, style: GoogleFonts.alata(color: Colors.white)),
           )
         ],
       ),

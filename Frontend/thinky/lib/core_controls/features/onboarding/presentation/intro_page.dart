@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class IntroPage extends StatelessWidget {
   const IntroPage({super.key});
@@ -56,7 +57,7 @@ class IntroPage extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          'Learn and Teach at\n the same time',
+                          Intro.title,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.alata(
                             fontSize: 30,
@@ -67,7 +68,7 @@ class IntroPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "Thousands of people use AI everyday but don't know how it works. \nBe the one to make a difference!",
+                          Intro.subtitle,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.alata(
                             fontSize: 16,
@@ -92,7 +93,7 @@ class IntroPage extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'SIGN UP',
+                              Intro.signUp,
                               style: GoogleFonts.alata(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
@@ -114,7 +115,7 @@ class IntroPage extends StatelessWidget {
                               ),
                             ),
                             child: Text(
-                              'CONTINUE AS GUEST',
+                              Intro.guest,
                               style: GoogleFonts.alata(
                                 color: const Color(0xFF8E97FD),
                                 fontWeight: FontWeight.w700,
@@ -129,7 +130,7 @@ class IntroPage extends StatelessWidget {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
-                              'ALREADY HAVE AN ACCOUNT? ',
+                              Intro.haveAccount,
                               style: GoogleFonts.alata(
                                 color: const Color(0xFF8A8A8F),
                                 fontSize: 14,
@@ -138,7 +139,7 @@ class IntroPage extends StatelessWidget {
                             TextButton(
                               onPressed: () => context.push(RouteNames.login),
                               child: Text(
-                                'LOG IN',
+                                Intro.logIn,
                                 style: GoogleFonts.alata(
                                   color: const Color(0xFF8E97FD),
                                   fontSize: 14,

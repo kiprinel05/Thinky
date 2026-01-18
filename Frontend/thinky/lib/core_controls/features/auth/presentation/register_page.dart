@@ -4,6 +4,7 @@ import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/models/auth_response.dart';
 import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/features/welcome/presentation/welcome_page.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -181,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'OR LOG IN WITH EMAIL',
+              Auth.orLoginEmail,
               style: GoogleFonts.alata(
                 color: const Color(0xFFA3A6AD),
                 fontSize: 12,
@@ -225,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     const SizedBox(height: 16),
                     Text(
-                      'Create your account',
+                      Auth.createAccount,
                       style: GoogleFonts.aleo(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
@@ -239,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 20,
                         width: 20,
                       ),
-                      label: 'CONTINUE WITH FACEBOOK',
+                      label: Auth.continueFacebook,
                       filled: true,
                     ),
                     const SizedBox(height: 14),
@@ -249,7 +250,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 20,
                         width: 20,
                       ),
-                      label: 'CONTINUE WITH GOOGLE',
+                      label: Auth.continueGoogle,
                       filled: false,
                     ),
                     orDivider(),
@@ -282,20 +283,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _usernameController,
                       decoration: inputDecoration(
-                        'Username',
+                        Auth.usernameHint,
                         suffix: _usernameController.text.isNotEmpty
                             ? const Icon(Icons.check, color: Color(0xFF7EC18C))
                             : null,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Username is required';
+                          return Auth.usernameRequired;
                         }
                         if (value.trim().length < 3) {
-                          return 'Username must be at least 3 characters';
+                          return Auth.usernameMinLength;
                         }
                         if (value.trim().length > 50) {
-                          return 'Username must be less than 50 characters';
+                          return Auth.usernameMaxLength;
                         }
                         return null;
                       },
@@ -305,7 +306,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _emailController,
                       decoration: inputDecoration(
-                        'Email address',
+                        Auth.emailHint,
                         suffix: _emailController.text.isNotEmpty &&
                                 _emailController.text.contains('@')
                             ? const Icon(Icons.check, color: Color(0xFF7EC18C))
@@ -314,10 +315,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Email is required';
+                          return Auth.emailRequired;
                         }
                         if (!value.contains('@') || !value.contains('.')) {
-                          return 'Please enter a valid email';
+                          return Auth.emailInvalid;
                         }
                         return null;
                       },
@@ -327,7 +328,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _passwordController,
                       decoration: inputDecoration(
-                        'Password',
+                        Auth.passwordHint,
                         suffix: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -345,10 +346,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password is required';
+                          return Auth.passwordRequired;
                         }
                         if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return Auth.passwordMinLength;
                         }
                         return null;
                       },
@@ -357,7 +358,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _confirmPasswordController,
                       decoration: inputDecoration(
-                        'Confirm password',
+                        Auth.confirmPasswordHint,
                         suffix: IconButton(
                           icon: Icon(
                             _obscureConfirmPassword
@@ -375,10 +376,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       obscureText: _obscureConfirmPassword,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
+                          return Auth.confirmPasswordRequired;
                         }
                         if (value != _passwordController.text) {
-                          return 'Passwords do not match';
+                          return Auth.passwordsMismatch;
                         }
                         return null;
                       },
@@ -406,7 +407,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                               )
                             : Text(
-                                'GET STARTED',
+                                Auth.getStarted,
                                 style: GoogleFonts.alata(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w700,
@@ -419,7 +420,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Already have an account? ',
+                          Auth.alreadyHaveAccount,
                           style: GoogleFonts.alata(
                             fontSize: 12,
                             color: const Color(0xFF8A8A8F),
@@ -428,7 +429,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
                           child: Text(
-                            'LOG IN',
+                            Auth.loginButton,
                             style: GoogleFonts.alata(
                               color: primaryPurple,
                               fontSize: 12,

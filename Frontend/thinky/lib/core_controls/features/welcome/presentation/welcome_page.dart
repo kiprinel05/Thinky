@@ -7,6 +7,7 @@ import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart'
 import 'package:thinky/core_controls/services/app_state_service.dart'; // Keep for now, or migrate to provider
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -126,7 +127,7 @@ class WelcomePage1 extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Hi $userName',
+                              '${Welcome.hi} $userName',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 28,
@@ -136,7 +137,7 @@ class WelcomePage1 extends ConsumerWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Welcome to Thinky',
+                              Welcome.title,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 32,
@@ -146,7 +147,7 @@ class WelcomePage1 extends ConsumerWidget {
                             ),
                             const SizedBox(height: 24),
                             Text(
-                              'My name is Pixy and I will be your friend in your journey of learning AI. Are you ready?',
+                              Welcome.introMessage,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 16,
@@ -194,7 +195,7 @@ class WelcomePage1 extends ConsumerWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'NEXT',
+                    Welcome.nextButton,
                     style: GoogleFonts.alata(
                       color: const Color(0xFF60646D),
                       fontWeight: FontWeight.w700,
@@ -256,7 +257,7 @@ class WelcomePage2 extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'I would like to know...\nhow do robots learn?',
+                              Welcome.robotQuestion,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 24,
@@ -267,7 +268,7 @@ class WelcomePage2 extends StatelessWidget {
                             ),
                             const SizedBox(height: 24),
                             Text(
-                              'Maybe you can help me find out!',
+                              Welcome.robotAnswer,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.alata(
                                 fontSize: 18,
@@ -309,7 +310,7 @@ class WelcomePage2 extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'LET\'S GET STARTED',
+                    Welcome.startButton,
                     style: GoogleFonts.alata(
                       color: const Color(0xFF60646D),
                       fontWeight: FontWeight.w700,

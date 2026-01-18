@@ -1,0 +1,75 @@
+{
+    "Misc": {
+        "test": "test value from json"
+    },
+    "Intro": {
+        "title": "Learn and Teach at\n the same time",
+        "subtitle": "Thousands of people use AI everyday but don't know how it works. \nBe the one to make a difference!",
+        "signUp": "SIGN UP",
+        "guest": "CONTINUE AS GUEST",
+        "logIn": "LOG IN",
+        "haveAccount": "ALREADY HAVE AN ACCOUNT? "
+    },
+    "Welcome": {
+        "hi": "Hi",
+        "title": "Welcome to Thinky",
+        "subtitle": "Learn and Teach",
+        "introMessage": "My name is Pixy and I will be your friend in your journey of learning AI. Are you ready?",
+        "nextButton": "NEXT",
+        "robotQuestion": "I would like to know...\nhow do robots learn?",
+        "robotAnswer": "Maybe you can help me find out!",
+        "startButton": "LET'S GET STARTED"
+    },
+    "Auth": {
+        "loginButton": "Log In",
+        "registerButton": "Sign Up",
+        "welcomeBack": "Welcome Back!",
+        "continueFacebook": "CONTINUE WITH FACEBOOK",
+        "continueGoogle": "CONTINUE WITH GOOGLE",
+        "orLoginEmail": "OR LOG IN WITH EMAIL",
+        "emailHint": "Email address",
+        "passwordHint": "Password",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email",
+        "passwordRequired": "Password is required",
+        "forgotPassword": "Forgot Password?",
+        "createAccount": "Create your account",
+        "usernameHint": "Username",
+        "usernameRequired": "Username is required",
+        "usernameMinLength": "Username must be at least 3 characters",
+        "usernameMaxLength": "Username must be less than 50 characters",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "confirmPasswordHint": "Confirm password",
+        "confirmPasswordRequired": "Please confirm your password",
+        "passwordsMismatch": "Passwords do not match",
+        "getStarted": "GET STARTED",
+        "alreadyHaveAccount": "Already have an account? ",
+        "continueGuest": "Continue as guest",
+        "guestNameSubtitle": "Tell us your name. You can change it later.",
+        "guestNameHint": "Your name",
+        "nameRequired": "Name is required",
+        "nameMaxLength": "Name must be less than 100 characters",
+        "continueAction": "CONTINUE"
+    },
+    "Missions": {
+        "title": "Let's start teaching Pixy simple things!",
+        "subtitle": "choose a topic to teach:",
+        "errorLoading": "Error loading missions: ",
+        "locked": "Locked"
+    },
+    "Quiz": {
+        "title": "Quiz",
+        "noQuestions": "No questions available",
+        "questionLabel": "Question",
+        "ofLabel": "of",
+        "previous": "PREVIOUS",
+        "next": "NEXT",
+        "seeResult": "SEE RESULT",
+        "feedbackCorrectTitle": "Professor Pixy says:",
+        "feedbackIncorrectTitle": "Professor Pixy explains:",
+        "continueAction": "CONTINUE",
+        "completedTitle": "Quiz Completed!",
+        "scoreLabel": "Your Score:",
+        "completeMission": "COMPLETE MISSION"
+    }
+}
