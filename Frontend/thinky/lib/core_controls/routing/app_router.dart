@@ -14,6 +14,7 @@ import 'package:thinky/core_controls/features/missions/presentation/pixy_learns_
 import 'package:thinky/core_controls/features/missions/quiz/presentation/pages/quiz_page_new.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
+import '../services/logger_service.dart';
 
 /// AppRouter - Centralized routing configuration using go_router
 /// Handles navigation guards, redirects, and all app routes
@@ -27,6 +28,7 @@ class AppRouter {
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
     redirect: _guardRedirect,
+    observers: [LoggingNavigatorObserver()],
     routes: _routes,
   );
 
@@ -164,3 +166,22 @@ extension GoRouterExtension on BuildContext {
     return GoRouter.of(this).canPop();
   }
 }
+
+/// Observer for navigation events to log them using LoggerService
+class LoggingNavigatorObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    LoggerService.v('Navigation PUSH: ');
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    LoggerService.v('Navigation POP: ');
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    LoggerService.v('Navigation REPLACE: ');
+  }
+}
+

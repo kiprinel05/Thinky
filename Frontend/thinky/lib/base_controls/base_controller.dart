@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:thinky/core_controls/services/logger_service.dart';
 import 'base_state.dart';
 
 /// BaseController - Abstract base class for all StateNotifier controllers
@@ -56,8 +57,9 @@ abstract class BaseAsyncController<T extends BaseState> extends BaseController<T
       final result = await operation();
       safeUpdate(successState(result));
       return result;
-    } catch (e) {
+    } catch (e, stack) {
       final message = defaultErrorMessage ?? e.toString();
+      LoggerService.e('Async Error in ${runtimeType}: $message', e, stack);
       safeUpdate(errorState(message));
       return null;
     }
@@ -73,7 +75,8 @@ abstract class BaseAsyncController<T extends BaseState> extends BaseController<T
       final result = await operation();
       safeUpdate(successState(result));
       return result;
-    } catch (e) {
+    } catch (e, stack) {
+      LoggerService.e('Silent Error in ${runtimeType}: $e', e, stack);
       if (errorState != null) {
         safeUpdate(errorState(e.toString()));
       }

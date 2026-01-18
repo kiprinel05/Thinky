@@ -24,6 +24,7 @@ dependencies:
   
   # Routing
   go_router: ^13.0.0
+  logger: ^2.6.2
 
 dev_dependencies:
   flutter_test:
