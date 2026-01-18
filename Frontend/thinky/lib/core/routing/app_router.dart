@@ -11,7 +11,7 @@ import '../../features/auth/presentation/forgot_password_page.dart';
 import '../../features/auth/presentation/profile_page.dart';
 import '../../features/missions/presentation/missions_menu_page.dart';
 import '../../features/missions/presentation/pixy_learns_page.dart';
-import '../../features/missions/quiz/quiz_page.dart';
+import '../../features/missions/quiz/presentation/pages/quiz_page_new.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 
@@ -123,7 +123,7 @@ class AppRouter {
     // Quiz
     GoRoute(
       path: RouteNames.quiz,
-      builder: (context, state) => const QuizPage(),
+      builder: (context, state) => const QuizPageNew(),
     ),
   ];
 }
