@@ -34,4 +34,10 @@ abstract class ApiEndpoints {
   
   static const String pixyLearnUpload = '/pixy-learns/upload';
   static const String pixyLearnImages = '/pixy-learns/images';
+  
+  // ══════════════════════════════════════════════════════════════════════════
+  // DRAWING
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String drawingAnalyze = '/drawing/analyze';
 }

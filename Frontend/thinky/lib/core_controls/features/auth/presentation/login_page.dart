@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/models/auth_response.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
-import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
 import 'forgot_password_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 
@@ -47,26 +46,27 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      if (mounted) {
-        await AppStateService.setHasSeenWelcome(true);
-        await AppStateService.setLastRoute('missions');
-        
-        Navigator.of(context).pushAndRemoveUntil(
-          SlidePageRoute(
-            page: const MissionsMenuPage(),
-            direction: SlideDirection.right,
-          ),
-          (route) => false,
-        );
-      }
+      if (!mounted) return;
+      
+      await AppStateService.setHasSeenWelcome(true);
+      await AppStateService.setLastRoute('missions');
+      
+      if (!mounted) return;
+      
+      // Use go_router for page-based navigation
+      context.go('/missions');
     } on AuthError catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Login failed. Please try again.';
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

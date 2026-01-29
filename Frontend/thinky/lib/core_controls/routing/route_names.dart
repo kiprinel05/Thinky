@@ -35,4 +35,5 @@ abstract class RouteNames {
   static const String quizIntro = '/quiz/intro';
   static const String quizResult = '/quiz/result';
   static const String pixyLearns = '/pixy-learns';
+  static const String drawTriangle = '/draw-triangle';
 }

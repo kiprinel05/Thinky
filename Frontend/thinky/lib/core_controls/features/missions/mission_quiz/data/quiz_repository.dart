@@ -2,7 +2,7 @@ import 'package:thinky/base_controls/base_repository.dart';
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/shared/models/result.dart';
-import 'package:thinky/core_controls/features/missions/quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 
 /// Repository for Quiz feature
 class QuizRepository extends BaseRepository {

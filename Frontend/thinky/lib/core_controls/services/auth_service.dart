@@ -61,9 +61,6 @@ class AuthService {
     await prefs.remove(_emailKey);
     await prefs.remove(_isGuestKey);
     await prefs.remove(_guestNameKey);
-    // Șterge și starea aplicației pentru a forța welcome pages la următoarea autentificare
-    // (opțional - poți comenta dacă vrei să păstrezi că utilizatorul a văzut welcome)
-    // await AppStateService.clearAppState();
   }
 
   static Future<AuthResponse> register({
@@ -73,15 +70,12 @@ class AuthService {
     required String confirmPassword,
   }) async {
     try {
-      final response = await ApiClient.post(
-        AppConfig.registerEndpoint,
-        {
-          'username': username,
-          'email': email,
-          'password': password,
-          'confirm_password': confirmPassword,
-        },
-      );
+      final response = await ApiClient.post(AppConfig.registerEndpoint, {
+        'username': username,
+        'email': email,
+        'password': password,
+        'confirm_password': confirmPassword,
+      });
 
       if (response.statusCode == 201) {
         final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
@@ -102,13 +96,10 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await ApiClient.post(
-        AppConfig.loginEndpoint,
-        {
-          'email': email,
-          'password': password,
-        },
-      );
+      final response = await ApiClient.post(AppConfig.loginEndpoint, {
+        'email': email,
+        'password': password,
+      });
 
       if (response.statusCode == 200) {
         final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
@@ -124,21 +115,17 @@ class AuthService {
     }
   }
 
-  static Future<AuthResponse> registerGuest({
-    required String name,
-  }) async {
+  static Future<AuthResponse> registerGuest({required String name}) async {
     try {
-      final response = await ApiClient.post(
-        AppConfig.guestEndpoint,
-        {
-          'name': name,
-        },
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw AuthError.fromString('Request timeout: Server is not responding');
-        },
-      );
+      final response =
+          await ApiClient.post(AppConfig.guestEndpoint, {'name': name}).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw AuthError.fromString(
+                'Request timeout: Server is not responding',
+              );
+            },
+          );
 
       if (response.statusCode == 201) {
         final authResponse = AuthResponse.fromJson(jsonDecode(response.body));
@@ -158,7 +145,8 @@ class AuthService {
       if (e is AuthError) {
         rethrow;
       }
-      if (e.toString().contains('timeout') || e.toString().contains('TimeoutException')) {
+      if (e.toString().contains('timeout') ||
+          e.toString().contains('TimeoutException')) {
         throw AuthError.fromString('Server is not responding');
       }
       throw AuthError.fromString('Network error: ${e.toString()}');
@@ -186,4 +174,3 @@ class AuthService {
     return authResponse;
   }
 }
-

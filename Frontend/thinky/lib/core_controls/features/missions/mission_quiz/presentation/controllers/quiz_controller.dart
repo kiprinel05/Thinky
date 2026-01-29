@@ -2,11 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
 import '../../data/quiz_repository.dart';
-import 'package:thinky/core_controls/features/missions/quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'quiz_state.dart';
 
 // Import local storage provider for repository DI
-import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:thinky/core_controls/storage/storage_provider.dart';
 
 /// Provider for QuizRepository
 final quizRepositoryProvider = Provider<QuizRepository>((ref) {

@@ -72,7 +72,7 @@ class MissionsRepository extends BaseRepository {
     return Result.failure(result.errorOrNull!);
   }
 
-  /// Offline fallback missions
+  /// Offline fallback missions - ALL UNLOCKED FOR TESTING
   List<Mission> _getOfflineMissions() {
     return [
       const Mission(
@@ -89,25 +89,26 @@ class MissionsRepository extends BaseRepository {
         name: 'Colors',
         imageUrl: 'assets/missions/colors.png',
         color: '#FFB59E',
-        isLocked: true,
+        isLocked: false, // UNLOCKED FOR TESTING
         order: 2,
         isCompleted: false,
       ),
       const Mission(
         id: 3,
-        name: 'Shapes',
+        name: 'Draw Triangle',
         imageUrl: 'assets/missions/shapes.png',
-        color: '#FEBF00',
-        isLocked: true,
+        color: '#8E97FD',
+        isLocked: false, // UNLOCKED FOR TESTING
         order: 3,
         isCompleted: false,
+        missionPath: 'draw_triangle',
       ),
       const Mission(
         id: 4,
         name: 'Numbers',
         imageUrl: 'assets/missions/numbers.png',
         color: '#6CB28E',
-        isLocked: true,
+        isLocked: false, // UNLOCKED FOR TESTING
         order: 4,
         isCompleted: false,
       ),

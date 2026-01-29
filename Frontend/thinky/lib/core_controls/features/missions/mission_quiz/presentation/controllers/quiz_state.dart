@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:thinky/base_controls/base_state.dart';
-import 'package:thinky/core_controls/features/missions/quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 
 @immutable
 class QuizState extends BaseState {

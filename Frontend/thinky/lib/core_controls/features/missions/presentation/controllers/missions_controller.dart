@@ -5,8 +5,8 @@ import 'package:thinky/base_controls/base_state.dart';
 import '../../data/missions_repository.dart';
 import 'missions_state.dart';
 
-// Import auth controller for LocalStorage provider
-import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
+// Import LocalStorage provider
+import 'package:thinky/core_controls/storage/storage_provider.dart';
 
 /// Provider for MissionsRepository
 final missionsRepositoryProvider = Provider<MissionsRepository>((ref) {

@@ -1,0 +1,1154 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import '../controllers/pixy_learns_controller.dart';
+import '../controllers/pixy_learns_state.dart';
+import '../../domain/pixy_learns_models.dart';
+
+/// Main page for Pixy Learns mission
+class PixyLearnsPage extends ConsumerStatefulWidget {
+  const PixyLearnsPage({super.key});
+
+  @override
+  ConsumerState<PixyLearnsPage> createState() => _PixyLearnsPageState();
+}
+
+class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pixyAnimationController;
+  late Animation<double> _pixyScaleAnimation;
+
+  // Theme colors
+  static const Color _primaryColor = AppColors.primaryPurple;
+  static const Color _primaryLightColor = AppColors.primaryPurpleLight;
+  static const Color _accentGreen = Color(0xFF4CAF50);
+
+  @override
+  void initState() {
+    super.initState();
+    _pixyAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+
+    _pixyScaleAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(
+        parent: _pixyAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Load images on init
+    Future.microtask(() => ref.read(pixyLearnsStateProvider.notifier).loadImages());
+  }
+
+  @override
+  void dispose() {
+    _pixyAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(pixyLearnsStateProvider);
+
+    if (state.status == StateStatus.loading) {
+      return _buildLoadingScreen();
+    }
+
+    if (state.showIntroduction) {
+      return _buildIntroductionScreen(state);
+    }
+
+    if (state.showCompletion) {
+      return _buildCompletionScreen(state);
+    }
+
+    return _buildMainScreen(state);
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LOADING SCREEN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_primaryColor, _primaryLightColor],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        'Preparing lessons...',
+                        style: GoogleFonts.alata(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INTRODUCTION SCREEN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildIntroductionScreen(PixyLearnsState state) {
+    final controller = ref.read(pixyLearnsStateProvider.notifier);
+    
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          // Purple gradient header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 320,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [_primaryColor, _primaryLightColor],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        
+                        // Pixy mascot
+                        ScaleInWidget(
+                          delay: const Duration(milliseconds: 200),
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.15),
+                            ),
+                            child: ScaleTransition(
+                              scale: _pixyScaleAnimation,
+                              child: Image.asset(
+                                'welcome/page2/thinking.png',
+                                height: 140,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Title card
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 400),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _primaryColor.withOpacity(0.15),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 15),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [_primaryColor, _primaryLightColor],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.psychology_rounded,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  "How Does Pixy Learn?",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF222222),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  "Help Pixy understand the world by teaching it to recognize different things. Label the images and watch Pixy learn!",
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 15,
+                                    color: const Color(0xFF8A8A8F),
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 20),
+                        
+                        // Feature pills
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 500),
+                          child: Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _buildFeaturePill(Icons.image_rounded, "${state.images.length} Images"),
+                              _buildFeaturePill(Icons.category_rounded, "2 Categories"),
+                              _buildFeaturePill(Icons.auto_awesome, "AI Learning"),
+                            ],
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 40),
+                        
+                        // Start button
+                        FadeInWidget(
+                          delay: const Duration(milliseconds: 600),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              gradient: const LinearGradient(
+                                colors: [_primaryColor, _primaryLightColor],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _primaryColor.withOpacity(0.4),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: controller.startMission,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'START TEACHING',
+                                    style: GoogleFonts.alata(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 17,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturePill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: _primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _primaryColor.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: _primaryColor),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.alata(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MAIN SCREEN (Image Labeling)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildMainScreen(PixyLearnsState state) {
+    final controller = ref.read(pixyLearnsStateProvider.notifier);
+    
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: Stack(
+        children: [
+          // Gradient header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 200,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [_primaryColor, _primaryLightColor],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(),
+                _buildProgressSection(state),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildInstructions(),
+                        const SizedBox(height: 24),
+                        _buildImagesGrid(state, controller),
+                        const SizedBox(height: 28),
+                        _buildSubmitButton(state, controller),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.school_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Chapter 1',
+                  style: GoogleFonts.alata(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressSection(PixyLearnsState state) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.auto_graph_rounded, color: Colors.white.withOpacity(0.9), size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Learning Progress',
+                    style: GoogleFonts.alata(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${state.labels.length}/${state.images.length}',
+                  style: GoogleFonts.alata(
+                    color: _primaryColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              children: [
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                AnimatedFractionallySizedBox(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
+                  widthFactor: state.progress,
+                  child: Container(
+                    height: 10,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Colors.white, Color(0xFFE3E7FF)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.5),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 300),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.lightbulb_rounded,
+                color: _primaryColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Teach Pixy!',
+                    style: GoogleFonts.alata(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF222222),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap each image and select the correct label',
+                    style: GoogleFonts.alata(
+                      fontSize: 13,
+                      color: const Color(0xFF8A8A8F),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagesGrid(PixyLearnsState state, PixyLearnsController controller) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.78,
+      ),
+      itemCount: state.images.length,
+      itemBuilder: (context, index) {
+        final image = state.images[index];
+        final selectedLabel = state.getLabel(image.id);
+        return _buildImageCard(image, selectedLabel, index, controller);
+      },
+    );
+  }
+
+  Widget _buildImageCard(
+    LearningImage image, 
+    String? selectedLabel, 
+    int index,
+    PixyLearnsController controller,
+  ) {
+    final bool isLabeled = selectedLabel != null;
+    
+    return ScaleInWidget(
+      delay: Duration(milliseconds: 400 + (index * 80)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: isLabeled 
+                  ? _primaryColor.withOpacity(0.15) 
+                  : Colors.black.withOpacity(0.06),
+              blurRadius: isLabeled ? 20 : 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+          border: isLabeled
+              ? Border.all(color: _primaryColor.withOpacity(0.3), width: 2)
+              : null,
+        ),
+        child: Column(
+          children: [
+            // Image container
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FC),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Center(
+                        child: _buildImageDisplay(image.url),
+                      ),
+                    ),
+                    if (isLabeled)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: _accentGreen,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            // Label buttons
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildLabelButton(
+                      '🍎 Apple',
+                      'apple',
+                      selectedLabel == 'apple',
+                      () => controller.selectLabel(image.id, 'apple'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildLabelButton(
+                      '🐱 Cat',
+                      'cat',
+                      selectedLabel == 'cat',
+                      () => controller.selectLabel(image.id, 'cat'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageDisplay(String imageUrl) {
+    // Check if it's an emoji fallback (offline mode)
+    if (imageUrl.startsWith('emoji:')) {
+      final emoji = imageUrl.substring(6);
+      return Container(
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Text(
+            emoji,
+            style: const TextStyle(fontSize: 56),
+          ),
+        ),
+      );
+    }
+    
+    // Load network image from URL
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            value: loadingProgress.expectedTotalBytes != null
+                ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                : null,
+            color: _primaryColor,
+            strokeWidth: 2,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback to emoji on image load error
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.image_not_supported_rounded,
+                size: 48,
+                color: Color(0xFFB7BAC3),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Image unavailable',
+                style: GoogleFonts.alata(
+                  fontSize: 11,
+                  color: const Color(0xFFB7BAC3),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLabelButton(String label, String value, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(colors: [_primaryColor, _primaryLightColor])
+              : null,
+          color: isSelected ? null : const Color(0xFFF2F3F7),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.alata(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : const Color(0xFF60646D),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(PixyLearnsState state, PixyLearnsController controller) {
+    final allLabeled = state.allLabeled;
+    
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 500),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: allLabeled
+              ? const LinearGradient(colors: [_primaryColor, _primaryLightColor])
+              : null,
+          color: allLabeled ? null : const Color(0xFFE0E2EA),
+          boxShadow: allLabeled
+              ? [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ]
+              : null,
+        ),
+        child: ElevatedButton(
+          onPressed: allLabeled && !state.isSubmitting ? controller.submitLabels : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            disabledBackgroundColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          child: state.isSubmitting
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.auto_awesome,
+                      color: allLabeled ? Colors.white : const Color(0xFFA3A6AD),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'TEACH PIXY',
+                      style: GoogleFonts.alata(
+                        color: allLabeled ? Colors.white : const Color(0xFFA3A6AD),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // COMPLETION SCREEN
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildCompletionScreen(PixyLearnsState state) {
+    final result = state.result;
+    
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_primaryColor, _primaryLightColor, Color(0xFFF5F6FA)],
+            stops: [0.0, 0.35, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      
+                      // Celebration
+                      ScaleInWidget(
+                        delay: const Duration(milliseconds: 200),
+                        child: Image.asset(
+                          'welcome/page1/hello.png',
+                          height: 160,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 400),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('🎉', style: TextStyle(fontSize: 36)),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Amazing Job!',
+                              style: GoogleFonts.alata(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text('🎉', style: TextStyle(fontSize: 36)),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Stats card
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 500),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(28),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(28),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFFFD700).withOpacity(0.4),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.emoji_events_rounded,
+                                  color: Colors.white,
+                                  size: 36,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'Pixy learned ${result?.learnedExamples ?? state.images.length} examples!',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.alata(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF222222),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _primaryColor.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.category_rounded, color: _primaryColor, size: 20),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Categories: ${result?.categories.join(", ") ?? "apple, cat"}',
+                                      style: GoogleFonts.alata(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: _primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Explanation
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 600),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: _primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: _primaryColor,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  'This is how AI learns! By seeing many examples, Pixy can now tell the difference between apples and cats.',
+                                  style: GoogleFonts.alata(
+                                    fontSize: 14,
+                                    color: const Color(0xFF60646D),
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Continue button
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 700),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            gradient: const LinearGradient(
+                              colors: [_primaryColor, _primaryLightColor],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _primaryColor.withOpacity(0.4),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'CONTINUE TO MISSIONS',
+                                  style: GoogleFonts.alata(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

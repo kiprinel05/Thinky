@@ -6,9 +6,10 @@ import 'package:thinky/core_controls/models/mission_models.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/features/auth/presentation/profile_page.dart';
-import '../quiz/quiz_page.dart';
-import 'pixy_learns_page.dart';
+import '../mission_quiz/quiz_page.dart';
+import '../mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import '../mission_drawing/presentation/draw_triangle_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
@@ -264,8 +265,25 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                             _loadMissions();
                           }
                         });
-                      } else if (mission.missionPath == 'geometric_shapes') {
-                        // TODO: Navigate to Geometric Shapes mission
+                      } else if (mission.missionPath == 'draw_triangle') {
+                        // Navigate to Draw Triangle mission
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const DrawTrianglePage(),
+                          ),
+                        ).then((shouldReload) {
+                          if (shouldReload == true) {
+                            _loadMissions();
+                          }
+                        });
+                      } else {
+                        // Default: show message for unhandled missions
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Mission "${mission.missionPath}" coming soon!'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
                       }
                     },
             ),

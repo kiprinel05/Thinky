@@ -10,11 +10,12 @@ import 'package:thinky/core_controls/features/auth/presentation/guest_name_page.
 import 'package:thinky/core_controls/features/auth/presentation/forgot_password_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/profile_page.dart';
 import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
-import 'package:thinky/core_controls/features/missions/presentation/pixy_learns_page.dart';
-import 'package:thinky/core_controls/features/missions/quiz/presentation/pages/quiz_page_new.dart';
+import 'package:thinky/core_controls/features/missions/mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page_new.dart';
+import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/draw_triangle_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
-import '../services/logger_service.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 /// AppRouter - Centralized routing configuration using go_router
 /// Handles navigation guards, redirects, and all app routes
@@ -127,6 +128,12 @@ class AppRouter {
       path: RouteNames.quiz,
       builder: (context, state) => const QuizPageNew(),
     ),
+
+    // Drawing Mission
+    GoRoute(
+      path: RouteNames.drawTriangle,
+      builder: (context, state) => const DrawTrianglePage(),
+    ),
   ];
 }
 
@@ -171,17 +178,17 @@ extension GoRouterExtension on BuildContext {
 class LoggingNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    LoggerService.v('Navigation PUSH: ');
+    ErrorLogger().logDebug('Navigation PUSH: ${route.settings.name}');
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    LoggerService.v('Navigation POP: ');
+    ErrorLogger().logDebug('Navigation POP: ${route.settings.name}');
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    LoggerService.v('Navigation REPLACE: ');
+    ErrorLogger().logDebug('Navigation REPLACE: ${newRoute?.settings.name}');
   }
 }
 

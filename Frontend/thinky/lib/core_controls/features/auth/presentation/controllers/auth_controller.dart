@@ -1,14 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/storage/local_storage.dart';
+import 'package:thinky/core_controls/storage/storage_provider.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
 import '../../data/auth_repository.dart';
 import 'auth_state.dart';
-
-/// Provider for LocalStorage instance
-final localStorageProvider = Provider<LocalStorage>((ref) {
-  throw UnimplementedError('LocalStorage must be overridden in ProviderScope');
-});
 
 /// Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

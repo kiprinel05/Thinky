@@ -8,7 +8,7 @@ import 'package:thinky/base_controls/base_state.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../controllers/quiz_controller.dart';
 import '../controllers/quiz_state.dart';
-import 'package:thinky/core_controls/features/missions/quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 
 // We might need to import these if we extract them or just define here

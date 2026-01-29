@@ -12,6 +12,7 @@ class Mission {
   final int order;
   final int? progress;
   final bool isCompleted;
+  final String? missionPath; // For navigation routing
 
   const Mission({
     required this.id,
@@ -22,6 +23,7 @@ class Mission {
     required this.order,
     this.progress,
     this.isCompleted = false,
+    this.missionPath,
   });
 
   Mission copyWith({
@@ -33,6 +35,7 @@ class Mission {
     int? order,
     int? progress,
     bool? isCompleted,
+    String? missionPath,
   }) {
     return Mission(
       id: id ?? this.id,
@@ -43,6 +46,7 @@ class Mission {
       order: order ?? this.order,
       progress: progress ?? this.progress,
       isCompleted: isCompleted ?? this.isCompleted,
+      missionPath: missionPath ?? this.missionPath,
     );
   }
 
@@ -56,6 +60,7 @@ class Mission {
       order: json['order'] as int? ?? 0,
       progress: json['progress'] as int?,
       isCompleted: json['is_completed'] as bool? ?? false,
+      missionPath: json['mission_path'] as String?,
     );
   }
 
@@ -69,9 +74,11 @@ class Mission {
       'order': order,
       'progress': progress,
       'is_completed': isCompleted,
+      'mission_path': missionPath,
     };
   }
 }
+
 
 /// Missions state
 @immutable

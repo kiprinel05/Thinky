@@ -13,3 +13,5 @@ class LearningProgressResponse(BaseModel):
     learned_examples: int
     categories: List[str]
     progress_percentage: float
+    is_complete: bool = False
+

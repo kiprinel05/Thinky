@@ -4,7 +4,7 @@ import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'package:thinky/core_controls/storage/local_storage.dart';
 import 'package:thinky/shared/models/result.dart';
-import 'package:thinky/core_controls/services/logger_service.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 /// BaseRepository - Abstract base class for all repositories
 /// Provides common API call patterns and error handling
@@ -33,7 +33,7 @@ abstract class BaseRepository {
   }) async {
     try {
       final url = buildUrl(endpoint);
-      LoggerService.i('[GET] Request: $url');
+      ErrorLogger().logInfo('[GET] Request: $url');
       
       final response = await http
           .get(
@@ -42,10 +42,10 @@ abstract class BaseRepository {
           )
           .timeout(timeout);
 
-      LoggerService.d('[GET] Response: ${response.statusCode} - ${response.body}');
+      ErrorLogger().logDebug('[GET] Response: ${response.statusCode} - ${response.body}');
       return _handleResponse(response, parser);
     } catch (e, stack) {
-      LoggerService.e('[GET] Error: $endpoint', e, stack);
+      ErrorLogger().logError('[GET] Error: $endpoint', stackTrace: stack);
       return _handleException(e);
     }
   }
@@ -60,7 +60,7 @@ abstract class BaseRepository {
     try {
       final url = buildUrl(endpoint);
       final jsonBody = jsonEncode(body);
-      LoggerService.i('[POST] Request: $url\nBody: $jsonBody');
+      ErrorLogger().logInfo('[POST] Request: $url\nBody: $jsonBody');
 
       final response = await http
           .post(
@@ -70,10 +70,10 @@ abstract class BaseRepository {
           )
           .timeout(timeout);
 
-      LoggerService.d('[POST] Response: ${response.statusCode} - ${response.body}');
+      ErrorLogger().logDebug('[POST] Response: ${response.statusCode} - ${response.body}');
       return _handleResponse(response, parser);
     } catch (e, stack) {
-      LoggerService.e('[POST] Error: $endpoint', e, stack);
+      ErrorLogger().logError('[POST] Error: $endpoint', stackTrace: stack);
       return _handleException(e);
     }
   }
@@ -88,7 +88,7 @@ abstract class BaseRepository {
     try {
       final url = buildUrl(endpoint);
       final jsonBody = jsonEncode(body);
-      LoggerService.i('[PUT] Request: $url\nBody: $jsonBody');
+      ErrorLogger().logInfo('[PUT] Request: $url\nBody: $jsonBody');
 
       final response = await http
           .put(
@@ -98,10 +98,10 @@ abstract class BaseRepository {
           )
           .timeout(timeout);
 
-      LoggerService.d('[PUT] Response: ${response.statusCode} - ${response.body}');
+      ErrorLogger().logDebug('[PUT] Response: ${response.statusCode} - ${response.body}');
       return _handleResponse(response, parser);
     } catch (e, stack) {
-      LoggerService.e('[PUT] Error: $endpoint', e, stack);
+      ErrorLogger().logError('[PUT] Error: $endpoint', stackTrace: stack);
       return _handleException(e);
     }
   }
@@ -113,7 +113,7 @@ abstract class BaseRepository {
   }) async {
     try {
       final url = buildUrl(endpoint);
-      LoggerService.i('[DELETE] Request: $url');
+      ErrorLogger().logInfo('[DELETE] Request: $url');
 
       final response = await http
           .delete(
@@ -122,7 +122,7 @@ abstract class BaseRepository {
           )
           .timeout(timeout);
 
-      LoggerService.d('[DELETE] Response: ${response.statusCode}');
+      ErrorLogger().logDebug('[DELETE] Response: ${response.statusCode}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return const Result.success(null);
@@ -132,7 +132,7 @@ abstract class BaseRepository {
         );
       }
     } catch (e, stack) {
-      LoggerService.e('[DELETE] Error: $endpoint', e, stack);
+      ErrorLogger().logError('[DELETE] Error: $endpoint', stackTrace: stack);
       return _handleException(e);
     }
   }

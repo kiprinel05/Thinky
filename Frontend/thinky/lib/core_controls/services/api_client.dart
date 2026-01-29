@@ -12,6 +12,13 @@ class TimeoutException implements Exception {
 }
 
 class ApiClient {
+  static http.Client _client = http.Client();
+
+  // Setter for testing purposes
+  static set client(http.Client client) {
+    _client = client;
+  }
+
   static Future<Map<String, String>> _getHeaders() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
@@ -30,7 +37,7 @@ class ApiClient {
 
   static Future<http.Response> get(String endpoint) async {
     final headers = await _getHeaders();
-    return await http.get(
+    return await _client.get(
       Uri.parse('${AppConfig.apiBaseUrl}$endpoint'),
       headers: headers,
     );
@@ -42,7 +49,7 @@ class ApiClient {
     final bodyJson = jsonEncode(body);
     
     try {
-      final response = await http.post(
+      final response = await _client.post(
         Uri.parse(url),
         headers: headers,
         body: bodyJson,
@@ -63,7 +70,7 @@ class ApiClient {
 
   static Future<http.Response> put(String endpoint, Map<String, dynamic> body) async {
     final headers = await _getHeaders();
-    return await http.put(
+    return await _client.put(
       Uri.parse('${AppConfig.apiBaseUrl}$endpoint'),
       headers: headers,
       body: jsonEncode(body),
@@ -72,7 +79,7 @@ class ApiClient {
 
   static Future<http.Response> delete(String endpoint) async {
     final headers = await _getHeaders();
-    return await http.delete(
+    return await _client.delete(
       Uri.parse('${AppConfig.apiBaseUrl}$endpoint'),
       headers: headers,
     );

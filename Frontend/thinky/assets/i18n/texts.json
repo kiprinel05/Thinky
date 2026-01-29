@@ -71,5 +71,24 @@
         "completedTitle": "Quiz Completed!",
         "scoreLabel": "Your Score:",
         "completeMission": "COMPLETE MISSION"
+    },
+    "Drawing": {
+        "title": "Draw a Blue Triangle",
+        "subtitle": "Creative Mission",
+        "instruction": "Draw a triangle using blue color! Tap the canvas to start drawing. 🎨",
+        "thinking": "Hmm, let me look at your drawing... 🤔",
+        "analyzingMessage": "Analyzing your masterpiece!",
+        "clear": "Clear",
+        "checkDrawing": "Check Drawing",
+        "successTitle": "Amazing!",
+        "successEmoji": "🎉",
+        "successMessage": "You drew a perfect blue triangle!",
+        "almostTitle": "Almost there!",
+        "wrongShapeHint": "Remember, a triangle has 3 corners!",
+        "wrongColorHint": "Don't forget to use blue color! Look at the color palette! 🎨",
+        "tryAgain": "Try Again",
+        "continueAction": "Continue",
+        "drawFirst": "Draw something first!",
+        "captureError": "Could not capture drawing. Try again!"
     }
 }

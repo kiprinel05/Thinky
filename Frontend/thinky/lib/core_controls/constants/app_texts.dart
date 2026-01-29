@@ -84,3 +84,25 @@ class Quiz {
   static String get scoreLabel => TextService.getString('Quiz', 'scoreLabel');
   static String get completeMission => TextService.getString('Quiz', 'completeMission');
 }
+
+/// Accessors for 'Drawing' texts
+class Drawing {
+  static String get title => TextService.getString('Drawing', 'title');
+  static String get subtitle => TextService.getString('Drawing', 'subtitle');
+  static String get instruction => TextService.getString('Drawing', 'instruction');
+  static String get thinking => TextService.getString('Drawing', 'thinking');
+  static String get analyzingMessage => TextService.getString('Drawing', 'analyzingMessage');
+  static String get clear => TextService.getString('Drawing', 'clear');
+  static String get checkDrawing => TextService.getString('Drawing', 'checkDrawing');
+  static String get successTitle => TextService.getString('Drawing', 'successTitle');
+  static String get successEmoji => TextService.getString('Drawing', 'successEmoji');
+  static String get successMessage => TextService.getString('Drawing', 'successMessage');
+  static String get almostTitle => TextService.getString('Drawing', 'almostTitle');
+  static String get wrongShapeHint => TextService.getString('Drawing', 'wrongShapeHint');
+  static String get wrongColorHint => TextService.getString('Drawing', 'wrongColorHint');
+  static String get tryAgain => TextService.getString('Drawing', 'tryAgain');
+  static String get continueAction => TextService.getString('Drawing', 'continueAction');
+  static String get drawFirst => TextService.getString('Drawing', 'drawFirst');
+  static String get captureError => TextService.getString('Drawing', 'captureError');
+}
+

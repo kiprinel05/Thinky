@@ -93,37 +93,37 @@ def startup_event():
 # Import routers - handle import errors gracefully
 try:
     from api.routers import auth_router
-    app.include_router(auth_router.router)
+    app.include_router(auth_router.router, prefix="/api/v1")
 except Exception as e:
     print(f"Warning: Could not load auth_router: {e}")
 
 try:
     from api.routers import shape_router
-    app.include_router(shape_router.router)
+    app.include_router(shape_router.router, prefix="/api/v1")
 except Exception as e:
     print(f"Warning: Could not load shape_router: {e}")
 
 try:
     from api.routers import color_router
-    app.include_router(color_router.router)
+    app.include_router(color_router.router, prefix="/api/v1")
 except Exception as e:
     print(f"Warning: Could not load color_router: {e}")
 
 try:
     from api.routers import quiz_router
-    app.include_router(quiz_router.router)
+    app.include_router(quiz_router.router, prefix="/api/v1")
 except Exception as e:
     print(f"Warning: Could not load quiz_router: {e}")
 
 try:
     from api.routers import mission_router
-    app.include_router(mission_router.router)
+    app.include_router(mission_router.router, prefix="/api/v1")
 except Exception as e:
     print(f"Warning: Could not load mission_router: {e}")
 
 try:
     from api.routers import pixy_learns_router
-    app.include_router(pixy_learns_router.router)
+    app.include_router(pixy_learns_router.router, prefix="/api/v1")
     print("[OK] pixy_learns_router loaded successfully")
 except Exception as e:
     print(f"[ERROR] Error loading pixy_learns_router: {e}")

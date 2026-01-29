@@ -3,7 +3,7 @@ class AppConfig {
   // For Android emulator: http://10.0.2.2:8000
   static const String baseUrl = 'http://localhost:8000';
   
-  static const String apiBaseUrl = baseUrl;
+  static const String apiBaseUrl = '$baseUrl/api/v1';
   
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';

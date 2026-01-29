@@ -19,7 +19,7 @@ def get_pixy_learns_service(db: Session = Depends(get_db)) -> PixyLearnsService:
 async def get_learning_images(service: PixyLearnsService = Depends(get_pixy_learns_service)):
     return service.get_images()
 
-@router.post("/label", response_model=LearningProgressResponse)
+@router.post("/upload", response_model=LearningProgressResponse)
 async def submit_labels(
     submission: LabelSubmission,
     current_user: User = Depends(get_current_user),

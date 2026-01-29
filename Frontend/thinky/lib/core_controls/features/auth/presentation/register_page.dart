@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/models/auth_response.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
-import 'package:thinky/core_controls/features/welcome/presentation/welcome_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -52,24 +51,22 @@ class _RegisterPageState extends State<RegisterPage> {
         confirmPassword: _confirmPasswordController.text,
       );
 
-      if (mounted) {
-        // Navigate to welcome page
-        Navigator.of(context).pushAndRemoveUntil(
-          SlidePageRoute(
-            page: WelcomePage(),
-            direction: SlideDirection.right,
-          ),
-          (route) => false,
-        );
-      }
+      if (!mounted) return;
+      
+      // Use go_router for page-based navigation
+      context.go('/welcome');
     } on AuthError catch (e) {
-      setState(() {
-        _errorMessage = e.message;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.message;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'An unexpected error occurred: ${e.toString()}';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Registration failed. Please try again.';
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

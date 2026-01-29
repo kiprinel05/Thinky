@@ -17,48 +17,68 @@ from datetime import datetime
 
 router = APIRouter(prefix="/pixy-learns", tags=["Pixy Learns"])
 
-# Simulated learning data - in a real app, this would be in a database
-LEARNING_IMAGES = [
-    {"id": "apple1", "url": "apple", "category": "apple"},
-    {"id": "apple2", "url": "apple", "category": "apple"},
-    {"id": "cat1", "url": "cat", "category": "cat"},
-    {"id": "cat2", "url": "cat", "category": "cat"},
-    {"id": "apple3", "url": "apple", "category": "apple"},
-    {"id": "cat3", "url": "cat", "category": "cat"},
+import random
+
+# Image URLs for cat and apple categories
+CAT_IMAGES = [
+    "https://placekitten.com/200/200",
+    "https://placekitten.com/201/201",
+    "https://placekitten.com/202/202",
+    "https://placekitten.com/203/203",
+    "https://placekitten.com/204/204",
 ]
+
+APPLE_IMAGES = [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/200px-Red_Apple.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Honeycrisp.jpg/200px-Honeycrisp.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Apples.jpg/200px-Apples.jpg",
+]
+
+# Store current session images for validation
+_current_images = {}
 
 @router.get("/images")
 async def get_learning_images():
-    """Get images for labeling"""
-    return {
-        "images": [
-            {
-                "id": img["id"],
-                "url": img["url"],
-            }
-            for img in LEARNING_IMAGES
-        ],
-        "total": len(LEARNING_IMAGES)
-    }
+    """Get random images for labeling"""
+    global _current_images
+    _current_images.clear()
+    images = []
+    
+    # Generate 3 cat images
+    for i in range(3):
+        image_id = f"cat_{i}_{random.randint(1000, 9999)}"
+        url = random.choice(CAT_IMAGES) + f"?v={random.randint(1, 1000)}"
+        images.append({"id": image_id, "url": url})
+        _current_images[image_id] = "cat"
+    
+    # Generate 3 apple images
+    for i in range(3):
+        image_id = f"apple_{i}_{random.randint(1000, 9999)}"
+        url = random.choice(APPLE_IMAGES)
+        images.append({"id": image_id, "url": url})
+        _current_images[image_id] = "apple"
+    
+    # Shuffle
+    random.shuffle(images)
+    
+    return {"images": images, "total": len(images)}
 
-@router.post("/label", response_model=LearningProgressResponse)
+@router.post("/upload", response_model=LearningProgressResponse)
 async def submit_labels(
     submission: LabelSubmission,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Submit labeled images and get learning progress"""
-    # Count correct labels
+    global _current_images
+    
+    # Count correct labels using stored session images
     correct_count = 0
-    total = len(LEARNING_IMAGES)
+    total = len(submission.labels)
     
-    # Create a map of image_id -> correct_category
-    image_map = {img["id"]: img["category"] for img in LEARNING_IMAGES}
-    
-    # Count correct labels
     for label_request in submission.labels:
-        correct_category = image_map.get(label_request.image_id)
-        if correct_category and label_request.label.lower() == correct_category.lower():
+        correct_label = _current_images.get(label_request.image_id)
+        if correct_label and label_request.label.lower() == correct_label.lower():
             correct_count += 1
     
     learned_examples = correct_count
@@ -66,9 +86,10 @@ async def submit_labels(
     
     # Get unique categories from labels
     categories = list(set([label.label.lower() for label in submission.labels]))
+    is_complete = learned_examples == total
     
     # Mark mission as completed if all images are correctly labeled
-    if learned_examples == total:
+    if is_complete:
         # Find the pixy_learns mission
         mission = db.query(Mission).filter(Mission.mission_path == "pixy_learns").first()
         if mission:
