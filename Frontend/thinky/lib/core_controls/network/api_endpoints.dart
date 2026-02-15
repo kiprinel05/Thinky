@@ -40,4 +40,12 @@ abstract class ApiEndpoints {
   // ══════════════════════════════════════════════════════════════════════════
   
   static const String drawingAnalyze = '/drawing/analyze';
+  
+  // ══════════════════════════════════════════════════════════════════════════
+  // GROUPING
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String groupingStart = '/grouping/start';
+  static const String groupingRound = '/grouping/round';
+  static const String groupingSubmit = '/grouping/submit';
 }

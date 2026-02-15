@@ -38,4 +38,5 @@ abstract class RouteNames {
   static const String drawTriangle = '/draw-triangle';
   static const String colorCircle = '/color-circle';
   static const String animalsMission = '/animals-mission';
+  static const String groupingMission = '/grouping-mission';
 }

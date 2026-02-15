@@ -61,6 +61,7 @@ flutter:
     - assets/missions/pixy_learns/
     - assets/missions/pixy_learns/images/
     - assets/missions/quiz/
+    - assets/missions/group_sorting/
     - assets/i18n/
     - .env
 

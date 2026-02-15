@@ -293,6 +293,9 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       } else if (mission.missionPath == 'animals') {
                         // Navigate to Animals mission
                         context.push(RouteNames.animalsMission);
+                      } else if (mission.missionPath == 'group_sorting') {
+                        // Navigate to Grouping mission
+                        context.push(RouteNames.groupingMission);
                       } else {
                         // Default: show message for unhandled missions
                         ScaffoldMessenger.of(context).showSnackBar(

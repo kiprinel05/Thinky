@@ -135,6 +135,22 @@ class MissionService {
         ),
         isLocked: false, // UNLOCKED FOR TESTING
       ),
+      Mission(
+        id: -6,
+        title: 'Group the Images',
+        missionPath: 'group_sorting',
+        description: 'Sort images into fruits, vegetables, and toys!',
+        orderIndex: 5,
+        backgroundColor: '#FF8A65',
+        height: 220,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -6,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
     ]);
   }
 }

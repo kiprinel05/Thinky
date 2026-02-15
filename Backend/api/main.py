@@ -148,6 +148,15 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.grouping.router import router as grouping_router
+    app.include_router(grouping_router, prefix="/api/v1")
+    print("[OK] grouping_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading grouping_router: {e}")
+    import traceback
+    traceback.print_exc()
+
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

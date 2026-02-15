@@ -106,3 +106,14 @@ class Drawing {
   static String get captureError => TextService.getString('Drawing', 'captureError');
 }
 
+/// Accessors for 'GroupingSorting' texts
+class GroupingSorting {
+  static String get title => 'Group the Images';
+  static String get subtitle => 'Sort items into the correct categories';
+  static String get instruction => 'Drag each image into the correct category';
+  static String get submit => 'Submit Sorting';
+  static String get allSorted => 'All items sorted!';
+  static String get missionComplete => 'Mission Complete!';
+  static String get tryAgain => 'Try Again';
+  static String get continueAction => 'Continue';
+}
