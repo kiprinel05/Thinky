@@ -299,6 +299,9 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       } else if (mission.missionPath == 'vocabulary') {
                         // Navigate to Vocabulary mission
                         context.push(RouteNames.vocabularyMission);
+                      } else if (mission.missionPath == 'describe_image') {
+                        // Navigate to Describe mission
+                        context.push(RouteNames.describeMission);
                       } else {
                         // Default: show message for unhandled missions
                         ScaffoldMessenger.of(context).showSnackBar(

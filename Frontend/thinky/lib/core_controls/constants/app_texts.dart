@@ -128,3 +128,12 @@ class Vocabulary {
   static String get tryAgain => 'Try Again';
   static String get seeResults => 'See Results';
 }
+
+class DescribeImage {
+  static String get title => 'Describe It';
+  static String get instruction => 'Press record and describe what you see';
+  static String get tapToRecord => 'Tap to Record';
+  static String get listening => 'Listening...';
+  static String get processing => 'Processing...';
+  static String get youSaid => 'You said:';
+}

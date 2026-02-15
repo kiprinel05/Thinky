@@ -17,6 +17,7 @@ import 'package:thinky/core_controls/features/missions/mission_drawing/presentat
 import 'package:thinky/core_controls/features/missions/mission_animals/presentation/pages/animals_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_grouping/presentation/pages/grouping_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_vocabulary/presentation/pages/vocabulary_mission_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_describe/presentation/pages/describe_mission_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -161,6 +162,12 @@ class AppRouter {
     GoRoute(
       path: RouteNames.vocabularyMission,
       builder: (context, state) => const VocabularyMissionPage(),
+    ),
+
+    // Describe Mission
+    GoRoute(
+      path: RouteNames.describeMission,
+      builder: (context, state) => const DescribeMissionPage(),
     ),
   ];
 }

@@ -167,6 +167,22 @@ class MissionService {
         ),
         isLocked: false, // UNLOCKED FOR TESTING
       ),
+      Mission(
+        id: -8,
+        title: 'Describe It',
+        missionPath: 'describe_image',
+        description: 'Describe what you see in the image using your voice!',
+        orderIndex: 7,
+        backgroundColor: '#FF7043',
+        height: 220,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -8,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
     ]);
   }
 }

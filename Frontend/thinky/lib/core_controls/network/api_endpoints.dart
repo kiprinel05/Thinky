@@ -56,4 +56,13 @@ abstract class ApiEndpoints {
   static const String vocabularyStart = '/vocabulary/start';
   static const String vocabularyAnswer = '/vocabulary/answer';
   static const String vocabularyProgress = '/vocabulary/progress';
+  
+  // ══════════════════════════════════════════════════════════════════════════
+  // DESCRIBE
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String describeStart = '/describe/start';
+  static const String describeNext = '/describe/next';
+  static const String describeTranscribe = '/describe/transcribe';
+  static const String describeProgress = '/describe/progress';
 }

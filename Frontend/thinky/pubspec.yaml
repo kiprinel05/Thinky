@@ -30,6 +30,11 @@ dependencies:
   
   # Environment
   flutter_dotenv: ^5.1.0
+  
+  # Audio Recording
+  record: ^5.2.0
+  path_provider: ^2.1.2
+  http_parser: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +68,7 @@ flutter:
     - assets/missions/quiz/
     - assets/missions/group_sorting/
     - assets/missions/vocabulary/
+    - assets/missions/describe_image/
     - assets/i18n/
     - .env
 
