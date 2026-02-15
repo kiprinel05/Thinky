@@ -12,18 +12,36 @@ class TextService {
   TextService._();
 
   /// Initialize the service by loading the JSON file
-  static Future<void> init() async {
-    if (_initialized) return;
+  static String _currentLanguage = 'en';
 
+  /// Initialize the service by loading the default language
+  static Future<void> init({String languageCode = 'en'}) async {
+    if (_initialized && _currentLanguage == languageCode) return;
+    await loadLanguage(languageCode);
+  }
+
+  /// Load texts for a specific language
+  static Future<void> loadLanguage(String languageCode) async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/i18n/texts.json');
+      String jsonPath = 'assets/i18n/texts.json'; // Default english
+      
+      if (languageCode == 'ro') {
+        jsonPath = 'assets/i18n/texts_ro.json';
+      }
+      
+      final String jsonString = await rootBundle.loadString(jsonPath);
       _texts = jsonDecode(jsonString);
+      _currentLanguage = languageCode;
       _initialized = true;
-      ErrorLogger().logInfo('TextService initialized successfully');
+      ErrorLogger().logInfo('TextService loaded language: $languageCode from $jsonPath');
     } catch (e, stack) {
-      ErrorLogger().logError('Failed to load texts: $e', stackTrace: stack);
-      // Fallback empty map or retain existing to prevent crash
-      _texts = {};
+      ErrorLogger().logError('Failed to load texts for $languageCode: $e', stackTrace: stack);
+      // If we fail to load specific language, try to fallback to english if not already loaded
+      if (languageCode != 'en' && !_initialized) {
+        await loadLanguage('en');
+      } else if (!_initialized) {
+        _texts = {};
+      }
     }
   }
 

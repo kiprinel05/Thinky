@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 class MissionService {
   // Set to true to force offline missions (all unlocked for testing)
-  static const bool USE_OFFLINE_MISSIONS = false; // Changed to false for API testing
+  static const bool USE_OFFLINE_MISSIONS = true; // ENABLED for testing - all missions unlocked
   
   static Future<MissionListResponse> getMissions() async {
     // Force offline mode for testing
@@ -32,6 +32,12 @@ class MissionService {
   }
 
   static Future<void> completeMission(int missionId, {double? score}) async {
+    // Skip API call for offline missions (negative IDs)
+    if (missionId < 0) {
+      debugPrint('MissionService: Offline mission $missionId completed locally');
+      return;
+    }
+    
     try {
       final response = await ApiClient.post(
         '/missions/$missionId/complete',
@@ -82,17 +88,49 @@ class MissionService {
         isLocked: false, // UNLOCKED FOR TESTING
       ),
       Mission(
+        id: -5,
+        title: 'Select All Animals',
+        missionPath: 'animals',
+        description: 'Teach Pixy to recognize animals!',
+        orderIndex: 2,
+        backgroundColor: '#4CAF50',
+        height: 220,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -5,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
+      Mission(
         id: -3,
         title: 'Draw a Blue Triangle',
         missionPath: 'draw_triangle',
         description: 'Draw a blue triangle on the canvas and let Pixy guess!',
-        orderIndex: 2,
+        orderIndex: 3,
         backgroundColor: '#8E97FD',
         height: 200,
         isActive: true,
         createdAt: now,
         progress: MissionProgress(
           missionId: -3,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
+      Mission(
+        id: -4,
+        title: 'Color the Circle',
+        missionPath: 'color_circle',
+        description: 'Color the circle in red and let Pixy check!',
+        orderIndex: 4,
+        backgroundColor: '#FF5722',
+        height: 200,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -4,
           isCompleted: false,
         ),
         isLocked: false, // UNLOCKED FOR TESTING

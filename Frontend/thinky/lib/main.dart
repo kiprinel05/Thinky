@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:thinky/app.dart';
 import 'package:thinky/core_controls/storage/local_storage.dart';
@@ -13,10 +15,13 @@ void main() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      await dotenv.load(fileName: ".env");
       ErrorLogger().logInfo('App Started');
       
       // Initialize services
-      await TextService.init();
+      final prefs = await SharedPreferences.getInstance();
+      final languageCode = prefs.getString('app_language') ?? 'en';
+      await TextService.init(languageCode: languageCode);
 
       // Global error handling for synchronous errors
       FlutterError.onError = (FlutterErrorDetails details) {

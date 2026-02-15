@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/models/mission_models.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/features/auth/presentation/profile_page.dart';
+import 'package:thinky/core_controls/routing/route_names.dart';
 import '../mission_quiz/quiz_page.dart';
 import '../mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import '../mission_drawing/presentation/draw_triangle_page.dart';
+import '../mission_drawing/presentation/color_circle_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
@@ -102,7 +105,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
               left: 0,
               right: 0,
               child: Image.asset(
-                'missions/missions/presentation/Union.png',
+                'assets/missions/missions/presentation/Union.png',
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
               ),
@@ -276,6 +279,20 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                             _loadMissions();
                           }
                         });
+                      } else if (mission.missionPath == 'color_circle') {
+                        // Navigate to Color Circle mission
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ColorCirclePage(),
+                          ),
+                        ).then((shouldReload) {
+                          if (shouldReload == true) {
+                            _loadMissions();
+                          }
+                        });
+                      } else if (mission.missionPath == 'animals') {
+                        // Navigate to Animals mission
+                        context.push(RouteNames.animalsMission);
                       } else {
                         // Default: show message for unhandled missions
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -328,7 +345,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
-                    'missions/$missionPath/background.png',
+                    'assets/missions/$missionPath/background.png',
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -340,7 +357,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                 child: Opacity(
                   opacity: 0.3,
                   child: Image.asset(
-                    'missions/$missionPath/vector1.png',
+                    'assets/missions/$missionPath/vector1.png',
                     width: 60,
                     height: 60,
                   ),
@@ -352,7 +369,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                 child: Opacity(
                   opacity: 0.3,
                   child: Image.asset(
-                    'missions/$missionPath/vector2.png',
+                    'assets/missions/$missionPath/vector2.png',
                     width: 50,
                     height: 50,
                   ),
@@ -365,8 +382,8 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                     padding: const EdgeInsets.all(16.0),
                     child: Image.asset(
                       missionPath == 'quiz'
-                          ? 'missions/quiz/quiz.png'
-                          : 'missions/$missionPath/card_drawing.png',
+                          ? 'assets/missions/quiz/quiz.png'
+                          : 'assets/missions/$missionPath/card_drawing.png',
                       fit: BoxFit.contain,
                     ),
                   ),

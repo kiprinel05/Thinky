@@ -13,6 +13,8 @@ import 'package:thinky/core_controls/features/missions/presentation/missions_men
 import 'package:thinky/core_controls/features/missions/mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page_new.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/draw_triangle_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/color_circle_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_animals/presentation/pages/animals_mission_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -133,6 +135,18 @@ class AppRouter {
     GoRoute(
       path: RouteNames.drawTriangle,
       builder: (context, state) => const DrawTrianglePage(),
+    ),
+
+    // Color Circle Mission
+    GoRoute(
+      path: RouteNames.colorCircle,
+      builder: (context, state) => const ColorCirclePage(),
+    ),
+
+    // Animals Mission
+    GoRoute(
+      path: RouteNames.animalsMission,
+      builder: (context, state) => const AnimalsMissionPage(),
     ),
   ];
 }

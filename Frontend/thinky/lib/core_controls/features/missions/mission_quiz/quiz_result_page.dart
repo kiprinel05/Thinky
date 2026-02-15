@@ -53,7 +53,7 @@ class QuizResultPage extends StatelessWidget {
                   ScaleInWidget(
                     delay: const Duration(milliseconds: 200),
                     child: Image.asset(
-                      'missions/quiz/happy.png',
+                      'assets/missions/quiz/happy.png',
                       height: 120,
                       fit: BoxFit.contain,
                     ),

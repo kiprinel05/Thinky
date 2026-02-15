@@ -27,7 +27,7 @@ class QuizIntroPage extends StatelessWidget {
               left: 0,
               right: 0,
               child: Image.asset(
-                'welcome/page1/background_welcome.png',
+                'assets/welcome/page1/background_welcome.png',
                 fit: BoxFit.fitWidth,
                 alignment: Alignment.bottomCenter,
                 width: double.infinity,
@@ -46,7 +46,7 @@ class QuizIntroPage extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Image.asset(
-                        'welcome/page2/thinking.png',
+                        'assets/welcome/page2/thinking.png',
                         height: 300,
                         fit: BoxFit.contain,
                       ),

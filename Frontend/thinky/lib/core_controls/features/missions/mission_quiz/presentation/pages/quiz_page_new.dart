@@ -265,7 +265,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
             color: Colors.white.withOpacity(0.15),
           ),
           child: Image.asset(
-            'welcome/page2/thinking.png', // Corrected path assumption? Original was 'welcome/page2/thinking.png'
+            'assets/welcome/page2/thinking.png', // Corrected path assumption? Original was 'welcome/page2/thinking.png'
             // Keep original path structure if that's how assets are declared
             height: 120,
             fit: BoxFit.contain,

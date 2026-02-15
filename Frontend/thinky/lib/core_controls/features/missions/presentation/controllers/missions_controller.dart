@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:thinky/core_controls/storage/local_storage.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
-import '../../data/missions_repository.dart';
+import '../../shared/missions_repository.dart';
 import 'missions_state.dart';
 
 // Import LocalStorage provider
@@ -15,10 +14,11 @@ final missionsRepositoryProvider = Provider<MissionsRepository>((ref) {
 });
 
 /// Provider for missions state
-final missionsStateProvider = StateNotifierProvider<MissionsController, MissionsState>((ref) {
-  final repository = ref.watch(missionsRepositoryProvider);
-  return MissionsController(repository);
-});
+final missionsStateProvider =
+    StateNotifierProvider<MissionsController, MissionsState>((ref) {
+      final repository = ref.watch(missionsRepositoryProvider);
+      return MissionsController(repository);
+    });
 
 /// Missions Controller - manages missions state using BaseAsyncController
 class MissionsController extends BaseAsyncController<MissionsState> {
@@ -30,7 +30,7 @@ class MissionsController extends BaseAsyncController<MissionsState> {
   Future<void> loadMissions() async {
     // If already loaded and success, maybe don't reload? Or silent reload.
     // For now standard load.
-    
+
     await executeAsync<List<Mission>>(
       operation: () async {
         final result = await _repository.getMissions();
@@ -54,10 +54,8 @@ class MissionsController extends BaseAsyncController<MissionsState> {
         missions.sort((a, b) => a.order.compareTo(b.order));
         return missions;
       },
-      successState: (missions) => state.copyWith(
-        status: StateStatus.success,
-        missions: missions,
-      ),
+      successState: (missions) =>
+          state.copyWith(status: StateStatus.success, missions: missions),
       errorState: (message) => state.copyWith(errorMessage: message),
     );
   }
@@ -74,20 +72,21 @@ class MissionsController extends BaseAsyncController<MissionsState> {
 
   /// Complete a mission
   Future<bool> completeMission(int missionId) async {
-    // Optimistic update or silent? 
+    // Optimistic update or silent?
     // We update local state manually after API success to enable unlocking next mission instantly.
-    
+
     try {
       final result = await _repository.completeMission(missionId);
-      
+
       if (result.isSuccess) {
-         // Custom logic to update UI state (unlock next mission)
+        // Custom logic to update UI state (unlock next mission)
         final updatedMissions = state.missions.map((m) {
           if (m.id == missionId) {
             return m.copyWith(isCompleted: true);
           }
           // Unlock next mission
-          if (m.order == state.missions.firstWhere((m) => m.id == missionId).order + 1) {
+          if (m.order ==
+              state.missions.firstWhere((m) => m.id == missionId).order + 1) {
             return m.copyWith(isLocked: false);
           }
           return m;
@@ -110,24 +109,24 @@ class MissionsController extends BaseAsyncController<MissionsState> {
       return null;
     }
   }
-  
+
   // Base implementations
   @override
   void setLoading() => state = MissionsState.loading();
-  
+
   @override
   void setError(String message) => state = MissionsState.error(message);
-  
+
   @override
   void setSuccess() => state = state.copyWith(status: StateStatus.success);
-  
+
   @override
   void clearError() {
     if (state.isError) {
       state = state.copyWith(status: StateStatus.initial, errorMessage: null);
     }
   }
-  
+
   @override
   void reset() => state = MissionsState.initial();
 }

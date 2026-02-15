@@ -88,3 +88,4 @@ app.include_router(drawing_router, prefix=settings.API_V1_STR)
 @app.get("/")
 def root():
     return {"message": f"{settings.PROJECT_NAME} is running!"}
+

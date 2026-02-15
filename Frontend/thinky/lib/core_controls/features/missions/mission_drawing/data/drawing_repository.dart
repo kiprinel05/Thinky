@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 import 'package:thinky/core_controls/config/app_config.dart';
@@ -41,6 +42,7 @@ class DrawingRepository {
         'file',
         imageBytes,
         filename: 'drawing.png',
+        contentType: MediaType('image', 'png'),
       ));
 
       // Send request

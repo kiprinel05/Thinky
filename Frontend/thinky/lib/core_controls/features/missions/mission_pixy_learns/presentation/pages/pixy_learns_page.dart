@@ -178,7 +178,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             child: ScaleTransition(
                               scale: _pixyScaleAnimation,
                               child: Image.asset(
-                                'welcome/page2/thinking.png',
+                                'assets/welcome/page2/thinking.png',
                                 height: 140,
                                 fit: BoxFit.contain,
                               ),
@@ -926,7 +926,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                       ScaleInWidget(
                         delay: const Duration(milliseconds: 200),
                         child: Image.asset(
-                          'welcome/page1/hello.png',
+                          'assets/welcome/page1/hello.png',
                           height: 160,
                           fit: BoxFit.contain,
                         ),

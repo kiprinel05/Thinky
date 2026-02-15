@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/features/onboarding/presentation/intro_page.dart';
+import 'package:thinky/core_controls/routing/route_names.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
 
@@ -72,10 +76,8 @@ class _ProfilePageState extends State<ProfilePage> {
       await AuthService.logout();
       await AppStateService.clearAppState();
       if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          FadePageRoute(page: const IntroPage()),
-          (route) => false,
-        );
+        // Use go_router instead of Navigator to avoid lock conflicts
+        context.go('/');
       }
     }
   }
@@ -83,6 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     const Color primaryPurple = Color(0xFF8E97FD);
+    final currentLocale = ref.watch(languageProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -192,6 +195,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        
+                        // Language Selector
+                        _buildLanguageSelector(currentLocale),
+                        const SizedBox(height: 12),
+                        
                         _buildSettingItem(
                           icon: Icons.info_outline,
                           title: 'About Thinky',
@@ -307,6 +315,62 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildLanguageSelector(Locale currentLocale) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F3F7),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.language, color: Color(0xFF8E97FD), size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Language',
+              style: GoogleFonts.alata(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF222222),
+              ),
+            ),
+          ),
+          DropdownButton<String>(
+            value: currentLocale.languageCode,
+            underline: const SizedBox(),
+            icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF8A8A8F)),
+            items: [
+              DropdownMenuItem(
+                value: 'en',
+                child: Row(
+                  children: [
+                    Text('🇺🇸 ', style: TextStyle(fontSize: 16)),
+                    Text('English', style: GoogleFonts.alata(color: Color(0xFF222222))),
+                  ],
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'ro',
+                child: Row(
+                  children: [
+                    Text('🇷🇴 ', style: TextStyle(fontSize: 16)),
+                    Text('Română', style: GoogleFonts.alata(color: Color(0xFF222222))),
+                  ],
+                ),
+              ),
+            ],
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                ref.read(languageProvider.notifier).setLanguage(Locale(newValue));
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

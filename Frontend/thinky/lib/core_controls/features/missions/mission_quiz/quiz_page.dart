@@ -399,7 +399,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
             color: Colors.white.withOpacity(0.15),
           ),
           child: Image.asset(
-            'welcome/page2/thinking.png',
+            'assets/welcome/page2/thinking.png',
             height: 120,
             fit: BoxFit.contain,
           ),
@@ -684,7 +684,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                         width: 400,
                         height: 400,
                         child: Image.asset(
-                          'missions/quiz/professor.png',
+                          'assets/missions/quiz/professor.png',
                           fit: BoxFit.contain,
                         ),
                       ),

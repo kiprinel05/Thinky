@@ -130,6 +130,25 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.animals import router as animals_router
+    app.include_router(animals_router.router, prefix="/api/v1")
+    print("[OK] animals_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading animals_router: {e}")
+    import traceback
+    traceback.print_exc()
+
+try:
+    from features.drawing.router import router as drawing_router
+    app.include_router(drawing_router, prefix="/api/v1")
+    print("[OK] drawing_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading drawing_router: {e}")
+    import traceback
+    traceback.print_exc()
+
+
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):
     """Handle CORS preflight requests"""

@@ -10,6 +10,7 @@ class DrawingService:
     """
     Service for analyzing user drawings using OpenCV.
     Detects shapes (triangle, square, circle) and colors.
+    Requires minimum 10% canvas coverage to pass.
     """
     
     # HSV color ranges for detection
@@ -52,6 +53,9 @@ class DrawingService:
         6: "hexagon"
     }
     
+    # Minimum coverage required (fraction of canvas that must be drawn on)
+    MIN_COVERAGE = 0.10  # 10% of canvas
+    
     def __init__(self):
         pass
     
@@ -89,16 +93,23 @@ class DrawingService:
             detected_color = color_result["color"]
             confidence_color = color_result["confidence"]
             
-            # Check if matches target
+            # Calculate canvas coverage
+            coverage = self._calculate_coverage(image)
+            has_enough_coverage = coverage >= self.MIN_COVERAGE
+            
+            # Check if matches target (shape + color + coverage)
             is_triangle = detected_shape == "triangle"
             is_blue = detected_color == "blue"
-            is_correct = (detected_shape == target_shape) and (detected_color == target_color)
+            is_circle = detected_shape == "circle"
+            is_red = detected_color == "red"
+            shape_and_color_match = (detected_shape == target_shape) and (detected_color == target_color)
+            is_correct = shape_and_color_match and has_enough_coverage
             
             # Generate feedback message and Pixy emotion
             message, pixy_emotion = self._generate_feedback(
                 detected_shape, detected_color,
                 target_shape, target_color,
-                is_correct
+                is_correct, coverage, has_enough_coverage
             )
             
             return DrawingAnalysisResponse(
@@ -107,9 +118,12 @@ class DrawingService:
                 vertex_count=vertex_count,
                 is_triangle=is_triangle,
                 is_blue=is_blue,
+                is_circle=is_circle,
+                is_red=is_red,
                 is_correct=is_correct,
                 confidence_shape=confidence_shape,
                 confidence_color=confidence_color,
+                coverage=round(coverage, 2),
                 message=message,
                 pixy_emotion=pixy_emotion
             )
@@ -270,13 +284,29 @@ class DrawingService:
         
         return {"color": dominant_color, "confidence": round(confidence, 2)}
     
+    def _calculate_coverage(self, image: np.ndarray) -> float:
+        """
+        Calculate what fraction of the canvas has been drawn on.
+        
+        Returns a value between 0.0 and 1.0.
+        """
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, drawing_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+        
+        total_pixels = image.shape[0] * image.shape[1]
+        drawn_pixels = cv2.countNonZero(drawing_mask)
+        
+        return drawn_pixels / total_pixels if total_pixels > 0 else 0.0
+    
     def _generate_feedback(
         self, 
         detected_shape: str, 
         detected_color: str,
         target_shape: str, 
         target_color: str,
-        is_correct: bool
+        is_correct: bool,
+        coverage: float = 0.0,
+        has_enough_coverage: bool = True
     ) -> Tuple[str, str]:
         """
         Generate user-friendly feedback message and Pixy emotion.
@@ -291,6 +321,14 @@ class DrawingService:
         
         shape_match = detected_shape == target_shape
         color_match = detected_color == target_color
+        
+        # Shape and color match but not enough coverage
+        if shape_match and color_match and not has_enough_coverage:
+            pct = int(coverage * 100)
+            return (
+                f"Good start! I can see a {target_color} {target_shape}, but draw more! Only {pct}% of the canvas is filled. Fill more of the shape! 🖍️",
+                "encouraging"
+            )
         
         if not shape_match and not color_match:
             return (
