@@ -48,4 +48,12 @@ abstract class ApiEndpoints {
   static const String groupingStart = '/grouping/start';
   static const String groupingRound = '/grouping/round';
   static const String groupingSubmit = '/grouping/submit';
+  
+  // ══════════════════════════════════════════════════════════════════════════
+  // VOCABULARY
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String vocabularyStart = '/vocabulary/start';
+  static const String vocabularyAnswer = '/vocabulary/answer';
+  static const String vocabularyProgress = '/vocabulary/progress';
 }

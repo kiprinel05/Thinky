@@ -157,6 +157,15 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.vocabulary.router import router as vocabulary_router
+    app.include_router(vocabulary_router, prefix="/api/v1")
+    print("[OK] vocabulary_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading vocabulary_router: {e}")
+    import traceback
+    traceback.print_exc()
+
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

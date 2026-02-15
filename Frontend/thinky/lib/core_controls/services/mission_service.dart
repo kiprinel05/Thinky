@@ -151,6 +151,22 @@ class MissionService {
         ),
         isLocked: false, // UNLOCKED FOR TESTING
       ),
+      Mission(
+        id: -7,
+        title: 'Word Match',
+        missionPath: 'vocabulary',
+        description: 'Match words to their images and build vocabulary!',
+        orderIndex: 6,
+        backgroundColor: '#42A5F5',
+        height: 200,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -7,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
     ]);
   }
 }

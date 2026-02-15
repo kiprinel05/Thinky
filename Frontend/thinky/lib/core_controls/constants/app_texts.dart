@@ -117,3 +117,14 @@ class GroupingSorting {
   static String get tryAgain => 'Try Again';
   static String get continueAction => 'Continue';
 }
+
+/// Accessors for 'Vocabulary' texts
+class Vocabulary {
+  static String get title => 'Word Match';
+  static String get subtitle => 'Select the image that matches the word';
+  static String get submitAnswer => 'Submit Answer';
+  static String get nextWord => 'Next Word';
+  static String get missionComplete => 'Mission Complete!';
+  static String get tryAgain => 'Try Again';
+  static String get seeResults => 'See Results';
+}
