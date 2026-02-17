@@ -65,4 +65,13 @@ abstract class ApiEndpoints {
   static const String describeNext = '/describe/next';
   static const String describeTranscribe = '/describe/transcribe';
   static const String describeProgress = '/describe/progress';
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PATTERN
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String patternStart = '/pattern/start';
+  static const String patternNext = '/pattern/next';
+  static const String patternAnswer = '/pattern/answer';
+  static const String patternProgress = '/pattern/progress';
 }

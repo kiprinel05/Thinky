@@ -18,6 +18,7 @@ import 'package:thinky/core_controls/features/missions/mission_animals/presentat
 import 'package:thinky/core_controls/features/missions/mission_grouping/presentation/pages/grouping_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_vocabulary/presentation/pages/vocabulary_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_describe/presentation/pages/describe_mission_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_pattern/presentation/pages/pattern_mission_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -168,6 +169,12 @@ class AppRouter {
     GoRoute(
       path: RouteNames.describeMission,
       builder: (context, state) => const DescribeMissionPage(),
+    ),
+
+    // Pattern Mission
+    GoRoute(
+      path: RouteNames.patternMission,
+      builder: (context, state) => const PatternMissionPage(),
     ),
   ];
 }

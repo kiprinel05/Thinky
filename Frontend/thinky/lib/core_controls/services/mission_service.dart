@@ -183,6 +183,22 @@ class MissionService {
         ),
         isLocked: false, // UNLOCKED FOR TESTING
       ),
+      Mission(
+        id: -9,
+        title: 'Complete the Pattern',
+        missionPath: 'pattern',
+        description: 'Look at the shapes and colors. What comes next?',
+        orderIndex: 8,
+        backgroundColor: '#9C27B0',
+        height: 220,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -9,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
     ]);
   }
 }

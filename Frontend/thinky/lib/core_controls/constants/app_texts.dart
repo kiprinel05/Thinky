@@ -137,3 +137,12 @@ class DescribeImage {
   static String get processing => 'Processing...';
   static String get youSaid => 'You said:';
 }
+
+class PatternMission {
+  static String get title => 'Complete the Pattern';
+  static String get instruction => 'What comes next?';
+  static String get chooseNext => 'Choose next:';
+  static String get checkAnswer => 'Check Answer';
+  static String get nextPattern => 'Next Pattern';
+  static String get tryAgain => 'Try Again';
+}

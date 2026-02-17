@@ -41,4 +41,5 @@ abstract class RouteNames {
   static const String groupingMission = '/grouping-mission';
   static const String vocabularyMission = '/vocabulary-mission';
   static const String describeMission = '/describe-mission';
+  static const String patternMission = '/pattern-mission';
 }

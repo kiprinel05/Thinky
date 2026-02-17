@@ -175,6 +175,15 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.pattern.router import router as pattern_router
+    app.include_router(pattern_router, prefix="/api/v1")
+    print("[OK] pattern_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading pattern_router: {e}")
+    import traceback
+    traceback.print_exc()
+
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

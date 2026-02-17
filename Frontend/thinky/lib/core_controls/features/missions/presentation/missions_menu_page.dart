@@ -302,6 +302,9 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       } else if (mission.missionPath == 'describe_image') {
                         // Navigate to Describe mission
                         context.push(RouteNames.describeMission);
+                      } else if (mission.missionPath == 'pattern') {
+                        // Navigate to Pattern mission
+                        context.push(RouteNames.patternMission);
                       } else {
                         // Default: show message for unhandled missions
                         ScaffoldMessenger.of(context).showSnackBar(

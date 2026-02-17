@@ -69,6 +69,7 @@ flutter:
     - assets/missions/group_sorting/
     - assets/missions/vocabulary/
     - assets/missions/describe_image/
+    - assets/missions/pattern/
     - assets/i18n/
     - .env
 
