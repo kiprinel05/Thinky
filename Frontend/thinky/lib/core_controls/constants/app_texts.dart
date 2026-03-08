@@ -146,3 +146,9 @@ class PatternMission {
   static String get nextPattern => 'Next Pattern';
   static String get tryAgain => 'Try Again';
 }
+
+/// Accessors for 'Nav' texts (bottom navigation bar)
+class Nav {
+  static String get missions => TextService.getString('Nav', 'missions');
+  static String get profile => TextService.getString('Nav', 'profile');
+}

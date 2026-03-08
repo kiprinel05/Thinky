@@ -21,6 +21,7 @@ from features.color.router import router as color_router
 from features.shape.router import router as shape_router
 from features.pixy_learns.router import router as pixy_learns_router
 from features.drawing.router import router as drawing_router
+from features.numbers.router import router as numbers_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -84,6 +85,7 @@ app.include_router(color_router, prefix=settings.API_V1_STR)
 app.include_router(shape_router, prefix=settings.API_V1_STR)
 app.include_router(pixy_learns_router, prefix=settings.API_V1_STR)
 app.include_router(drawing_router, prefix=settings.API_V1_STR)
+app.include_router(numbers_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

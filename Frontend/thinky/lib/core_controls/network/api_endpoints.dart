@@ -74,4 +74,14 @@ abstract class ApiEndpoints {
   static const String patternNext = '/pattern/next';
   static const String patternAnswer = '/pattern/answer';
   static const String patternProgress = '/pattern/progress';
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // NUMBERS MISSION
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String numbersStart = '/numbers/start';
+  static const String numbersRound = '/numbers/round';
+  static const String numbersSubmitCount = '/numbers/submit-count';
+  static const String numbersSubmitDrawing = '/numbers/submit-drawing';
+  static const String numbersProgress = '/numbers/progress';
 }

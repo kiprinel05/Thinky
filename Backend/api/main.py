@@ -184,6 +184,15 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.numbers.router import router as numbers_router
+    app.include_router(numbers_router, prefix="/api/v1")
+    print("[OK] numbers_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading numbers_router: {e}")
+    import traceback
+    traceback.print_exc()
+
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

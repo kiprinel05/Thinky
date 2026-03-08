@@ -9,6 +9,7 @@ import 'package:thinky/core_controls/features/auth/presentation/register_page.da
 import 'package:thinky/core_controls/features/auth/presentation/guest_name_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/forgot_password_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/profile_page.dart';
+import 'package:thinky/core_controls/features/navigation/main_shell_page.dart';
 import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page_new.dart';
@@ -19,6 +20,7 @@ import 'package:thinky/core_controls/features/missions/mission_grouping/presenta
 import 'package:thinky/core_controls/features/missions/mission_vocabulary/presentation/pages/vocabulary_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_describe/presentation/pages/describe_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_pattern/presentation/pages/pattern_mission_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_numbers/presentation/pages/numbers_mission_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -108,10 +110,6 @@ class AppRouter {
       path: RouteNames.forgotPassword,
       builder: (context, state) => const ForgotPasswordPage(),
     ),
-    GoRoute(
-      path: RouteNames.profile,
-      builder: (context, state) => const ProfilePage(),
-    ),
 
     // Welcome
     GoRoute(
@@ -119,11 +117,26 @@ class AppRouter {
       builder: (context, state) => const WelcomePage(),
     ),
 
-    // Missions
-    GoRoute(
-      path: RouteNames.missions,
-      builder: (context, state) => const MissionsMenuPage(),
+    // Main Shell — bottom navigation bar wraps Missions and Profile
+    ShellRoute(
+      builder: (context, state, child) => MainShellPage(child: child),
+      routes: [
+        GoRoute(
+          path: RouteNames.missions,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MissionsMenuPage(),
+          ),
+        ),
+        GoRoute(
+          path: RouteNames.profile,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: ProfilePage(),
+          ),
+        ),
+      ],
     ),
+
+    // Individual mission routes — full-screen without nav bar
     GoRoute(
       path: RouteNames.pixyLearns,
       builder: (context, state) => const PixyLearnsPage(),
@@ -175,6 +188,12 @@ class AppRouter {
     GoRoute(
       path: RouteNames.patternMission,
       builder: (context, state) => const PatternMissionPage(),
+    ),
+
+    // Numbers Mission
+    GoRoute(
+      path: RouteNames.numbersMission,
+      builder: (context, state) => const NumbersMissionPage(),
     ),
   ];
 }

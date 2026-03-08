@@ -90,5 +90,9 @@
         "continueAction": "Continuă",
         "drawFirst": "Desenează ceva mai întâi!",
         "captureError": "Nu am putut captura desenul. Încearcă din nou!"
+    },
+    "Nav": {
+        "missions": "Misiuni",
+        "profile": "Profil"
     }
 }

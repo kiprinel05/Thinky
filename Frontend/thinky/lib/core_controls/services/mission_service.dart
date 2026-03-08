@@ -199,6 +199,22 @@ class MissionService {
         ),
         isLocked: false, // UNLOCKED FOR TESTING
       ),
+      Mission(
+        id: -10,
+        title: 'Învățăm numerele cu Pixy',
+        missionPath: 'numbers',
+        description: 'Ajută-l pe Pixy să recunoască numerele de la 1 la 5!',
+        orderIndex: 9,
+        backgroundColor: '#FF9A5C',
+        height: 220,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -10,
+          isCompleted: false,
+        ),
+        isLocked: false, // UNLOCKED FOR TESTING
+      ),
     ]);
   }
 }

@@ -90,5 +90,9 @@
         "continueAction": "Continue",
         "drawFirst": "Draw something first!",
         "captureError": "Could not capture drawing. Try again!"
+    },
+    "Nav": {
+        "missions": "Missions",
+        "profile": "Profile"
     }
 }

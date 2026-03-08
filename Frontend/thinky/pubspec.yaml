@@ -70,6 +70,7 @@ flutter:
     - assets/missions/vocabulary/
     - assets/missions/describe_image/
     - assets/missions/pattern/
+    - assets/missions/numbers/
     - assets/i18n/
     - .env
 
