@@ -193,6 +193,24 @@ except Exception as e:
     import traceback
     traceback.print_exc()
 
+try:
+    from features.workshop.router import router as workshop_router
+    app.include_router(workshop_router, prefix="/api/v1")
+    print("[OK] workshop_router loaded successfully")
+    # Ensure workshop tables are created
+    try:
+        from features.workshop.models import WorkshopMission, WorkshopDownload
+        from database import engine
+        WorkshopMission.__table__.create(bind=engine, checkfirst=True)
+        WorkshopDownload.__table__.create(bind=engine, checkfirst=True)
+        print("[OK] Workshop tables verified")
+    except Exception as te:
+        print(f"[WARNING] Workshop tables: {te}")
+except Exception as e:
+    print(f"[ERROR] Error loading workshop_router: {e}")
+    import traceback
+    traceback.print_exc()
+
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

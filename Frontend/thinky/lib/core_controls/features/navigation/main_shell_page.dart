@@ -22,11 +22,13 @@ class _MainShellPageState extends State<MainShellPage>
 
   static const _tabs = [
     RouteNames.missions,
+    RouteNames.workshop,
     RouteNames.profile,
   ];
 
   static const _icons = [
     Icons.rocket_launch_rounded,
+    Icons.extension_rounded,
     Icons.person_rounded,
   ];
 
@@ -184,7 +186,7 @@ class _MainShellPageState extends State<MainShellPage>
           // The island pill
           Container(
             height: 54,
-            width: 160,
+            width: 200,
             decoration: BoxDecoration(
               color: AppColors.backgroundWhite,
               borderRadius: BorderRadius.circular(27),

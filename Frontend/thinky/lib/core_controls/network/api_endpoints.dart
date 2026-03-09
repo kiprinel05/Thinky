@@ -84,4 +84,14 @@ abstract class ApiEndpoints {
   static const String numbersSubmitCount = '/numbers/submit-count';
   static const String numbersSubmitDrawing = '/numbers/submit-drawing';
   static const String numbersProgress = '/numbers/progress';
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // WORKSHOP
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String workshopMissions = '/workshop/missions';
+  static String workshopMissionDetail(int id) => '/workshop/missions/$id';
+  static const String workshopUpload = '/workshop/upload';
+  static String workshopDownload(int id) => '/workshop/download/$id';
+  static const String workshopMyMissions = '/workshop/my-missions';
 }

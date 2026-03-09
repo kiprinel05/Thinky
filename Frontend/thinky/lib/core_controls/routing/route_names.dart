@@ -43,4 +43,13 @@ abstract class RouteNames {
   static const String describeMission = '/describe-mission';
   static const String patternMission = '/pattern-mission';
   static const String numbersMission = '/numbers-mission';
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // WORKSHOP ROUTES
+  // ══════════════════════════════════════════════════════════════════════════
+  
+  static const String workshop = '/workshop';
+  static const String workshopCreate = '/workshop/create';
+  static const String workshopMyMissions = '/workshop/my-missions';
+  // Dynamic: /workshop/mission/:id
 }

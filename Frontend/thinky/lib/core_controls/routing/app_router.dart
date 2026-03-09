@@ -21,6 +21,11 @@ import 'package:thinky/core_controls/features/missions/mission_vocabulary/presen
 import 'package:thinky/core_controls/features/missions/mission_describe/presentation/pages/describe_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_pattern/presentation/pages/pattern_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_numbers/presentation/pages/numbers_mission_page.dart';
+import 'package:thinky/core_controls/features/workshop/presentation/workshop_browse_page.dart';
+import 'package:thinky/core_controls/features/workshop/presentation/workshop_detail_page.dart';
+import 'package:thinky/core_controls/features/workshop/presentation/create_mission_page.dart';
+import 'package:thinky/core_controls/features/workshop/presentation/my_missions_page.dart';
+import 'package:thinky/core_controls/features/workshop/presentation/workshop_play_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -133,6 +138,12 @@ class AppRouter {
             child: ProfilePage(),
           ),
         ),
+        GoRoute(
+          path: RouteNames.workshop,
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: WorkshopBrowsePage(),
+          ),
+        ),
       ],
     ),
 
@@ -194,6 +205,30 @@ class AppRouter {
     GoRoute(
       path: RouteNames.numbersMission,
       builder: (context, state) => const NumbersMissionPage(),
+    ),
+
+    // Workshop full-screen routes
+    GoRoute(
+      path: '/workshop/mission/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return WorkshopDetailPage(missionId: id);
+      },
+    ),
+    GoRoute(
+      path: RouteNames.workshopCreate,
+      builder: (context, state) => const CreateMissionPage(),
+    ),
+    GoRoute(
+      path: RouteNames.workshopMyMissions,
+      builder: (context, state) => const MyMissionsPage(),
+    ),
+    GoRoute(
+      path: '/workshop-play/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return WorkshopPlayPage(missionId: id);
+      },
     ),
   ];
 }

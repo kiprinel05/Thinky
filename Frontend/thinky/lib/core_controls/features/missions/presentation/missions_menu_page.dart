@@ -3,7 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
 import 'package:thinky/core_controls/models/mission_models.dart';
+import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/storage/workshop_storage.dart';
+import 'package:thinky/core_controls/services/auth_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
 
 import 'package:thinky/core_controls/routing/route_names.dart';
 import '../mission_quiz/quiz_page.dart';
@@ -21,8 +25,11 @@ class MissionsMenuPage extends StatefulWidget {
 
 class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProviderStateMixin {
   List<Mission> _missions = [];
+  List<WorkshopMissionDetail> _workshopMissions = [];
   bool _isLoading = true;
-  Set<int> _unlockedMissions = {}; // Track newly unlocked missions for animation
+  bool _isGuest = true;
+  int _selectedTab = 0; // 0 = Default, 1 = Workshop
+  Set<int> _unlockedMissions = {};
   late AnimationController _unlockAnimationController;
 
   @override
@@ -33,6 +40,23 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
       duration: const Duration(milliseconds: 600),
     );
     _loadMissions();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final user = await AuthService.getCurrentUser();
+    final isGuest = user?['isGuest'] ?? true;
+    setState(() => _isGuest = isGuest);
+    if (!isGuest) _loadWorkshopMissions();
+  }
+
+  Future<void> _loadWorkshopMissions() async {
+    try {
+      final missions = await WorkshopStorage.getDownloadedMissions();
+      setState(() => _workshopMissions = missions);
+    } catch (e) {
+      // Silently fail — workshop missions are optional
+    }
   }
 
   @override
@@ -139,12 +163,16 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : _buildMissionsGrid(context),
+                  const SizedBox(height: 20),
+                  _buildTabToggle(),
+                  const SizedBox(height: 24),
+                  _selectedTab == 0
+                      ? (_isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : _buildMissionsGrid(context))
+                      : _buildWorkshopGrid(),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -502,6 +530,213 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabToggle() {
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 350),
+      child: Container(
+        height: 46,
+        decoration: BoxDecoration(
+          color: AppColors.backgroundWhite,
+          borderRadius: BorderRadius.circular(23),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryPurple.withValues(alpha: 0.12),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          children: [
+            _buildToggleOption('Default', 0, Icons.grid_view_rounded),
+            _buildToggleOption('Workshop', 1, Icons.extension_rounded),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleOption(String label, int index, IconData icon) {
+    final isSelected = _selectedTab == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _selectedTab = index);
+          if (index == 1) _loadWorkshopMissions();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primaryPurple.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(19),
+          ),
+          child: Center(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: isSelected ? 19 : 20,
+                    color: isSelected
+                        ? AppColors.primaryPurple
+                        : AppColors.textHint,
+                  ),
+                  if (isSelected) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: GoogleFonts.alata(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryPurple,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkshopGrid() {
+    if (_workshopMissions.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60),
+          child: Column(
+            children: [
+              Icon(Icons.extension_off_rounded, size: 48, color: const Color(0xFFBBBBC5)),
+              const SizedBox(height: 12),
+              Text(
+                'No downloaded missions',
+                style: GoogleFonts.alata(
+                  fontSize: 16,
+                  color: const Color(0xFF8A8A8F),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Browse the Workshop to find missions!',
+                style: GoogleFonts.alata(
+                  fontSize: 13,
+                  color: const Color(0xFFBBBBC5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: _workshopMissions.asMap().entries.map((entry) {
+        final index = entry.key;
+        final mission = entry.value;
+        return FadeInWidget(
+          delay: Duration(milliseconds: 50 * index),
+          child: _buildWorkshopMissionCard(mission),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildWorkshopMissionCard(WorkshopMissionDetail mission) {
+    return GestureDetector(
+      onTap: () => context.push('/workshop-play/${mission.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE8E8ED)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.quiz_rounded,
+                color: AppColors.primaryPurple,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    mission.title,
+                    style: GoogleFonts.alata(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF222222),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'by ${mission.authorName} · ${mission.questions.length} questions',
+                    style: GoogleFonts.alata(
+                      fontSize: 12,
+                      color: const Color(0xFF8A8A8F),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Play icon
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.primaryPurple,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ],
         ),
       ),

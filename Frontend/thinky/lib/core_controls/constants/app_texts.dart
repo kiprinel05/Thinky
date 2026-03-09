@@ -150,5 +150,6 @@ class PatternMission {
 /// Accessors for 'Nav' texts (bottom navigation bar)
 class Nav {
   static String get missions => TextService.getString('Nav', 'missions');
+  static String get workshop => TextService.getString('Nav', 'workshop');
   static String get profile => TextService.getString('Nav', 'profile');
 }

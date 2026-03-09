@@ -93,6 +93,7 @@
     },
     "Nav": {
         "missions": "Misiuni",
+        "workshop": "Atelier",
         "profile": "Profil"
     }
 }
