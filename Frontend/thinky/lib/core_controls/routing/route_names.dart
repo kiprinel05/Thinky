@@ -52,4 +52,10 @@ abstract class RouteNames {
   static const String workshopCreate = '/workshop/create';
   static const String workshopMyMissions = '/workshop/my-missions';
   // Dynamic: /workshop/mission/:id
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // LEADERBOARD ROUTES
+  // ══════════════════════════════════════════════════════════════════════════
+
+  static const String leaderboard = '/leaderboard';
 }

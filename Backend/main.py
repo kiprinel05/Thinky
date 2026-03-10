@@ -13,6 +13,7 @@ from features.auth.models import User, PasswordResetCode
 from features.mission.models import Mission, MissionProgress
 from features.quiz.models import QuizResult
 from features.workshop.models import WorkshopMission, WorkshopDownload
+from features.leaderboard import models as leaderboard_models  # noqa: F401
 
 # Feature Routers
 from features.auth.router import router as auth_router
@@ -24,6 +25,7 @@ from features.pixy_learns.router import router as pixy_learns_router
 from features.drawing.router import router as drawing_router
 from features.numbers.router import router as numbers_router
 from features.workshop.router import router as workshop_router
+from features.leaderboard.router import router as leaderboard_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -89,6 +91,7 @@ app.include_router(pixy_learns_router, prefix=settings.API_V1_STR)
 app.include_router(drawing_router, prefix=settings.API_V1_STR)
 app.include_router(numbers_router, prefix=settings.API_V1_STR)
 app.include_router(workshop_router, prefix=settings.API_V1_STR)
+app.include_router(leaderboard_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

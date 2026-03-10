@@ -24,6 +24,7 @@ class _MainShellPageState extends State<MainShellPage>
   static const _tabs = [
     RouteNames.missions,
     RouteNames.workshop,
+    RouteNames.leaderboard,
     '/mascot-chat', // Mascot Chat
     RouteNames.profile,
   ];
@@ -31,6 +32,7 @@ class _MainShellPageState extends State<MainShellPage>
   static const _icons = [
     Icons.rocket_launch_rounded,
     Icons.extension_rounded,
+    Icons.leaderboard_rounded,
     Icons.smart_toy_rounded, // Robot icon for mascot
     Icons.person_rounded,
   ];
@@ -189,7 +191,7 @@ class _MainShellPageState extends State<MainShellPage>
           // The island pill
           Container(
             height: 54,
-            width: 250, // Widened from 200 to accommodate 4 tabs
+            width: 300, // Widened to accommodate 5 tabs including Leaderboard
             decoration: BoxDecoration(
               color: AppColors.backgroundWhite,
               borderRadius: BorderRadius.circular(27),

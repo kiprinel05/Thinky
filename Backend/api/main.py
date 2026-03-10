@@ -212,6 +212,15 @@ except Exception as e:
     traceback.print_exc()
 
 try:
+    from features.leaderboard.router import router as leaderboard_router
+    app.include_router(leaderboard_router, prefix="/api/v1")
+    print("[OK] leaderboard_router loaded successfully")
+except Exception as e:
+    print(f"[ERROR] Error loading leaderboard_router: {e}")
+    import traceback
+    traceback.print_exc()
+
+try:
     from features.mascot.router import router as mascot_router
     app.include_router(mascot_router, prefix="/api/v1")
     print("[OK] mascot_router loaded successfully")
