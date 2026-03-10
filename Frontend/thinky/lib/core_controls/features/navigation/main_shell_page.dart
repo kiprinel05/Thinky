@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
+import 'package:thinky/core_controls/features/mascot/presentation/mascot_floating_button.dart';
 
 /// MainShellPage — wraps the main app pages with a floating, pill-shaped
 /// bottom navigation island inspired by iOS Dynamic Island.
@@ -23,12 +24,14 @@ class _MainShellPageState extends State<MainShellPage>
   static const _tabs = [
     RouteNames.missions,
     RouteNames.workshop,
+    '/mascot-chat', // Mascot Chat
     RouteNames.profile,
   ];
 
   static const _icons = [
     Icons.rocket_launch_rounded,
     Icons.extension_rounded,
+    Icons.smart_toy_rounded, // Robot icon for mascot
     Icons.person_rounded,
   ];
 
@@ -186,7 +189,7 @@ class _MainShellPageState extends State<MainShellPage>
           // The island pill
           Container(
             height: 54,
-            width: 200,
+            width: 250, // Widened from 200 to accommodate 4 tabs
             decoration: BoxDecoration(
               color: AppColors.backgroundWhite,
               borderRadius: BorderRadius.circular(27),

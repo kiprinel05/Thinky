@@ -71,4 +71,3 @@ async def get_current_user_optional(
 ) -> Optional[User]:
     """Return current user if token is provided, otherwise None."""
     return await _resolve_user_from_token(credentials, db, allow_invalid=True)
-

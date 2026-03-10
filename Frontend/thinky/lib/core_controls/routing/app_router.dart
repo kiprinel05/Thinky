@@ -26,6 +26,7 @@ import 'package:thinky/core_controls/features/workshop/presentation/workshop_det
 import 'package:thinky/core_controls/features/workshop/presentation/create_mission_page.dart';
 import 'package:thinky/core_controls/features/workshop/presentation/my_missions_page.dart';
 import 'package:thinky/core_controls/features/workshop/presentation/workshop_play_page.dart';
+import 'package:thinky/core_controls/features/mascot/presentation/mascot_chat_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -142,6 +143,12 @@ class AppRouter {
           path: RouteNames.workshop,
           pageBuilder: (context, state) => const NoTransitionPage(
             child: WorkshopBrowsePage(),
+          ),
+        ),
+        GoRoute(
+          path: '/mascot-chat',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: MascotChatPage(),
           ),
         ),
       ],
