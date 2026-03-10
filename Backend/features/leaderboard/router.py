@@ -28,10 +28,10 @@ async def get_leaderboard(
         description="Include points from Workshop missions (downloads)",
     ),
     limit: int = Query(
-        50,
+        20,
         ge=1,
         le=200,
-        description="How many top players to return",
+        description="How many top players to display (stats include all players)",
     ),
     current_user: Optional[User] = Depends(get_current_user_optional),
     service: LeaderboardService = Depends(get_leaderboard_service),

@@ -103,13 +103,13 @@ class LeaderboardService:
 
         # Sort by points desc, then username asc for stable ordering
         entries.sort(key=lambda e: (-e.points, e.username.lower()))
-        entries = entries[:limit]
 
-        point_values = [e.points for e in entries]
+        # Stats from ALL players (before limiting display)
+        all_point_values = [e.points for e in entries]
         total_players = len(entries)
-        average_points = sum(point_values) / total_players if total_players else 0.0
-        max_points = max(point_values) if point_values else 0.0
-        min_points = min(point_values) if point_values else 0.0
+        average_points = sum(all_point_values) / total_players if total_players else 0.0
+        max_points = max(all_point_values) if all_point_values else 0.0
+        min_points = min(all_point_values) if all_point_values else 0.0
 
         stats = LeaderboardStats(
             total_players=total_players,
@@ -117,6 +117,9 @@ class LeaderboardService:
             max_points=max_points,
             min_points=min_points,
         )
+
+        # Limit displayed entries to top 20
+        entries = entries[:limit]
 
         return LeaderboardResponse(entries=entries, stats=stats)
 
