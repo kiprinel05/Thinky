@@ -35,7 +35,7 @@ abstract class RouteNames {
   static const String quizIntro = '/quiz/intro';
   static const String quizResult = '/quiz/result';
   static const String pixyLearns = '/pixy-learns';
-  static const String drawTriangle = '/draw-triangle';
+  static const String drawShapes = '/draw-shapes';
   static const String colorCircle = '/color-circle';
   static const String animalsMission = '/animals-mission';
   static const String groupingMission = '/grouping-mission';
@@ -58,4 +58,11 @@ abstract class RouteNames {
   // ══════════════════════════════════════════════════════════════════════════
 
   static const String leaderboard = '/leaderboard';
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INFO ROUTES
+  // ══════════════════════════════════════════════════════════════════════════
+
+  static const String about = '/about';
+  static const String help = '/help';
 }

@@ -25,6 +25,7 @@ class DrawingCanvas extends StatefulWidget {
   final Color backgroundColor;
   final VoidCallback? onDrawingChanged;
   final GlobalKey? repaintKey;
+  final bool isEraserMode;
 
   const DrawingCanvas({
     super.key,
@@ -33,6 +34,7 @@ class DrawingCanvas extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.onDrawingChanged,
     this.repaintKey,
+    this.isEraserMode = false,
   });
 
   @override
@@ -81,13 +83,19 @@ class DrawingCanvasState extends State<DrawingCanvas> {
     }
   }
 
+  Color get _effectiveColor =>
+      widget.isEraserMode ? widget.backgroundColor : widget.selectedColor;
+
+  /// Min distance between points to reduce lag (fewer points = smoother)
+  static const double _minPointDistance = 4.0;
+
   void _onPanStart(DragStartDetails details) {
     setState(() {
       _isDrawing = true;
       _points.add(DrawingPoint(
         offset: details.localPosition,
-        color: widget.selectedColor,
-        strokeWidth: widget.strokeWidth,
+        color: _effectiveColor,
+        strokeWidth: widget.isEraserMode ? widget.strokeWidth * 1.5 : widget.strokeWidth,
         isNewStroke: true,
       ));
     });
@@ -95,12 +103,19 @@ class DrawingCanvasState extends State<DrawingCanvas> {
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (!_isDrawing) return;
-    
+    final pos = details.localPosition;
+    // Decimate: only add point if far enough from last - reduces lag dramatically
+    if (_points.isNotEmpty) {
+      final last = _points.last.offset;
+      final dx = pos.dx - last.dx;
+      final dy = pos.dy - last.dy;
+      if (dx * dx + dy * dy < _minPointDistance * _minPointDistance) return;
+    }
     setState(() {
       _points.add(DrawingPoint(
-        offset: details.localPosition,
-        color: widget.selectedColor,
-        strokeWidth: widget.strokeWidth,
+        offset: pos,
+        color: _effectiveColor,
+        strokeWidth: widget.isEraserMode ? widget.strokeWidth * 1.5 : widget.strokeWidth,
         isNewStroke: false,
       ));
     });
@@ -207,12 +222,18 @@ class ColorPalette extends StatelessWidget {
   final List<Color> colors;
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
+  final bool showEraser;
+  final bool isEraserSelected;
+  final VoidCallback? onEraserSelected;
 
   const ColorPalette({
     super.key,
     required this.colors,
     required this.selectedColor,
     required this.onColorSelected,
+    this.showEraser = false,
+    this.isEraserSelected = false,
+    this.onEraserSelected,
   });
 
   static const List<Color> defaultColors = [
@@ -242,36 +263,70 @@ class ColorPalette extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: colors.map((color) {
-          final isSelected = color == selectedColor;
-          return GestureDetector(
-            onTap: () => onColorSelected(color),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: isSelected ? 44 : 36,
-              height: isSelected ? 44 : 36,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? Colors.white : Colors.transparent,
-                  width: 3,
+        children: [
+          if (showEraser && onEraserSelected != null) ...[
+            GestureDetector(
+              onTap: onEraserSelected,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: isEraserSelected ? 44 : 36,
+                height: isEraserSelected ? 44 : 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0E0E0),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isEraserSelected ? Colors.white : Colors.transparent,
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    if (isEraserSelected)
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                  ],
                 ),
-                boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: color.withOpacity(0.5),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                ],
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: isEraserSelected ? Colors.white : Colors.grey.shade700,
+                  size: 20,
+                ),
               ),
-              child: isSelected
-                  ? const Icon(Icons.check, color: Colors.white, size: 20)
-                  : null,
             ),
-          );
-        }).toList(),
+            const SizedBox(width: 8),
+          ],
+          ...colors.map((color) {
+            final isSelected = !isEraserSelected && color == selectedColor;
+            return GestureDetector(
+              onTap: () => onColorSelected(color),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: isSelected ? 44 : 36,
+                height: isSelected ? 44 : 36,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    width: 3,
+                  ),
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: color.withOpacity(0.5),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                  ],
+                ),
+                child: isSelected
+                    ? const Icon(Icons.check, color: Colors.white, size: 20)
+                    : null,
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

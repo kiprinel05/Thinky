@@ -59,6 +59,9 @@
     },
     "Quiz": {
         "title": "Quiz",
+        "introTitle": "Let's see what you know about AI!",
+        "introSubtitle": "This is just a quick introduction to understand your knowledge.",
+        "startQuizButton": "START QUIZ",
         "noQuestions": "No questions available",
         "questionLabel": "Question",
         "ofLabel": "of",
@@ -70,7 +73,19 @@
         "continueAction": "CONTINUE",
         "completedTitle": "Quiz Completed!",
         "scoreLabel": "Your Score:",
-        "completeMission": "COMPLETE MISSION"
+        "completeMission": "COMPLETE MISSION",
+        "resultExcellent": "Excellent!",
+        "resultGood": "Good job!",
+        "resultKeepLearning": "Keep learning!",
+        "resultHelperText": "Nice work! You can review each question and see the correct answers.",
+        "resultOutOf": "out of",
+        "resultCorrect": "correct",
+        "showDetailedResults": "SHOW DETAILED RESULTS",
+        "continueToMissions": "CONTINUE TO MISSIONS"
+    },
+    "Animals": {
+        "lookAtImage": "Look at this image and think about what you see in it.",
+        "continueAction": "Continue"
     },
     "Drawing": {
         "title": "Draw a Blue Triangle",

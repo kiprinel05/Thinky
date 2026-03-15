@@ -8,19 +8,37 @@ import 'package:thinky/core_controls/storage/storage_provider.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_models.dart';
 
-/// State for the drawing mission
+/// Round config: shape + color for each round
+class DrawingRoundConfig {
+  final String shape;
+  final String color;
+
+  const DrawingRoundConfig({required this.shape, required this.color});
+}
+
+/// State for the drawing mission (3 rounds: triangle, circle, square)
 class DrawingState extends BaseState {
+  final int currentRound;
+  final int totalRounds;
   final Color selectedColor;
   final bool hasDrawing;
   final bool isAnalyzing;
   final DrawingAnalysisResult? analysisResult;
-  final String pixyEmotion; // "neutral", "thinking", "happy", "encouraging", "hint_color"
+  final String pixyEmotion;
   final bool showResult;
+
+  static const List<DrawingRoundConfig> roundConfigs = [
+    DrawingRoundConfig(shape: 'triangle', color: 'blue'),
+    DrawingRoundConfig(shape: 'circle', color: 'red'),
+    DrawingRoundConfig(shape: 'square', color: 'green'),
+  ];
 
   const DrawingState({
     super.status = StateStatus.initial,
     super.errorMessage,
-    this.selectedColor = const Color(0xFF2196F3), // Blue default
+    this.currentRound = 1,
+    this.totalRounds = 3,
+    this.selectedColor = const Color(0xFF2196F3),
     this.hasDrawing = false,
     this.isAnalyzing = false,
     this.analysisResult,
@@ -28,9 +46,16 @@ class DrawingState extends BaseState {
     this.showResult = false,
   });
 
+  DrawingRoundConfig get currentRoundConfig =>
+      roundConfigs[currentRound - 1];
+
+  bool get isMissionComplete => currentRound > totalRounds;
+
   DrawingState copyWith({
     StateStatus? status,
     String? errorMessage,
+    int? currentRound,
+    int? totalRounds,
     Color? selectedColor,
     bool? hasDrawing,
     bool? isAnalyzing,
@@ -41,6 +66,8 @@ class DrawingState extends BaseState {
     return DrawingState(
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
+      currentRound: currentRound ?? this.currentRound,
+      totalRounds: totalRounds ?? this.totalRounds,
       selectedColor: selectedColor ?? this.selectedColor,
       hasDrawing: hasDrawing ?? this.hasDrawing,
       isAnalyzing: isAnalyzing ?? this.isAnalyzing,
@@ -67,8 +94,9 @@ class DrawingController extends BaseAsyncController<DrawingState> {
     safeUpdate(state.copyWith(hasDrawing: hasDrawing));
   }
 
-  /// Analyze the drawing
+  /// Analyze the drawing for current round
   Future<void> analyzeDrawing(Uint8List imageBytes) async {
+    final config = state.currentRoundConfig;
     // Start analysis - show Pixy thinking
     safeUpdate(state.copyWith(
       isAnalyzing: true,
@@ -81,8 +109,9 @@ class DrawingController extends BaseAsyncController<DrawingState> {
 
     final result = await _repository.analyzeDrawing(
       imageBytes: imageBytes,
-      targetShape: 'triangle',
-      targetColor: 'blue',
+      targetShape: config.shape,
+      targetColor: config.color,
+      requireFill: false,
     );
 
     result.fold(
@@ -119,6 +148,18 @@ class DrawingController extends BaseAsyncController<DrawingState> {
   /// Clear canvas state
   void clearCanvas() {
     safeUpdate(state.copyWith(
+      hasDrawing: false,
+      showResult: false,
+      analysisResult: null,
+      pixyEmotion: 'neutral',
+    ));
+  }
+
+  /// Advance to next round (after correct drawing)
+  void nextRound() {
+    if (state.currentRound >= state.totalRounds) return;
+    safeUpdate(state.copyWith(
+      currentRound: state.currentRound + 1,
       hasDrawing: false,
       showResult: false,
       analysisResult: null,

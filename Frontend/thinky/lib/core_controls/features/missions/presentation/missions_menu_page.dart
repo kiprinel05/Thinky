@@ -13,7 +13,7 @@ import 'package:thinky/core_controls/routing/route_names.dart';
 import '../mission_quiz/quiz_page.dart';
 import '../mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
-import '../mission_drawing/presentation/draw_triangle_page.dart';
+import '../mission_drawing/presentation/draw_shapes_page.dart';
 import '../mission_drawing/presentation/color_circle_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
@@ -252,16 +252,13 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                             _loadMissions();
                           }
                         });
-                      } else if (mission.missionPath == 'draw_triangle') {
-                        // Navigate to Draw Triangle mission
+                      } else if (mission.missionPath == 'draw_shapes') {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const DrawTrianglePage(),
+                            builder: (_) => const DrawShapesPage(),
                           ),
                         ).then((shouldReload) {
-                          if (shouldReload == true) {
-                            _loadMissions();
-                          }
+                          if (shouldReload == true) _loadMissions();
                         });
                       } else if (mission.missionPath == 'color_circle') {
                         // Navigate to Color Circle mission

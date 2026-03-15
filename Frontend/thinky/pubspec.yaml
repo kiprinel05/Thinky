@@ -32,7 +32,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   
   # Audio Recording
-  record: ^5.2.0
+  record: ^6.0.0
   path_provider: ^2.1.2
   http_parser: ^4.0.0
 
@@ -59,7 +59,7 @@ flutter:
     - assets/missions/
     - assets/missions/animals/
     - assets/missions/color_circle/
-    - assets/missions/draw_triangle/
+    - assets/missions/draw_shapes/
     - assets/missions/geometric_shapes/
     - assets/missions/missions/
     - assets/missions/missions/presentation/
@@ -67,10 +67,16 @@ flutter:
     - assets/missions/pixy_learns/images/
     - assets/missions/quiz/
     - assets/missions/group_sorting/
+    - assets/missions/group_sorting/images/
+    - assets/missions/group_sorting/images/fruits/
+    - assets/missions/group_sorting/images/vegetables/
+    - assets/missions/group_sorting/images/toys/
     - assets/missions/vocabulary/
     - assets/missions/describe_image/
     - assets/missions/pattern/
     - assets/missions/numbers/
     - assets/i18n/
+    - assets/i18n/texts.json
+    - assets/i18n/texts_ro.json
     - .env
 

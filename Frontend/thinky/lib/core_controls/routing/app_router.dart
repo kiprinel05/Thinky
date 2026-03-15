@@ -13,7 +13,7 @@ import 'package:thinky/core_controls/features/navigation/main_shell_page.dart';
 import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page_new.dart';
-import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/draw_triangle_page.dart';
+import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/draw_shapes_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/color_circle_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_animals/presentation/pages/animals_mission_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_grouping/presentation/pages/grouping_mission_page.dart';
@@ -28,6 +28,8 @@ import 'package:thinky/core_controls/features/workshop/presentation/my_missions_
 import 'package:thinky/core_controls/features/workshop/presentation/workshop_play_page.dart';
 import 'package:thinky/core_controls/features/mascot/presentation/mascot_chat_page.dart';
 import 'package:thinky/core_controls/features/leaderboard/presentation/leaderboard_page.dart';
+import 'package:thinky/core_controls/features/about/presentation/about_page.dart';
+import 'package:thinky/core_controls/features/help/presentation/help_page.dart';
 import '../services/auth_service.dart';
 import '../services/app_state_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
@@ -175,8 +177,8 @@ class AppRouter {
 
     // Drawing Mission
     GoRoute(
-      path: RouteNames.drawTriangle,
-      builder: (context, state) => const DrawTrianglePage(),
+      path: RouteNames.drawShapes,
+      builder: (context, state) => const DrawShapesPage(),
     ),
 
     // Color Circle Mission
@@ -243,6 +245,16 @@ class AppRouter {
         final id = int.parse(state.pathParameters['id']!);
         return WorkshopPlayPage(missionId: id);
       },
+    ),
+
+    // Info pages (from profile)
+    GoRoute(
+      path: RouteNames.about,
+      builder: (context, state) => const AboutPage(),
+    ),
+    GoRoute(
+      path: RouteNames.help,
+      builder: (context, state) => const HelpPage(),
     ),
   ];
 }

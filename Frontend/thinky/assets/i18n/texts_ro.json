@@ -59,6 +59,9 @@
     },
     "Quiz": {
         "title": "Quiz",
+        "introTitle": "Hai să vedem ce știi despre AI!",
+        "introSubtitle": "Este doar o scurtă introducere pentru a înțelege cunoștințele tale.",
+        "startQuizButton": "ÎNCEPE QUIZ-UL",
         "noQuestions": "Nu sunt întrebări disponibile",
         "questionLabel": "Întrebarea",
         "ofLabel": "din",
@@ -70,7 +73,19 @@
         "continueAction": "CONTINUĂ",
         "completedTitle": "Quiz Completat!",
         "scoreLabel": "Scorul Tău:",
-        "completeMission": "COMPLETEAZĂ MISIUNEA"
+        "completeMission": "COMPLETEAZĂ MISIUNEA",
+        "resultExcellent": "Excelent!",
+        "resultGood": "Bravo!",
+        "resultKeepLearning": "Continuă să înveți!",
+        "resultHelperText": "Bună treabă! Poți revizui fiecare întrebare și vedea răspunsurile corecte.",
+        "resultOutOf": "din",
+        "resultCorrect": "corecte",
+        "showDetailedResults": "VEZI REZULTATELE DETALIATE",
+        "continueToMissions": "CONTINUĂ LA MISIUNI"
+    },
+    "Animals": {
+        "lookAtImage": "Uită-te la această imagine și gândește-te ce vezi în ea.",
+        "continueAction": "Continuă"
     },
     "Drawing": {
         "title": "Desenează un Triunghi Albastru",

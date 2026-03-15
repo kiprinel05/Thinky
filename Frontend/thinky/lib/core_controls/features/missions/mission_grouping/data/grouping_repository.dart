@@ -56,8 +56,20 @@ class GroupingRepository {
     }
   }
 
-  /// Build full image URL from relative path
+  /// Build full image URL from relative path (for network loading)
   static String getImageUrl(String relativePath) {
     return '${AppConfig.apiBaseUrl}$relativePath';
+  }
+
+  /// Get local asset path from API url (e.g. /grouping/image/fruits/apple.png)
+  /// Returns assets/missions/group_sorting/images/fruits/apple.png
+  static String? getAssetPath(String url) {
+    final parts = url.split('/');
+    if (parts.length >= 2) {
+      final category = parts[parts.length - 2];
+      final filename = parts[parts.length - 1];
+      return 'assets/missions/group_sorting/images/$category/$filename';
+    }
+    return null;
   }
 }

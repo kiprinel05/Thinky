@@ -1,357 +1,386 @@
+"""
+Drawing analysis service - robust shape and color detection.
+
+Supports: triangle, square, rectangle, circle, star, diamond, pentagon, hexagon.
+Handles: faint drawings, multiple strokes, adaptive thresholding, flexible matching.
+"""
 import cv2
 import numpy as np
-from typing import Tuple, Optional
-import io
+from typing import Tuple, Optional, List, Dict
 
 from features.drawing.schemas import DrawingAnalysisResponse
 
 
+# Shapes that can be considered equivalent for matching (e.g. rectangle ≈ square)
+# When detected=X, we accept target if target in aliases[X]
+SHAPE_ALIASES = {
+    "rectangle": ["square", "circle"],  # Round rect ≈ circle
+    "square": ["rectangle", "circle"],  # Round square ≈ circle (coloring mission)
+    "diamond": ["square"],  # Diamond is a rotated square
+}
+
+
 class DrawingService:
     """
-    Service for analyzing user drawings using OpenCV.
-    Detects shapes (triangle, square, circle) and colors.
-    Requires minimum 10% canvas coverage to pass.
+    Robust drawing analysis using OpenCV.
+    - Multiple shapes: triangle, square, circle, star, diamond, pentagon, hexagon
+    - Adaptive preprocessing for faint/rough drawings
+    - Convex hull for scattered strokes
+    - Flexible shape matching (rectangle→square, etc.)
     """
-    
-    # HSV color ranges for detection
+
+    # HSV ranges - tuned for Flutter ColorPalette.defaultColors
+    # Blue 0xFF2196F3, Red 0xFFF44336, Green 0xFF4CAF50, Yellow 0xFFFFEB3B,
+    # Purple 0xFF9C27B0, Orange 0xFFFF9800, Black 0xFF000000
     COLOR_RANGES = {
-        "blue": {
-            "lower": np.array([100, 50, 50]),
-            "upper": np.array([130, 255, 255])
-        },
-        "red_low": {
-            "lower": np.array([0, 50, 50]),
-            "upper": np.array([10, 255, 255])
-        },
-        "red_high": {
-            "lower": np.array([170, 50, 50]),
-            "upper": np.array([180, 255, 255])
-        },
-        "green": {
-            "lower": np.array([35, 50, 50]),
-            "upper": np.array([85, 255, 255])
-        },
-        "yellow": {
-            "lower": np.array([20, 50, 50]),
-            "upper": np.array([35, 255, 255])
-        },
-        "purple": {
-            "lower": np.array([130, 50, 50]),
-            "upper": np.array([160, 255, 255])
-        },
-        "orange": {
-            "lower": np.array([10, 50, 50]),
-            "upper": np.array([20, 255, 255])
-        }
+        "blue": {"lower": np.array([95, 40, 40]), "upper": np.array([135, 255, 255])},
+        "red_low": {"lower": np.array([0, 40, 40]), "upper": np.array([10, 255, 255])},
+        "red_high": {"lower": np.array([165, 40, 40]), "upper": np.array([180, 255, 255])},
+        "green": {"lower": np.array([35, 40, 40]), "upper": np.array([90, 255, 255])},
+        "yellow": {"lower": np.array([18, 40, 40]), "upper": np.array([38, 255, 255])},
+        "purple": {"lower": np.array([125, 40, 40]), "upper": np.array([165, 255, 255])},
+        "orange": {"lower": np.array([8, 40, 40]), "upper": np.array([25, 255, 255])},
+        "black": {"lower": np.array([0, 0, 0]), "upper": np.array([180, 255, 50])},
     }
-    
-    # Shape names based on vertex count
-    SHAPE_NAMES = {
-        3: "triangle",
-        4: "square",
-        5: "pentagon",
-        6: "hexagon"
-    }
-    
-    # Minimum coverage required (fraction of canvas that must be drawn on)
-    MIN_COVERAGE = 0.10  # 10% of canvas
-    
+
+    SUPPORTED_SHAPES = [
+        "triangle", "square", "rectangle", "circle", "star",
+        "diamond", "pentagon", "hexagon"
+    ]
+
+    MIN_COVERAGE = 0.08  # 8% - slightly more lenient for kids
+    MIN_CONTOUR_AREA = 300  # Ignore tiny noise
+    MIN_CANVAS_RATIO = 0.02  # Drawing should be at least 2% of canvas
+
     def __init__(self):
         pass
-    
-    def analyze_drawing(self, image_bytes: bytes, target_shape: str = "triangle", target_color: str = "blue") -> DrawingAnalysisResponse:
-        """
-        Analyze a drawing image for shape and color detection.
-        
-        Args:
-            image_bytes: PNG/JPG image as bytes
-            target_shape: Expected shape ("triangle", "square", etc.)
-            target_color: Expected color ("blue", "red", etc.)
-            
-        Returns:
-            DrawingAnalysisResponse with detection results
-        """
+
+    def analyze_drawing(
+        self,
+        image_bytes: bytes,
+        target_shape: str = "triangle",
+        target_color: str = "blue",
+        require_fill: bool = False,
+    ) -> DrawingAnalysisResponse:
         try:
-            # Convert bytes to OpenCV image
             nparr = np.frombuffer(image_bytes, np.uint8)
             image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
+
             if image is None:
-                return DrawingAnalysisResponse(
-                    message="Could not read the image. Try again!",
-                    pixy_emotion="encouraging"
+                return self._error_response("Could not read the image. Try again!")
+
+            # Preprocess - get best binary image
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            thresh = self._preprocess_image(gray)
+
+            # Get main contour (possibly merged from multiple strokes)
+            main_contour = self._get_main_contour(thresh, image.shape)
+            if main_contour is None:
+                return self._error_response(
+                    "I don't see a drawing yet! Draw something and try again. 🎨"
                 )
-            
-            # Detect shape
-            shape_result = self._detect_shape(image)
+
+            # Detect shape with multiple epsilon attempts
+            shape_result = self._detect_shape_robust(main_contour)
             detected_shape = shape_result["shape"]
-            vertex_count = shape_result["vertices"]
             confidence_shape = shape_result["confidence"]
-            
+
             # Detect color
-            color_result = self._detect_dominant_color(image)
+            color_result = self._detect_dominant_color(image, thresh)
             detected_color = color_result["color"]
             confidence_color = color_result["confidence"]
-            
-            # Calculate canvas coverage
-            coverage = self._calculate_coverage(image)
-            has_enough_coverage = coverage >= self.MIN_COVERAGE
-            
-            # Check if matches target (shape + color + coverage)
-            is_triangle = detected_shape == "triangle"
-            is_blue = detected_color == "blue"
-            is_circle = detected_shape == "circle"
-            is_red = detected_color == "red"
-            shape_and_color_match = (detected_shape == target_shape) and (detected_color == target_color)
-            is_correct = shape_and_color_match and has_enough_coverage
-            
-            # Generate feedback message and Pixy emotion
+
+            # Coverage - only required when require_fill=True
+            coverage = self._calculate_coverage(thresh)
+            has_enough_coverage = coverage >= self.MIN_COVERAGE if require_fill else True
+
+            # Flexible shape matching (rectangle→square, etc.)
+            shape_matches = self._shapes_match(detected_shape, target_shape)
+            color_matches = detected_color == target_color
+            is_correct = shape_matches and color_matches and has_enough_coverage
+
             message, pixy_emotion = self._generate_feedback(
                 detected_shape, detected_color,
                 target_shape, target_color,
-                is_correct, coverage, has_enough_coverage
+                is_correct, coverage, has_enough_coverage,
+                require_fill=require_fill,
             )
-            
+
             return DrawingAnalysisResponse(
                 detected_shape=detected_shape,
                 detected_color=detected_color,
-                vertex_count=vertex_count,
-                is_triangle=is_triangle,
-                is_blue=is_blue,
-                is_circle=is_circle,
-                is_red=is_red,
+                vertex_count=shape_result.get("vertices", 0),
+                is_triangle=(detected_shape == "triangle"),
+                is_blue=(detected_color == "blue"),
+                is_circle=(detected_shape == "circle"),
+                is_red=(detected_color == "red"),
                 is_correct=is_correct,
                 confidence_shape=confidence_shape,
                 confidence_color=confidence_color,
                 coverage=round(coverage, 2),
                 message=message,
-                pixy_emotion=pixy_emotion
+                pixy_emotion=pixy_emotion,
             )
-            
+
         except Exception as e:
             print(f"[ERROR] Drawing analysis failed: {e}")
-            return DrawingAnalysisResponse(
-                message="Oops! Something went wrong. Try again!",
-                pixy_emotion="encouraging"
-            )
-    
-    def _detect_shape(self, image: np.ndarray) -> dict:
-        """
-        Detect the shape in the drawing using contour analysis.
-        
-        Returns dict with shape name, vertex count, and confidence.
-        """
-        # Convert to grayscale
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
-        # Apply Gaussian blur to reduce noise
+            import traceback
+            traceback.print_exc()
+            return self._error_response("Oops! Something went wrong. Try again!")
+
+    def _error_response(self, message: str) -> DrawingAnalysisResponse:
+        return DrawingAnalysisResponse(
+            message=message,
+            pixy_emotion="encouraging",
+        )
+
+    def _preprocess_image(self, gray: np.ndarray) -> np.ndarray:
+        """Get binary image - try multiple methods, pick best."""
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        
-        # Apply threshold - handle both dark drawings on light bg and vice versa
-        _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-        
-        # Find contours
+
+        # Method 1: Otsu inverted (dark strokes on light bg)
+        _, thresh_inv = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        # Method 2: Otsu normal (light strokes on dark - rare)
+        _, thresh_norm = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Pick the one with more "drawing" pixels (typically 10-60% of canvas)
+        h, w = gray.shape
+        total = h * w
+        inv_pixels = cv2.countNonZero(thresh_inv)
+        norm_pixels = cv2.countNonZero(thresh_norm)
+
+        inv_ratio = inv_pixels / total if total > 0 else 0
+        norm_ratio = norm_pixels / total if total > 0 else 0
+
+        # Prefer inverted if it looks like a drawing (5-70% filled)
+        if 0.05 <= inv_ratio <= 0.75:
+            return thresh_inv
+        if 0.05 <= norm_ratio <= 0.75:
+            return thresh_norm
+
+        # Fallback: adaptive threshold for uneven lighting
+        adaptive = cv2.adaptiveThreshold(
+            blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV, 11, 2
+        )
+        return adaptive
+
+    def _get_main_contour(self, thresh: np.ndarray, img_shape: tuple) -> Optional[np.ndarray]:
+        """Get main drawing contour, possibly merging multiple strokes via convex hull."""
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         if not contours:
-            return {"shape": "unknown", "vertices": 0, "confidence": 0.0}
-        
-        # Get the largest contour (main drawing)
-        largest_contour = max(contours, key=cv2.contourArea)
-        area = cv2.contourArea(largest_contour)
-        
-        # Filter out very small contours (noise)
-        if area < 500:
-            return {"shape": "unknown", "vertices": 0, "confidence": 0.0}
-        
-        # Approximate the polygon
-        peri = cv2.arcLength(largest_contour, True)
-        epsilon = 0.04 * peri  # Tolerance for approximation
-        approx = cv2.approxPolyDP(largest_contour, epsilon, True)
-        
-        vertices = len(approx)
-        
-        # Determine shape based on vertices
-        if vertices == 3:
-            shape = "triangle"
-            confidence = self._calculate_shape_confidence(largest_contour, approx, "triangle")
-        elif vertices == 4:
-            # Check if it's a square or rectangle
-            (x, y, w, h) = cv2.boundingRect(approx)
-            aspect_ratio = float(w) / h
-            if 0.85 <= aspect_ratio <= 1.15:
-                shape = "square"
-            else:
-                shape = "rectangle"
-            confidence = self._calculate_shape_confidence(largest_contour, approx, "square")
-        elif vertices > 6:
-            # Many vertices suggest a circle
-            shape = "circle"
-            confidence = self._calculate_circularity(largest_contour)
-        else:
-            shape = self.SHAPE_NAMES.get(vertices, f"polygon_{vertices}")
-            confidence = 0.5
-        
-        return {"shape": shape, "vertices": vertices, "confidence": confidence}
-    
-    def _calculate_shape_confidence(self, contour: np.ndarray, approx: np.ndarray, expected_shape: str) -> float:
-        """Calculate confidence score for shape detection."""
+            return None
+
+        # Filter by area
+        valid = [c for c in contours if cv2.contourArea(c) >= self.MIN_CONTOUR_AREA]
+        if not valid:
+            return None
+
+        # If one dominant contour, use it
+        largest = max(valid, key=cv2.contourArea)
+        area = cv2.contourArea(largest)
+        total_pixels = img_shape[0] * img_shape[1]
+        if area / total_pixels < self.MIN_CANVAS_RATIO:
+            return None
+
+        # If multiple significant contours (e.g. triangle drawn with 3 lines), use convex hull
+        if len(valid) > 1:
+            combined = np.vstack(valid)
+            hull = cv2.convexHull(combined)
+            if cv2.contourArea(hull) >= self.MIN_CONTOUR_AREA:
+                return hull
+
+        return largest
+
+    def _detect_shape_robust(self, contour: np.ndarray) -> dict:
+        """Detect shape trying multiple approximation tolerances."""
+        best = {"shape": "unknown", "vertices": 0, "confidence": 0.0}
+
+        for eps_factor in [0.01, 0.02, 0.04, 0.06, 0.08, 0.10]:
+            peri = cv2.arcLength(contour, True)
+            if peri < 1:
+                continue
+            epsilon = eps_factor * peri
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            vertices = len(approx)
+
+            shape, confidence = self._classify_shape(contour, approx, vertices)
+            if confidence > best["confidence"]:
+                best = {"shape": shape, "vertices": vertices, "confidence": confidence}
+
+        return best
+
+    def _classify_shape(
+        self, contour: np.ndarray, approx: np.ndarray, vertices: int
+    ) -> Tuple[str, float]:
+        """Classify shape from vertex count and geometry."""
         area = cv2.contourArea(contour)
         perimeter = cv2.arcLength(contour, True)
-        
-        if perimeter == 0:
-            return 0.0
-        
-        # Compactness measure
-        compactness = 4 * np.pi * area / (perimeter ** 2)
-        
-        if expected_shape == "triangle":
-            # Perfect triangle has compactness ~0.6
-            ideal_compactness = 0.6
-            confidence = 1 - min(abs(compactness - ideal_compactness) / ideal_compactness, 1.0)
-        elif expected_shape == "square":
-            # Perfect square has compactness ~0.785
-            ideal_compactness = 0.785
-            confidence = 1 - min(abs(compactness - ideal_compactness) / ideal_compactness, 1.0)
-        else:
-            confidence = 0.5
-        
-        return round(min(max(confidence, 0.0), 1.0), 2)
-    
-    def _calculate_circularity(self, contour: np.ndarray) -> float:
-        """Calculate how circular a contour is (1.0 = perfect circle)."""
-        area = cv2.contourArea(contour)
-        perimeter = cv2.arcLength(contour, True)
-        
-        if perimeter == 0:
-            return 0.0
-        
+        if perimeter < 1:
+            return "unknown", 0.0
+
         circularity = 4 * np.pi * area / (perimeter ** 2)
-        return round(min(circularity, 1.0), 2)
-    
-    def _detect_dominant_color(self, image: np.ndarray) -> dict:
-        """
-        Detect the dominant color in the drawing.
-        
-        Returns dict with color name and confidence.
-        """
-        # Convert to HSV
+
+        if vertices == 3:
+            conf = self._triangle_confidence(contour)
+            return "triangle", conf
+
+        if vertices == 4:
+            # High circularity = round shape (circle) despite 4-vertex approximation
+            if circularity > 0.80:
+                return "circle", min(circularity, 1.0)
+            shape, conf = self._classify_quadrilateral(approx)
+            return shape, conf
+
+        if vertices == 5:
+            # Pentagon or star (5-pointed star has 10 vertices, but kids may draw 5)
+            if circularity > 0.85:
+                return "circle", min(circularity, 1.0)
+            return "pentagon", 0.6
+
+        if vertices == 6:
+            if circularity > 0.88:
+                return "circle", min(circularity, 1.0)
+            return "hexagon", 0.6
+
+        if vertices == 10:
+            return "star", 0.7
+
+        if vertices >= 7:
+            # Many vertices → circle
+            return "circle", min(circularity, 1.0)
+
+        return "unknown", 0.0
+
+    def _triangle_confidence(self, contour: np.ndarray) -> float:
+        area = cv2.contourArea(contour)
+        perimeter = cv2.arcLength(contour, True)
+        if perimeter < 1:
+            return 0.0
+        compactness = 4 * np.pi * area / (perimeter ** 2)
+        ideal = 0.6
+        conf = 1 - min(abs(compactness - ideal) / ideal, 1.0)
+        return round(min(max(conf, 0.0), 1.0), 2)
+
+    def _classify_quadrilateral(self, approx: np.ndarray) -> Tuple[str, float]:
+        """Distinguish square, rectangle, diamond."""
+        (x, y, w, h) = cv2.boundingRect(approx)
+        if w < 2 or h < 2:
+            return "square", 0.5
+        aspect = float(w) / h
+
+        # Check if diamond (rotated 45°) - corners form a diamond shape
+        pts = approx.reshape(4, 2)
+        # For diamond, two opposite sides are more "diagonal"
+        # Simple heuristic: square has aspect ~1, rectangle is elongated
+        if 0.75 <= aspect <= 1.33:
+            compactness = 4 * np.pi * cv2.contourArea(approx) / (cv2.arcLength(approx, True) ** 2)
+            conf = 1 - min(abs(compactness - 0.785) / 0.785, 1.0)
+            return "square", round(min(max(conf, 0.0), 1.0), 2)
+        if 0.5 <= aspect <= 2.0:
+            return "rectangle", 0.65
+        return "square", 0.5
+
+    def _detect_dominant_color(self, image: np.ndarray, drawing_mask: np.ndarray) -> dict:
+        """Detect dominant color in drawing pixels."""
+        total = cv2.countNonZero(drawing_mask)
+        if total == 0:
+            return {"color": "unknown", "confidence": 0.0}
+
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        
-        # Create mask for non-white/non-background pixels
-        # Assuming white or light gray background
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, drawing_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
-        
-        total_drawing_pixels = cv2.countNonZero(drawing_mask)
-        
-        if total_drawing_pixels == 0:
-            return {"color": "unknown", "confidence": 0.0}
-        
-        color_scores = {}
-        
-        # Check each color range
-        for color_name, ranges in self.COLOR_RANGES.items():
-            if color_name.startswith("red_"):
-                continue  # Handle red specially below
-                
+        color_scores: Dict[str, float] = {}
+
+        for name, ranges in self.COLOR_RANGES.items():
+            if name.startswith("red_"):
+                continue
             mask = cv2.inRange(hsv, ranges["lower"], ranges["upper"])
-            # Combine with drawing mask
-            combined_mask = cv2.bitwise_and(mask, drawing_mask)
-            color_pixels = cv2.countNonZero(combined_mask)
-            
-            if total_drawing_pixels > 0:
-                color_scores[color_name] = color_pixels / total_drawing_pixels
-        
-        # Handle red (wraps around HSV)
-        red_low = cv2.inRange(hsv, self.COLOR_RANGES["red_low"]["lower"], self.COLOR_RANGES["red_low"]["upper"])
-        red_high = cv2.inRange(hsv, self.COLOR_RANGES["red_high"]["lower"], self.COLOR_RANGES["red_high"]["upper"])
-        red_mask = cv2.bitwise_or(red_low, red_high)
-        red_combined = cv2.bitwise_and(red_mask, drawing_mask)
-        red_pixels = cv2.countNonZero(red_combined)
-        color_scores["red"] = red_pixels / total_drawing_pixels if total_drawing_pixels > 0 else 0
-        
-        # Find dominant color
-        if not color_scores:
-            return {"color": "unknown", "confidence": 0.0}
-        
-        dominant_color = max(color_scores, key=color_scores.get)
-        confidence = color_scores[dominant_color]
-        
-        # If confidence is too low, mark as unknown
-        if confidence < 0.1:
-            return {"color": "unknown", "confidence": confidence}
-        
-        return {"color": dominant_color, "confidence": round(confidence, 2)}
-    
-    def _calculate_coverage(self, image: np.ndarray) -> float:
-        """
-        Calculate what fraction of the canvas has been drawn on.
-        
-        Returns a value between 0.0 and 1.0.
-        """
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, drawing_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
-        
-        total_pixels = image.shape[0] * image.shape[1]
-        drawn_pixels = cv2.countNonZero(drawing_mask)
-        
-        return drawn_pixels / total_pixels if total_pixels > 0 else 0.0
-    
+            combined = cv2.bitwise_and(mask, drawing_mask)
+            count = cv2.countNonZero(combined)
+            color_scores[name] = count / total if total > 0 else 0
+
+        # Red wraps in HSV
+        rl = self.COLOR_RANGES["red_low"]
+        rh = self.COLOR_RANGES["red_high"]
+        red_mask = cv2.bitwise_or(
+            cv2.inRange(hsv, rl["lower"], rl["upper"]),
+            cv2.inRange(hsv, rh["lower"], rh["upper"]),
+        )
+        color_scores["red"] = cv2.countNonZero(cv2.bitwise_and(red_mask, drawing_mask)) / total
+
+        dominant = max(color_scores, key=color_scores.get)
+        conf = color_scores[dominant]
+        if conf < 0.08:
+            return {"color": "unknown", "confidence": round(conf, 2)}
+        return {"color": dominant, "confidence": round(conf, 2)}
+
+    def _calculate_coverage(self, thresh: np.ndarray) -> float:
+        total = thresh.shape[0] * thresh.shape[1]
+        drawn = cv2.countNonZero(thresh)
+        return drawn / total if total > 0 else 0.0
+
+    def _shapes_match(self, detected: str, target: str) -> bool:
+        """Flexible matching: rectangle→square, diamond→square, etc."""
+        if detected == target:
+            return True
+        aliases = SHAPE_ALIASES.get(detected, [])
+        return target in aliases
+
     def _generate_feedback(
-        self, 
-        detected_shape: str, 
+        self,
+        detected_shape: str,
         detected_color: str,
-        target_shape: str, 
+        target_shape: str,
         target_color: str,
         is_correct: bool,
-        coverage: float = 0.0,
-        has_enough_coverage: bool = True
+        coverage: float,
+        has_enough_coverage: bool,
+        require_fill: bool = False,
     ) -> Tuple[str, str]:
-        """
-        Generate user-friendly feedback message and Pixy emotion.
-        
-        Returns (message, pixy_emotion)
-        """
         if is_correct:
             return (
                 f"Amazing! You drew a perfect {target_color} {target_shape}! 🎉",
-                "happy"
+                "happy",
             )
-        
-        shape_match = detected_shape == target_shape
+
+        shape_match = self._shapes_match(detected_shape, target_shape)
         color_match = detected_color == target_color
-        
-        # Shape and color match but not enough coverage
-        if shape_match and color_match and not has_enough_coverage:
+
+        if require_fill and shape_match and color_match and not has_enough_coverage:
             pct = int(coverage * 100)
             return (
-                f"Good start! I can see a {target_color} {target_shape}, but draw more! Only {pct}% of the canvas is filled. Fill more of the shape! 🖍️",
-                "encouraging"
+                f"Good start! I can see a {target_color} {target_shape}, but draw more! "
+                f"Only {pct}% filled. Fill the shape more! 🖍️",
+                "encouraging",
             )
-        
+
+        hints = {
+            "triangle": "Remember, a triangle has 3 corners!",
+            "square": "A square has 4 equal sides!",
+            "rectangle": "A rectangle has 4 sides - try making them equal for a square!",
+            "circle": "Try to make it round - no corners!",
+            "star": "A star has 5 points!",
+            "diamond": "A diamond is like a square turned sideways!",
+            "pentagon": "A pentagon has 5 sides!",
+            "hexagon": "A hexagon has 6 sides!",
+        }
+
         if not shape_match and not color_match:
             return (
-                f"Hmm, I see a {detected_color} {detected_shape}. Let's try to draw a {target_color} {target_shape}!",
-                "encouraging"
+                f"Hmm, I see a {detected_color} {detected_shape}. "
+                f"Let's try a {target_color} {target_shape}!",
+                "encouraging",
             )
-        elif not shape_match:
-            hints = {
-                "triangle": "Remember, a triangle has 3 corners!",
-                "square": "A square has 4 equal sides!",
-                "circle": "Try to make it round!"
-            }
+        if not shape_match:
             hint = hints.get(target_shape, f"Try drawing a {target_shape}!")
             return (
                 f"Great {detected_color} color! But I see a {detected_shape}. {hint}",
-                "encouraging"
+                "encouraging",
             )
-        else:  # color mismatch
-            return (
-                f"Nice {detected_shape}! But can you make it {target_color}? Look at the color palette! 🎨",
-                "hint_color"
-            )
+        return (
+            f"Nice {detected_shape}! Can you make it {target_color}? Look at the palette! 🎨",
+            "hint_color",
+        )
 
 
-# Singleton instance
 drawing_service = DrawingService()

@@ -71,6 +71,9 @@ class Missions {
 /// Accessors for 'Quiz' texts
 class Quiz {
   static String get title => TextService.getString('Quiz', 'title');
+  static String get introTitle => TextService.getString('Quiz', 'introTitle');
+  static String get introSubtitle => TextService.getString('Quiz', 'introSubtitle');
+  static String get startQuizButton => TextService.getString('Quiz', 'startQuizButton');
   static String get noQuestions => TextService.getString('Quiz', 'noQuestions');
   static String get questionLabel => TextService.getString('Quiz', 'questionLabel');
   static String get ofLabel => TextService.getString('Quiz', 'ofLabel');
@@ -83,6 +86,20 @@ class Quiz {
   static String get completedTitle => TextService.getString('Quiz', 'completedTitle');
   static String get scoreLabel => TextService.getString('Quiz', 'scoreLabel');
   static String get completeMission => TextService.getString('Quiz', 'completeMission');
+  static String get resultExcellent => TextService.getString('Quiz', 'resultExcellent');
+  static String get resultGood => TextService.getString('Quiz', 'resultGood');
+  static String get resultKeepLearning => TextService.getString('Quiz', 'resultKeepLearning');
+  static String get resultHelperText => TextService.getString('Quiz', 'resultHelperText');
+  static String get resultOutOf => TextService.getString('Quiz', 'resultOutOf');
+  static String get resultCorrect => TextService.getString('Quiz', 'resultCorrect');
+  static String get showDetailedResults => TextService.getString('Quiz', 'showDetailedResults');
+  static String get continueToMissions => TextService.getString('Quiz', 'continueToMissions');
+}
+
+/// Accessors for 'Animals' texts
+class Animals {
+  static String get lookAtImage => TextService.getString('Animals', 'lookAtImage');
+  static String get continueAction => TextService.getString('Animals', 'continueAction');
 }
 
 /// Accessors for 'Drawing' texts

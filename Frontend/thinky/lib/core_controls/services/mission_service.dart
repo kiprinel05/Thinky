@@ -56,11 +56,27 @@ class MissionService {
     final now = DateTime.now();
     return MissionListResponse(missions: [
       Mission(
-        id: -1,
-        title: 'Teach Pixy Colors',
-        missionPath: 'pixy_learns',
-        description: 'Intro mission to explain primary colors to Pixy.',
+        id: -2,
+        title: 'Quiz Time',
+        missionPath: 'quiz',
+        description: 'Quick recap quiz to test what Pixy learned.',
         orderIndex: 0,
+        backgroundColor: '#FFB59E',
+        height: 200,
+        isActive: true,
+        createdAt: now,
+        progress: MissionProgress(
+          missionId: -2,
+          isCompleted: false,
+        ),
+        isLocked: false,
+      ),
+      Mission(
+        id: -1,
+        title: 'Apple vs Cat',
+        missionPath: 'pixy_learns',
+        description: 'Teach Pixy to recognize apples and cats by labeling images.',
+        orderIndex: 1,
         backgroundColor: '#8E97FD',
         height: 220,
         isActive: true,
@@ -70,22 +86,6 @@ class MissionService {
           isCompleted: false,
         ),
         isLocked: false,
-      ),
-      Mission(
-        id: -2,
-        title: 'Quiz Time',
-        missionPath: 'quiz',
-        description: 'Quick recap quiz to test what Pixy learned.',
-        orderIndex: 1,
-        backgroundColor: '#FFB59E',
-        height: 200,
-        isActive: true,
-        createdAt: now,
-        progress: MissionProgress(
-          missionId: -2,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
       ),
       Mission(
         id: -5,
@@ -105,9 +105,9 @@ class MissionService {
       ),
       Mission(
         id: -3,
-        title: 'Draw a Blue Triangle',
-        missionPath: 'draw_triangle',
-        description: 'Draw a blue triangle on the canvas and let Pixy guess!',
+        title: 'Draw Shapes',
+        missionPath: 'draw_shapes',
+        description: '3 rounds: draw a triangle, a circle, and a square!',
         orderIndex: 3,
         backgroundColor: '#8E97FD',
         height: 200,
@@ -117,7 +117,7 @@ class MissionService {
           missionId: -3,
           isCompleted: false,
         ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        isLocked: false,
       ),
       Mission(
         id: -4,
@@ -172,7 +172,7 @@ class MissionService {
         title: 'Describe It',
         missionPath: 'describe_image',
         description: 'Describe what you see in the image using your voice!',
-        orderIndex: 7,
+        orderIndex: 9,
         backgroundColor: '#FF7043',
         height: 220,
         isActive: true,

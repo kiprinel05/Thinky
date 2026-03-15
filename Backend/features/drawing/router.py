@@ -9,7 +9,8 @@ router = APIRouter(prefix="/drawing", tags=["Drawing Analysis"])
 async def analyze_drawing(
     file: UploadFile = File(..., description="PNG or JPG image of the drawing"),
     target_shape: str = Query("triangle", description="Expected shape to detect"),
-    target_color: str = Query("blue", description="Expected color to detect")
+    target_color: str = Query("blue", description="Expected color to detect"),
+    require_fill: bool = Query(False, description="If False, outline shapes are accepted (no min coverage)"),
 ):
     """
     Analyze a user's drawing for shape and color detection.
@@ -41,9 +42,10 @@ async def analyze_drawing(
             )
         
         result = drawing_service.analyze_drawing(
-            contents, 
-            target_shape=target_shape, 
-            target_color=target_color
+            contents,
+            target_shape=target_shape,
+            target_color=target_color,
+            require_fill=require_fill,
         )
         
         return result

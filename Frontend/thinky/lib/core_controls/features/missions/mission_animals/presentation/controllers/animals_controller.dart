@@ -109,10 +109,6 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
         selectedImageIds: {},
         isLoading: false,
       );
-      
-      // Auto-trigger Pixy's guess after a delay
-      await Future.delayed(const Duration(milliseconds: 1500));
-      await makePixyGuess();
     } catch (e) {
       // Check if mission is complete
       if (e.toString().contains('already complete')) {

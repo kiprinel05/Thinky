@@ -27,6 +27,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     with TickerProviderStateMixin {
   final GlobalKey _canvasKey = GlobalKey();
   final GlobalKey<DrawingCanvasState> _canvasStateKey = GlobalKey<DrawingCanvasState>();
+  bool _isEraserSelected = false;
   
   late AnimationController _pixyBounceController;
   late AnimationController _resultSlideController;
@@ -167,21 +168,32 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                   ),
                 ),
                 
-                // Color palette
+                // Color palette with eraser
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   child: ColorPalette(
                     colors: ColorPalette.defaultColors,
                     selectedColor: state.selectedColor,
                     onColorSelected: (color) {
+                      setState(() => _isEraserSelected = false);
                       ref.read(colorCircleControllerProvider.notifier).selectColor(color);
+                    },
+                    showEraser: true,
+                    isEraserSelected: _isEraserSelected,
+                    onEraserSelected: () {
+                      setState(() => _isEraserSelected = true);
                     },
                   ),
                 ),
                 
-                // Action buttons
+                // Action buttons (extra bottom padding for navbar)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    0,
+                    24,
+                    MediaQuery.of(context).padding.bottom + 80,
+                  ),
                   child: _buildActionButtons(state),
                 ),
               ],
@@ -382,15 +394,12 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   String _getPixyAsset(String emotion) {
     switch (emotion) {
       case 'thinking':
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page2/thinking.png';
       case 'happy':
-        return 'assets/welcome/page1/robot.png';
       case 'encouraging':
-        return 'assets/welcome/page1/robot.png';
-      case 'hint_color':
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page1/hello.png';
       default:
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page1/hello.png';
     }
   }
 
@@ -427,6 +436,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               selectedColor: state.selectedColor,
               strokeWidth: 20.0, // Thicker for coloring
               backgroundColor: Colors.white,
+              isEraserMode: _isEraserSelected,
               onDrawingChanged: () {
                 ref.read(colorCircleControllerProvider.notifier).setHasDrawing(true);
               },
@@ -567,7 +577,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/welcome/page1/robot.png',
+                        'assets/welcome/page2/thinking.png',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const Icon(
                           Icons.smart_toy,
@@ -780,9 +790,9 @@ class CircleOutlinePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
     
-    // Draw circle in the center of the canvas
+    // Draw full circle in the center - larger radius for better coloring area
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width < size.height ? size.width : size.height) * 0.35;
+    final radius = (size.width < size.height ? size.width : size.height) * 0.42;
     
     canvas.drawCircle(center, radius, paint);
   }

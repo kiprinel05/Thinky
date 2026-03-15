@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart' show Quiz;
 import 'quiz_models.dart';
 import 'quiz_answers_page.dart';
 
@@ -24,207 +26,298 @@ class QuizResultPage extends StatelessWidget {
     final isExcellent = percentage >= 80;
     final isGood = percentage >= 60;
 
+    // Score-based accent color
+    final accentColor = isExcellent
+        ? const Color(0xFF4CAF50) // green
+        : isGood
+            ? AppColors.primaryPurple
+            : const Color(0xFFFF9A5C); // warm orange
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF8E97FD)),
-          onPressed: () => Navigator.of(context).pop(true),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFB8BEFD),
+              Color(0xFF9AA2FD),
+              Color(0xFF8E97FD),
+            ],
+            stops: [0.0, 0.4, 1.0],
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top gradient header
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF8E97FD), Color(0xFF9AA2FD)],
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Soft decorative circles
+              Positioned(
+                top: -60,
+                right: -40,
+                child: Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.08),
+                  ),
                 ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Column(
+              Positioned(
+                bottom: 200,
+                left: -50,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.06),
+                  ),
+                ),
+              ),
+              Column(
                 children: [
-                  ScaleInWidget(
-                    delay: const Duration(milliseconds: 200),
-                    child: Image.asset(
-                      'assets/missions/quiz/happy.png',
-                      height: 120,
-                      fit: BoxFit.contain,
+                  AppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    leading: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white.withOpacity(0.9),
+                        size: 20,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(true),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        isExcellent
-                            ? '🎉'
-                            : isGood
-                                ? '👍'
-                                : '💪',
-                        style: const TextStyle(fontSize: 26),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        bottom: MediaQuery.of(context).padding.bottom + 100,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        isExcellent
-                            ? 'Excellent!'
-                            : isGood
-                                ? 'Good job!'
-                                : 'Keep learning!',
-                        style: GoogleFonts.alata(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          ScaleInWidget(
+                            delay: const Duration(milliseconds: 200),
+                            child: Image.asset(
+                              'assets/missions/quiz/happy.png',
+                              height: 130,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          FadeInWidget(
+                            delay: const Duration(milliseconds: 250),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  isExcellent ? '🎉' : isGood ? '👍' : '💪',
+                                  style: const TextStyle(fontSize: 28),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  isExcellent
+                                      ? Quiz.resultExcellent
+                                      : isGood
+                                          ? Quiz.resultGood
+                                          : Quiz.resultKeepLearning,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+                          // Score card with glass effect
+                          FadeInWidget(
+                            delay: const Duration(milliseconds: 300),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 32,
+                                horizontal: 24,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 12),
+                                  ),
+                                  BoxShadow(
+                                    color: accentColor.withOpacity(0.15),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${percentage.toInt()}%',
+                                    style: GoogleFonts.alata(
+                                      fontSize: 56,
+                                      fontWeight: FontWeight.w800,
+                                      color: accentColor,
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: accentColor.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      '${result.correctAnswers} ${Quiz.resultOutOf} ${result.totalQuestions} ${Quiz.resultCorrect}',
+                                      style: GoogleFonts.alata(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: accentColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          FadeInWidget(
+                            delay: const Duration(milliseconds: 350),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                Quiz.resultHelperText,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.alata(
+                                  fontSize: 15,
+                                  color: Colors.white.withOpacity(0.92),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          // Show detailed results button
+                          FadeInWidget(
+                            delay: const Duration(milliseconds: 400),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => QuizAnswersPage(
+                                        questions: questions,
+                                        selectedAnswers:
+                                            Map<int, int>.from(selectedAnswers),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  side: BorderSide(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  backgroundColor: Colors.white.withOpacity(0.15),
+                                ),
+                                child: Text(
+                                  Quiz.showDetailedResults,
+                                  style: GoogleFonts.alata(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Continue button
+                          FadeInWidget(
+                            delay: const Duration(milliseconds: 450),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(28),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                  BoxShadow(
+                                    color: AppColors.primaryPurple.withOpacity(0.3),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                onPressed: onContinue,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: AppColors.primaryPurple,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Text(
+                                  Quiz.continueToMissions,
+                                  style: GoogleFonts.alata(
+                                    color: AppColors.primaryPurple,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Score card
-                    FadeInWidget(
-                      delay: const Duration(milliseconds: 300),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 24,
-                          horizontal: 20,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${percentage.toInt()}%',
-                              style: GoogleFonts.alata(
-                                fontSize: 48,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF8E97FD),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${result.correctAnswers} out of ${result.totalQuestions} correct',
-                              style: GoogleFonts.alata(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF60646D),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Helper text
-                    FadeInWidget(
-                      delay: const Duration(milliseconds: 350),
-                      child: Text(
-                        'Nice work! You can review each question and see the correct answers.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.alata(
-                          fontSize: 14,
-                          color: const Color(0xFF666666),
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    // Show results button
-                    FadeInWidget(
-                      delay: const Duration(milliseconds: 400),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => QuizAnswersPage(
-                                  questions: questions,
-                                  selectedAnswers:
-                                      Map<int, int>.from(selectedAnswers),
-                                ),
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            side: const BorderSide(
-                              color: Color(0xFF8E97FD),
-                              width: 2,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                          ),
-                          child: Text(
-                            'SHOW DETAILED RESULTS',
-                            style: GoogleFonts.alata(
-                              color: const Color(0xFF8E97FD),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Continue button
-                    FadeInWidget(
-                      delay: const Duration(milliseconds: 450),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: onContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8E97FD),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'CONTINUE TO MISSIONS',
-                            style: GoogleFonts.alata(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

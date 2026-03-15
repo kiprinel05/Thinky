@@ -19,19 +19,17 @@ router = APIRouter(prefix="/pixy-learns", tags=["Pixy Learns"])
 
 import random
 
-# Image URLs for cat and apple categories
+# Local asset paths for Flutter (assets/missions/pixy_learns/images/)
 CAT_IMAGES = [
-    "https://placekitten.com/200/200",
-    "https://placekitten.com/201/201",
-    "https://placekitten.com/202/202",
-    "https://placekitten.com/203/203",
-    "https://placekitten.com/204/204",
+    "assets/missions/pixy_learns/images/cat1.png",
+    "assets/missions/pixy_learns/images/cat2.png",
+    "assets/missions/pixy_learns/images/cat3.png",
 ]
 
 APPLE_IMAGES = [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/200px-Red_Apple.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Honeycrisp.jpg/200px-Honeycrisp.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Apples.jpg/200px-Apples.jpg",
+    "assets/missions/pixy_learns/images/apple1.png",
+    "assets/missions/pixy_learns/images/apple2.png",
+    "assets/missions/pixy_learns/images/apple3.png",
 ]
 
 # Store current session images for validation
@@ -44,17 +42,17 @@ async def get_learning_images():
     _current_images.clear()
     images = []
     
-    # Generate 3 cat images
-    for i in range(3):
+    # Generate 3 cat images (unique, no duplicates)
+    cat_urls = random.sample(CAT_IMAGES, 3)
+    for i, url in enumerate(cat_urls):
         image_id = f"cat_{i}_{random.randint(1000, 9999)}"
-        url = random.choice(CAT_IMAGES) + f"?v={random.randint(1, 1000)}"
         images.append({"id": image_id, "url": url})
         _current_images[image_id] = "cat"
     
-    # Generate 3 apple images
-    for i in range(3):
+    # Generate 3 apple images (unique, no duplicates)
+    apple_urls = random.sample(APPLE_IMAGES, 3)
+    for i, url in enumerate(apple_urls):
         image_id = f"apple_{i}_{random.randint(1000, 9999)}"
-        url = random.choice(APPLE_IMAGES)
         images.append({"id": image_id, "url": url})
         _current_images[image_id] = "apple"
     

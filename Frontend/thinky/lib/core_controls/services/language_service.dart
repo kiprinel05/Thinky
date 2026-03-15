@@ -14,7 +14,10 @@ class LanguageService extends StateNotifier<Locale> {
   static const String _languageKey = 'app_language';
   static const Locale _defaultLocale = Locale('en');
   
-  LanguageService() : super(_defaultLocale);
+  LanguageService() : super(_defaultLocale) {
+    // Sync TextService with saved language when service is first created
+    init();
+  }
 
   /// Initialize the service by loading the saved language preference
   Future<void> init() async {

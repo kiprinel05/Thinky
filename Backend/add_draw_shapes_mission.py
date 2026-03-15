@@ -1,6 +1,6 @@
 """
-Script pentru adăugarea misiunii 'Draw a Blue Triangle' în baza de date.
-Rulează: python add_draw_triangle_mission.py
+Script pentru adăugarea misiunii 'Draw Shapes' în baza de date.
+Rulează: python add_draw_shapes_mission.py
 """
 import pyodbc
 from dotenv import load_dotenv
@@ -23,17 +23,17 @@ connection_string = (
     f"PWD={DB_PASSWORD};"
 )
 
-def add_draw_triangle_mission():
+def add_draw_shapes_mission():
     try:
         conn = pyodbc.connect(connection_string)
         cursor = conn.cursor()
         
         # Check if mission already exists
-        cursor.execute("SELECT id FROM missions WHERE mission_path = ?", ('draw_triangle',))
+        cursor.execute("SELECT id FROM missions WHERE mission_path = ?", ('draw_shapes',))
         existing = cursor.fetchone()
         
         if existing:
-            print(f"Mission 'draw_triangle' already exists with ID: {existing[0]}")
+            print(f"Mission 'draw_shapes' already exists with ID: {existing[0]}")
             return
         
         # Insert new mission
@@ -41,9 +41,9 @@ def add_draw_triangle_mission():
             INSERT INTO missions (title, mission_path, description, order_index, background_color, height, is_active)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
-            'Draw a Blue Triangle',
-            'draw_triangle',
-            'Draw a blue triangle on the canvas and let Pixy guess what you drew!',
+            'Draw Shapes',
+            'draw_shapes',
+            '3 rounds: draw a triangle, a circle, and a square!',
             3,  # Adjust order_index based on your existing missions
             '#8E97FD',
             200.0,
@@ -53,12 +53,12 @@ def add_draw_triangle_mission():
         conn.commit()
         
         # Get the inserted ID
-        cursor.execute("SELECT id FROM missions WHERE mission_path = ?", ('draw_triangle',))
+        cursor.execute("SELECT id FROM missions WHERE mission_path = ?", ('draw_shapes',))
         new_id = cursor.fetchone()[0]
         
-        print(f"✅ Mission 'Draw a Blue Triangle' added successfully!")
+        print(f"✅ Mission 'Draw Shapes' added successfully!")
         print(f"   ID: {new_id}")
-        print(f"   Path: draw_triangle")
+        print(f"   Path: draw_shapes")
         print(f"   Order: 3")
         
         cursor.close()
@@ -68,4 +68,4 @@ def add_draw_triangle_mission():
         print(f"❌ Error adding mission: {e}")
 
 if __name__ == "__main__":
-    add_draw_triangle_mission()
+    add_draw_shapes_mission()

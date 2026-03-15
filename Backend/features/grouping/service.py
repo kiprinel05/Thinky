@@ -20,27 +20,39 @@ class GroupingMissionService:
     CATEGORIES = ["fruits", "vegetables", "toys"]
     
     # Item definitions per category: (filename, display_name)
+    # Must match files in Backend/Resources/Grouping Dataset/
     ITEMS = {
         "fruits": [
             ("apple.png", "Apple"),
             ("banana.png", "Banana"),
+            ("cherry.png", "Cherry"),
             ("grape.png", "Grape"),
+            ("kiwi.png", "Kiwi"),
             ("orange.png", "Orange"),
+            ("pineapple.png", "Pineapple"),
             ("strawberry.png", "Strawberry"),
+            ("watermelon.png", "Watermelon"),
         ],
         "vegetables": [
-            ("carrot.png", "Carrot"),
             ("broccoli.png", "Broccoli"),
-            ("tomato.png", "Tomato"),
+            ("carrot.png", "Carrot"),
+            ("cucumber.png", "Cucumber"),
+            ("garlic.png", "Garlic"),
+            ("lettuce.png", "Lettuce"),
+            ("onion.png", "Onion"),
             ("pepper.png", "Pepper"),
             ("potato.png", "Potato"),
         ],
         "toys": [
-            ("ball.png", "Ball"),
-            ("car.png", "Toy Car"),
-            ("doll.png", "Doll"),
             ("blocks.png", "Blocks"),
-            ("teddy.png", "Teddy Bear"),
+            ("doll.png", "Doll"),
+            ("duck.png", "Duck"),
+            ("helicopter.png", "Helicopter"),
+            ("kite.png", "Kite"),
+            ("pinwheel.png", "Pinwheel"),
+            ("puzzle.png", "Puzzle"),
+            ("teddy_bear.png", "Teddy Bear"),
+            ("toy_car.png", "Toy Car"),
         ],
     }
     

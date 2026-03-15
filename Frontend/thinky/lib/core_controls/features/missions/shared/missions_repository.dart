@@ -95,13 +95,13 @@ class MissionsRepository extends BaseRepository {
       ),
       const Mission(
         id: 3,
-        name: 'Draw Triangle',
+        name: 'Draw Shapes',
         imageUrl: 'assets/missions/shapes.png',
         color: '#8E97FD',
         isLocked: false, // UNLOCKED FOR TESTING
         order: 3,
         isCompleted: false,
-        missionPath: 'draw_triangle',
+        missionPath: 'draw_shapes',
       ),
       const Mission(
         id: 4,

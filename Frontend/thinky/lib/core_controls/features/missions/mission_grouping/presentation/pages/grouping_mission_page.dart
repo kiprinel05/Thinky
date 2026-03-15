@@ -256,9 +256,9 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
         ),
         const SizedBox(height: 8),
 
-        // Category drop zones
+        // Category drop zones (smaller tables)
         Expanded(
-          flex: 3,
+          flex: 2,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
@@ -291,9 +291,9 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
 
         const SizedBox(height: 8),
 
-        // Image tray (unassigned items)
+        // Image tray (unassigned items) - more space
         Expanded(
-          flex: 2,
+          flex: 3,
           child: _buildImageTray(state),
         ),
 
@@ -335,10 +335,10 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           ),
           child: Column(
             children: [
-              // Category header
+              // Category header (more compact)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 6),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
                   borderRadius: const BorderRadius.only(
@@ -348,12 +348,12 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 ),
                 child: Column(
                   children: [
-                    Icon(icon, color: color, size: 20),
-                    const SizedBox(height: 2),
+                    Icon(icon, color: color, size: 18),
+                    const SizedBox(height: 1),
                     Text(
                       category[0].toUpperCase() + category.substring(1),
                       style: GoogleFonts.alata(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: color,
                       ),
@@ -374,16 +374,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                           ),
                         ),
                       )
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.all(4),
-                        child: Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: itemsInCat.map((item) {
-                            return _buildDroppedItemChip(item, color);
-                          }).toList(),
-                        ),
-                      ),
+                    : _buildScrollableDropList(itemsInCat, color),
               ),
             ],
           ),
@@ -392,9 +383,55 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
+  Widget _buildScrollableDropList(
+    List<GroupingItem> itemsInCat,
+    Color color,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final needsScroll = itemsInCat.length > 2;
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(4),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: itemsInCat.map((item) {
+                  return _buildDroppedItemChip(item, color);
+                }).toList(),
+              ),
+            ),
+            // Scroll indicator (fade at bottom when scrollable)
+            if (needsScroll)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Container(
+                    height: 24,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          color.withOpacity(0.15),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildDroppedItemChip(GroupingItem item, Color categoryColor) {
     final controller = ref.read(groupingControllerProvider.notifier);
-    final imageUrl = GroupingRepository.getImageUrl(item.url);
 
     return GestureDetector(
       onTap: () => controller.removeItem(item.id),
@@ -414,17 +451,11 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: Image.network(
-                imageUrl,
+              child: _GroupingImage(
+                item: item,
                 width: 28,
                 height: 28,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 28,
-                  height: 28,
-                  color: categoryColor.withOpacity(0.2),
-                  child: Icon(Icons.image, size: 14, color: categoryColor),
-                ),
+                categoryColor: categoryColor,
               ),
             ),
             const SizedBox(width: 4),
@@ -483,18 +514,51 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             ),
           ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 0.85,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: unassigned.length,
-              itemBuilder: (context, index) {
-                return _buildDraggableItem(unassigned[index]);
-              },
+            child: Stack(
+              children: [
+                GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.9,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: unassigned.length,
+                  itemBuilder: (context, index) {
+                    return _buildDraggableItem(unassigned[index]);
+                  },
+                ),
+                // Scroll hint - fade at bottom when more items
+                if (unassigned.length > 6)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: IgnorePointer(
+                      child: Container(
+                        height: 32,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.white.withOpacity(0.9),
+                            ],
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: const Color(0xFF8E97FD).withOpacity(0.6),
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -503,8 +567,6 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   }
 
   Widget _buildDraggableItem(GroupingItem item) {
-    final imageUrl = GroupingRepository.getImageUrl(item.url);
-
     return Draggable<GroupingItem>(
       data: item,
       feedback: Material(
@@ -520,25 +582,25 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Icon(Icons.image, size: 30, color: Color(0xFF8E97FD)),
-              ),
+            child: _GroupingImage(
+              item: item,
+              width: 90,
+              height: 90,
+              categoryColor: const Color(0xFF8E97FD),
             ),
           ),
         ),
       ),
       childWhenDragging: Opacity(
         opacity: 0.3,
-        child: _buildItemCard(item, imageUrl),
+        child: _buildItemCard(item, showLabel: false),
       ),
-      child: _buildItemCard(item, imageUrl),
+      child: _buildItemCard(item, showLabel: false),
     );
   }
 
-  Widget _buildItemCard(GroupingItem item, String imageUrl) {
+  /// Item card in tray - no label (label shown only when dropped in table)
+  Widget _buildItemCard(GroupingItem item, {required bool showLabel}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -552,40 +614,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (_, __, ___) => Container(
-                  color: const Color(0xFFF2F3F7),
-                  child: const Center(
-                    child: Icon(Icons.image, size: 30, color: Color(0xFF8A8A8F)),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(
-              item.name,
-              style: GoogleFonts.alata(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF222222),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: _GroupingImage(
+          item: item,
+          width: double.infinity,
+          height: double.infinity,
+          categoryColor: const Color(0xFF8A8A8F),
+        ),
       ),
     );
   }
@@ -878,6 +914,61 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GROUPING IMAGE — loads from local assets (reliable) or network fallback
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _GroupingImage extends StatelessWidget {
+  final GroupingItem item;
+  final double width;
+  final double height;
+  final Color categoryColor;
+
+  const _GroupingImage({
+    required this.item,
+    required this.width,
+    required this.height,
+    required this.categoryColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final assetPath = GroupingRepository.getAssetPath(item.url);
+    final networkUrl = GroupingRepository.getImageUrl(item.url);
+
+    // Prefer local assets (work offline, no CORS)
+    if (assetPath != null) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildNetworkFallback(networkUrl),
+        ),
+      );
+    }
+    return _buildNetworkFallback(networkUrl);
+  }
+
+  Widget _buildNetworkFallback(String url) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          width: width,
+          height: height,
+          color: categoryColor.withOpacity(0.2),
+          child: Icon(Icons.image, size: width * 0.3, color: categoryColor),
         ),
       ),
     );

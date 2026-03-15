@@ -409,7 +409,8 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         _buildImagesGrid(state, controller),
                         const SizedBox(height: 28),
                         _buildSubmitButton(state, controller),
-                        const SizedBox(height: 32),
+                        // Extra padding so submit button is not covered by navbar when pushed from missions
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 80),
                       ],
                     ),
                   ),
@@ -745,6 +746,14 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
             style: const TextStyle(fontSize: 56),
           ),
         ),
+      );
+    }
+    
+    // Load from local assets (e.g. assets/missions/pixy_learns/images/cat1.png)
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
       );
     }
     

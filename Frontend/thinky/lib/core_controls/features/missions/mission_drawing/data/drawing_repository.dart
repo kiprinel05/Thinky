@@ -24,9 +24,10 @@ class DrawingRepository {
     required Uint8List imageBytes,
     String targetShape = 'triangle',
     String targetColor = 'blue',
+    bool requireFill = false,
   }) async {
     try {
-      final url = '${AppConfig.apiBaseUrl}${ApiEndpoints.drawingAnalyze}?target_shape=$targetShape&target_color=$targetColor';
+      final url = '${AppConfig.apiBaseUrl}${ApiEndpoints.drawingAnalyze}?target_shape=$targetShape&target_color=$targetColor&require_fill=${requireFill ? 'true' : 'false'}';
       ErrorLogger().logInfo('[MULTIPART POST] Request: $url');
 
       // Create multipart request

@@ -7,25 +7,22 @@ import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'controllers/drawing_controller.dart';
 
-/// Draw Triangle Mission Page
-/// 
-/// A creative mission where the user draws a blue triangle.
-/// Features:
-/// - Interactive drawing canvas
-/// - Color palette (blue pre-selected)
-/// - Pixy mascot with emotion animations
-/// - Modern glassmorphism design
-class DrawTrianglePage extends ConsumerStatefulWidget {
-  const DrawTrianglePage({super.key});
+/// Draw Shapes Mission Page
+///
+/// 3 rounds: triangle (blue), circle (red), square (green).
+/// Outline drawings accepted (no fill required).
+class DrawShapesPage extends ConsumerStatefulWidget {
+  const DrawShapesPage({super.key});
 
   @override
-  ConsumerState<DrawTrianglePage> createState() => _DrawTrianglePageState();
+  ConsumerState<DrawShapesPage> createState() => _DrawShapesPageState();
 }
 
-class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
+class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     with TickerProviderStateMixin {
   final GlobalKey _canvasKey = GlobalKey();
   final GlobalKey<DrawingCanvasState> _canvasStateKey = GlobalKey<DrawingCanvasState>();
+  bool _isEraserSelected = false;
   
   late AnimationController _pixyBounceController;
   late AnimationController _resultSlideController;
@@ -38,7 +35,7 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
   @override
   void initState() {
     super.initState();
-    
+
     // Pixy bounce animation (idle)
     _pixyBounceController = AnimationController(
       vsync: this,
@@ -133,8 +130,13 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
     ref.read(drawingControllerProvider.notifier).resetForRetry();
   }
 
+  void _onNextRound() {
+    _resultSlideController.reverse();
+    _canvasStateKey.currentState?.clear();
+    ref.read(drawingControllerProvider.notifier).nextRound();
+  }
+
   void _onComplete() {
-    // TODO: Mark mission as complete and navigate back
     Navigator.of(context).pop(true);
   }
 
@@ -154,7 +156,7 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
             Column(
               children: [
                 // App bar
-                _buildAppBar(),
+                _buildAppBar(state),
                 
                 // Pixy mascot with emotion
                 _buildPixySection(state),
@@ -179,9 +181,14 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
                   ),
                 ),
                 
-                // Action buttons
+                // Action buttons (extra bottom padding for navbar)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    0,
+                    24,
+                    MediaQuery.of(context).padding.bottom + 80,
+                  ),
                   child: _buildActionButtons(state),
                 ),
               ],
@@ -241,12 +248,14 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(DrawingState state) {
+    final config = state.currentRoundConfig;
+    final roundTitle =
+        'Draw a ${config.color[0].toUpperCase()}${config.color.substring(1)} ${config.shape[0].toUpperCase()}${config.shape.substring(1)}';
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Back button
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Container(
@@ -268,16 +277,13 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
               ),
             ),
           ),
-          
           const SizedBox(width: 16),
-          
-          // Title
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Creative Mission',
+                  'Draw Shapes • Round ${state.currentRound}/${state.totalRounds}',
                   style: GoogleFonts.alata(
                     fontSize: 12,
                     color: const Color(0xFF8E97FD),
@@ -285,7 +291,7 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
                   ),
                 ),
                 Text(
-                  'Draw a Blue Triangle',
+                  roundTitle,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -380,18 +386,16 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
   }
 
   String _getPixyAsset(String emotion) {
-    // TODO: Add actual Pixy emotion assets
     switch (emotion) {
       case 'thinking':
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page2/thinking.png';
       case 'happy':
-        return 'assets/welcome/page1/robot.png';
       case 'encouraging':
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page1/hello.png';
       case 'hint_color':
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page1/hello.png';
       default:
-        return 'assets/welcome/page1/robot.png';
+        return 'assets/welcome/page1/hello.png';
     }
   }
 
@@ -402,7 +406,8 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
     if (state.showResult && state.analysisResult != null) {
       return state.analysisResult!.message;
     }
-    return 'Draw a triangle using blue color! Tap the canvas to start drawing. 🎨';
+    final config = state.currentRoundConfig;
+    return 'Draw a ${config.shape} using ${config.color} color! Tap the canvas to start. 🎨';
   }
 
   Widget _buildCanvasSection(DrawingState state) {
@@ -425,6 +430,7 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
           selectedColor: state.selectedColor,
           strokeWidth: 12.0,
           backgroundColor: Colors.white,
+          isEraserMode: _isEraserSelected,
           onDrawingChanged: () {
             ref.read(drawingControllerProvider.notifier).setHasDrawing(true);
           },
@@ -556,7 +562,7 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/welcome/page1/robot.png',
+                        'assets/welcome/page2/thinking.png',
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const Icon(
                           Icons.smart_toy,
@@ -697,8 +703,12 @@ class _DrawTrianglePageState extends ConsumerState<DrawTrianglePage>
                   // Action buttons
                   if (isCorrect)
                     _buildGradientButton(
-                      onTap: _onComplete,
-                      label: 'Continue',
+                      onTap: state.currentRound < state.totalRounds
+                          ? _onNextRound
+                          : _onComplete,
+                      label: state.currentRound < state.totalRounds
+                          ? 'Next Round'
+                          : 'Mission Complete',
                       colors: [const Color(0xFF4CAF50), const Color(0xFF81C784)],
                     )
                   else
