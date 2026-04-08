@@ -125,43 +125,88 @@ class Drawing {
 
 /// Accessors for 'GroupingSorting' texts
 class GroupingSorting {
-  static String get title => 'Group the Images';
-  static String get subtitle => 'Sort items into the correct categories';
-  static String get instruction => 'Drag each image into the correct category';
-  static String get submit => 'Submit Sorting';
-  static String get allSorted => 'All items sorted!';
-  static String get missionComplete => 'Mission Complete!';
-  static String get tryAgain => 'Try Again';
-  static String get continueAction => 'Continue';
+  static String get title => TextService.getString('GroupingSorting', 'title');
+  static String get subtitle => TextService.getString('GroupingSorting', 'subtitle');
+  static String get instruction => TextService.getString('GroupingSorting', 'instruction');
+  static String get submit => TextService.getString('GroupingSorting', 'submit');
+  static String get allSorted => TextService.getString('GroupingSorting', 'allSorted');
+  static String get missionComplete => TextService.getString('GroupingSorting', 'missionComplete');
+  static String get tryAgain => TextService.getString('GroupingSorting', 'tryAgain');
+  static String get continueAction => TextService.getString('GroupingSorting', 'continueAction');
 }
 
 /// Accessors for 'Vocabulary' texts
 class Vocabulary {
-  static String get title => 'Word Match';
-  static String get subtitle => 'Select the image that matches the word';
-  static String get submitAnswer => 'Submit Answer';
-  static String get nextWord => 'Next Word';
-  static String get missionComplete => 'Mission Complete!';
-  static String get tryAgain => 'Try Again';
-  static String get seeResults => 'See Results';
+  static String get title => TextService.getString('Vocabulary', 'title');
+  static String get subtitle => TextService.getString('Vocabulary', 'subtitle');
+  static String get submitAnswer => TextService.getString('Vocabulary', 'submitAnswer');
+  static String get nextWord => TextService.getString('Vocabulary', 'nextWord');
+  static String get missionComplete => TextService.getString('Vocabulary', 'missionComplete');
+  static String get tryAgain => TextService.getString('Vocabulary', 'tryAgain');
+  static String get seeResults => TextService.getString('Vocabulary', 'seeResults');
 }
 
+/// Accessors for 'DescribeImage' texts
 class DescribeImage {
-  static String get title => 'Describe It';
-  static String get instruction => 'Press record and describe what you see';
-  static String get tapToRecord => 'Tap to Record';
-  static String get listening => 'Listening...';
-  static String get processing => 'Processing...';
-  static String get youSaid => 'You said:';
+  static String get title => TextService.getString('DescribeImage', 'title');
+  static String get instruction => TextService.getString('DescribeImage', 'instruction');
+  static String get tapToRecord => TextService.getString('DescribeImage', 'tapToRecord');
+  static String get listening => TextService.getString('DescribeImage', 'listening');
+  static String get processing => TextService.getString('DescribeImage', 'processing');
+  static String get youSaid => TextService.getString('DescribeImage', 'youSaid');
 }
 
+/// Accessors for 'PatternMission' texts
 class PatternMission {
-  static String get title => 'Complete the Pattern';
-  static String get instruction => 'What comes next?';
-  static String get chooseNext => 'Choose next:';
-  static String get checkAnswer => 'Check Answer';
-  static String get nextPattern => 'Next Pattern';
-  static String get tryAgain => 'Try Again';
+  static String get title => TextService.getString('PatternMission', 'title');
+  static String get instruction => TextService.getString('PatternMission', 'instruction');
+  static String get chooseNext => TextService.getString('PatternMission', 'chooseNext');
+  static String get checkAnswer => TextService.getString('PatternMission', 'checkAnswer');
+  static String get nextPattern => TextService.getString('PatternMission', 'nextPattern');
+  static String get tryAgain => TextService.getString('PatternMission', 'tryAgain');
+}
+
+/// Accessors for 'Common' texts (shared across features)
+class Common {
+  static String get retry => TextService.getString('Common', 'retry');
+  static String get tryAgain => TextService.getString('Common', 'tryAgain');
+  static String get close => TextService.getString('Common', 'close');
+  static String get cancel => TextService.getString('Common', 'cancel');
+  static String get confirm => TextService.getString('Common', 'confirm');
+  static String get backToMissions => TextService.getString('Common', 'backToMissions');
+  static String get loading => TextService.getString('Common', 'loading');
+  static String get error => TextService.getString('Common', 'error');
+  static String get success => TextService.getString('Common', 'success');
+  static String get missionComplete => TextService.getString('Common', 'missionComplete');
+  static String get comingSoon => TextService.getString('Common', 'comingSoon');
+  static String get networkError => TextService.getString('Common', 'networkError');
+  static String get connectionTimeout => TextService.getString('Common', 'connectionTimeout');
+  static String get sessionExpired => TextService.getString('Common', 'sessionExpired');
+  static String get serverError => TextService.getString('Common', 'serverError');
+}
+
+/// Accessors for 'Profile' texts
+class ProfileTexts {
+  static String get title => TextService.getString('Profile', 'title');
+  static String get settings => TextService.getString('Profile', 'settings');
+  static String get language => TextService.getString('Profile', 'language');
+  static String get english => TextService.getString('Profile', 'english');
+  static String get romanian => TextService.getString('Profile', 'romanian');
+  static String get logout => TextService.getString('Profile', 'logout');
+  static String get logoutConfirm => TextService.getString('Profile', 'logoutConfirm');
+  static String get aboutThinky => TextService.getString('Profile', 'aboutThinky');
+  static String get helpFaq => TextService.getString('Profile', 'helpFaq');
+}
+
+/// Accessors for 'Workshop' texts
+class WorkshopTexts {
+  static String get title => TextService.getString('Workshop', 'title');
+  static String get myMissions => TextService.getString('Workshop', 'myMissions');
+  static String get createMission => TextService.getString('Workshop', 'createMission');
+  static String get missionPublished => TextService.getString('Workshop', 'missionPublished');
+  static String get searchMissions => TextService.getString('Workshop', 'searchMissions');
+  static String get downloadSuccess => TextService.getString('Workshop', 'downloadSuccess');
+  static String get downloadFailed => TextService.getString('Workshop', 'downloadFailed');
 }
 
 /// Accessors for 'Nav' texts (bottom navigation bar)

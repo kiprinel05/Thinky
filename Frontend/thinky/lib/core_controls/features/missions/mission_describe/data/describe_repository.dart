@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
@@ -21,8 +21,8 @@ class DescribeRepository {
         return DescribeStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to start describe mission: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('DescribeRepository.startMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -36,8 +36,8 @@ class DescribeRepository {
         return DescribeStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get next round: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('DescribeRepository.nextRound error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -64,8 +64,8 @@ class DescribeRepository {
       }
       throw Exception(
           'Failed to transcribe audio: ${response.statusCode} ${response.body}');
-    } catch (e) {
-      debugPrint('DescribeRepository.transcribeAudio error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

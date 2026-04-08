@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
-import 'quiz_models.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
+import 'domain/quiz_models.dart';
 
 class QuizAnswersPage extends StatelessWidget {
   final List<Question> questions;

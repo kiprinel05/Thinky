@@ -110,5 +110,77 @@
         "missions": "Missions",
         "workshop": "Workshop",
         "profile": "Profile"
+    },
+    "Common": {
+        "retry": "Retry",
+        "tryAgain": "Try Again",
+        "close": "Close",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "backToMissions": "Back to Missions",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "missionComplete": "Mission Complete!",
+        "comingSoon": "Coming soon!",
+        "networkError": "Network Error",
+        "connectionTimeout": "Connection Timeout",
+        "sessionExpired": "Session Expired",
+        "serverError": "Server Error"
+    },
+    "GroupingSorting": {
+        "title": "Group the Images",
+        "subtitle": "Sort items into the correct categories",
+        "instruction": "Drag each image into the correct category",
+        "submit": "Submit Sorting",
+        "allSorted": "All items sorted!",
+        "missionComplete": "Mission Complete!",
+        "tryAgain": "Try Again",
+        "continueAction": "Continue"
+    },
+    "Vocabulary": {
+        "title": "Word Match",
+        "subtitle": "Select the image that matches the word",
+        "submitAnswer": "Submit Answer",
+        "nextWord": "Next Word",
+        "missionComplete": "Mission Complete!",
+        "tryAgain": "Try Again",
+        "seeResults": "See Results"
+    },
+    "DescribeImage": {
+        "title": "Describe It",
+        "instruction": "Press record and describe what you see",
+        "tapToRecord": "Tap to Record",
+        "listening": "Listening...",
+        "processing": "Processing...",
+        "youSaid": "You said:"
+    },
+    "PatternMission": {
+        "title": "Complete the Pattern",
+        "instruction": "What comes next?",
+        "chooseNext": "Choose next:",
+        "checkAnswer": "Check Answer",
+        "nextPattern": "Next Pattern",
+        "tryAgain": "Try Again"
+    },
+    "Profile": {
+        "title": "Profile",
+        "settings": "Settings",
+        "language": "Language",
+        "english": "English",
+        "romanian": "Română",
+        "logout": "Logout",
+        "logoutConfirm": "Are you sure you want to log out?",
+        "aboutThinky": "About Thinky",
+        "helpFaq": "Help & FAQ"
+    },
+    "Workshop": {
+        "title": "Workshop",
+        "myMissions": "My Missions",
+        "createMission": "Create Mission",
+        "missionPublished": "Mission published!",
+        "searchMissions": "Search missions...",
+        "downloadSuccess": "Mission downloaded!",
+        "downloadFailed": "Download failed"
     }
 }

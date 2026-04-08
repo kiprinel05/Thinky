@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'verify_code_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -47,7 +48,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           });
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
         _errorMessage = e.toString().replaceAll('Exception: ', '');
         _isLoading = false;

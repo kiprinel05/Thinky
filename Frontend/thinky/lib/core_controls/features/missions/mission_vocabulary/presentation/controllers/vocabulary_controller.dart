@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/vocabulary_models.dart';
@@ -152,8 +152,8 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
       // Mission complete
       try {
         await MissionService.completeMission(-7);
-      } catch (e) {
-        debugPrint('Failed to mark vocab mission complete: $e');
+      } catch (e, stack) {
+        ErrorLogger().logError(e, stackTrace: stack);
       }
       state = state.copyWith(phase: VocabMissionPhase.missionComplete);
     } else {

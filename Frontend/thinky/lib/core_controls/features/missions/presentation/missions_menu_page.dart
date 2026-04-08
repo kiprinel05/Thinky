@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/mission_models.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 import 'package:thinky/core_controls/routing/route_names.dart';
-import '../mission_quiz/quiz_page.dart';
-import '../mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
-import '../mission_drawing/presentation/draw_shapes_page.dart';
-import '../mission_drawing/presentation/color_circle_page.dart';
 
 class MissionsMenuPage extends StatefulWidget {
   const MissionsMenuPage({super.key});
@@ -55,7 +53,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
       final missions = await WorkshopStorage.getDownloadedMissions();
       setState(() => _workshopMissions = missions);
     } catch (e) {
-      // Silently fail — workshop missions are optional
+      ErrorLogger().logDebug('Failed to load workshop missions: $e');
     }
   }
 
@@ -84,17 +82,13 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
           }
         }
       });
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${Missions.errorLoading} $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ErrorHandlerUI.showError(context, '${Missions.errorLoading} $e');
       }
     }
   }
@@ -234,43 +228,13 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                   ? null
                   : () {
                       if (mission.missionPath == 'quiz') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const QuizPage(),
-                          ),
-                        ).then((_) {
-                          // Reload missions when returning from quiz
-                          _loadMissions();
-                        });
+                        context.push(RouteNames.quiz);
                       } else if (mission.missionPath == 'pixy_learns') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const PixyLearnsPage(),
-                          ),
-                        ).then((shouldReload) {
-                          if (shouldReload == true) {
-                            _loadMissions();
-                          }
-                        });
+                        context.push(RouteNames.pixyLearns);
                       } else if (mission.missionPath == 'draw_shapes') {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const DrawShapesPage(),
-                          ),
-                        ).then((shouldReload) {
-                          if (shouldReload == true) _loadMissions();
-                        });
+                        context.push(RouteNames.drawShapes);
                       } else if (mission.missionPath == 'color_circle') {
-                        // Navigate to Color Circle mission
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const ColorCirclePage(),
-                          ),
-                        ).then((shouldReload) {
-                          if (shouldReload == true) {
-                            _loadMissions();
-                          }
-                        });
+                        context.push(RouteNames.colorCircle);
                       } else if (mission.missionPath == 'animals') {
                         // Navigate to Animals mission
                         context.push(RouteNames.animalsMission);
@@ -291,12 +255,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                         context.push(RouteNames.numbersMission);
                       } else {
                         // Default: show message for unhandled missions
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Mission "${mission.missionPath}" coming soon!'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
+                        ErrorHandlerUI.showInfo(context, 'Mission "${mission.missionPath}" coming soon!');
                       }
                     },
             ),

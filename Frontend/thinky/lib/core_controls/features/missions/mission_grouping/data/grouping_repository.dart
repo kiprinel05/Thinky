@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'grouping_models.dart';
@@ -16,8 +16,8 @@ class GroupingRepository {
         return GroupingStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to start mission: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('GroupingRepository.startMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -30,8 +30,8 @@ class GroupingRepository {
         return GroupingRoundResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get round: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('GroupingRepository.getRound error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -50,8 +50,8 @@ class GroupingRepository {
         return GroupingSubmitResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to submit grouping: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('GroupingRepository.submitGrouping error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

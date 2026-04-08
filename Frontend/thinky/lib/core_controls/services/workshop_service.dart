@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import '../models/workshop_models.dart';
 import 'api_client.dart';
 
@@ -30,8 +30,8 @@ class WorkshopService {
       } else {
         throw Exception('Failed to load workshop missions: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('WorkshopService.getMissions error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -45,8 +45,8 @@ class WorkshopService {
       } else {
         throw Exception('Failed to load mission detail: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('WorkshopService.getMissionDetail error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -75,8 +75,8 @@ class WorkshopService {
         final error = jsonDecode(response.body);
         throw Exception(error['detail'] ?? 'Failed to upload mission');
       }
-    } catch (e) {
-      debugPrint('WorkshopService.uploadMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -90,8 +90,8 @@ class WorkshopService {
       } else {
         throw Exception('Failed to download mission: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('WorkshopService.downloadMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -105,8 +105,8 @@ class WorkshopService {
       } else {
         throw Exception('Failed to load my missions: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('WorkshopService.getMyMissions error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

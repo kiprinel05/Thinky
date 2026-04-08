@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 class MyMissionsPage extends StatefulWidget {
   const MyMissionsPage({super.key});
@@ -37,7 +38,8 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
         _missions = result.missions;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
         _error = e.toString();
         _isLoading = false;

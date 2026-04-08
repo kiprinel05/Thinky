@@ -7,7 +7,7 @@ import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/base_controls/base_state.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../controllers/numbers_controller.dart';
 import '../controllers/numbers_state.dart';
 import 'numbers_counting_page.dart';

@@ -8,6 +8,7 @@ import 'package:thinky/base_controls/base_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_state.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 class GuestNamePage extends BasePage {
   const GuestNamePage({super.key});
@@ -82,9 +83,7 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
     ref.listen<AuthState>(authStateProvider, (previous, next) {
       final error = next.errorMessage;
       if (next.isError && error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: Colors.red),
-        );
+        ErrorHandlerUI.showError(context, error);
       }
     });
 

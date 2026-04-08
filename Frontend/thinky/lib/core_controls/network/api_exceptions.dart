@@ -1,12 +1,11 @@
-/// API Exceptions - Custom exception classes for network errors
-/// Provides typed exceptions for better error handling
+import 'package:thinky/core/errors/exceptions.dart';
 
-/// Base exception for all API errors
-abstract class ApiException implements Exception {
-  final String message;
+/// Base exception for all API errors — extends AppException for unified handling
+abstract class ApiException extends AppException {
   final int? statusCode;
 
-  const ApiException(this.message, [this.statusCode]);
+  const ApiException(String message, [this.statusCode])
+      : super(message, code: 'API_ERROR');
 
   @override
   String toString() => message;

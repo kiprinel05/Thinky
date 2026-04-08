@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'pattern_models.dart';
 
@@ -14,8 +14,8 @@ class PatternRepository {
         return PatternStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to start pattern mission: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('PatternRepository.startMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -28,8 +28,8 @@ class PatternRepository {
         return PatternStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get next round: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('PatternRepository.nextRound error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -45,8 +45,8 @@ class PatternRepository {
         return PatternResultResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to submit answer: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('PatternRepository.submitAnswer error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

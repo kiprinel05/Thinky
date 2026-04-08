@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:thinky/core_controls/config/app_config.dart';
 import '../models/mission_models.dart';
 import 'api_client.dart';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 class MissionService {
   // Set to true to force offline missions (all unlocked for testing)
@@ -11,7 +11,7 @@ class MissionService {
   static Future<MissionListResponse> getMissions() async {
     // Force offline mode for testing
     if (USE_OFFLINE_MISSIONS) {
-      debugPrint('MissionService: Using offline missions (forced for testing)');
+      ErrorLogger().logInfo('MissionService: Using offline missions (forced for testing)');
       return _offlineMissions();
     }
     
@@ -20,13 +20,13 @@ class MissionService {
       if (response.statusCode == 200) {
         return MissionListResponse.fromJson(jsonDecode(response.body));
       } else if (response.statusCode == 401 || response.statusCode == 403) {
-        debugPrint('MissionService: received ${response.statusCode}, using offline missions.');
+        ErrorLogger().logInfo('MissionService: received ${response.statusCode}, using offline missions.');
         return _offlineMissions();
       } else {
         throw Exception('Failed to load missions: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('MissionService: error loading missions ($e). Falling back to offline list.');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       return _offlineMissions();
     }
   }
@@ -34,7 +34,7 @@ class MissionService {
   static Future<void> completeMission(int missionId, {double? score}) async {
     // Skip API call for offline missions (negative IDs)
     if (missionId < 0) {
-      debugPrint('MissionService: Offline mission $missionId completed locally');
+      ErrorLogger().logInfo('MissionService: Offline mission $missionId completed locally');
       return;
     }
     

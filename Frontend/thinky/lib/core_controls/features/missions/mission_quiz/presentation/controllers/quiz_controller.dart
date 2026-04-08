@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import '../../data/quiz_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'quiz_state.dart';
@@ -133,7 +134,8 @@ class QuizController extends BaseAsyncController<QuizState> {
       // We can do it here if we have access to MissionsController.
       // But keeping it decoupled is better. Page can observe quizResult and trigger mission completion.
       
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       safeUpdate(state.copyWith(
         isSubmitting: false,
         errorMessage: e.toString(),

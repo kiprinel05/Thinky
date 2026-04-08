@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/animals_models.dart';
@@ -274,8 +274,8 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
       // Mark mission as complete
       try {
         await MissionService.completeMission(-5); // -5 is animals mission ID in offline list
-      } catch (e) {
-        debugPrint('Failed to mark mission complete: $e');
+      } catch (e, stack) {
+        ErrorLogger().logError(e, stackTrace: stack);
       }
       state = state.copyWith(phase: AnimalsMissionPhase.missionComplete);
     } else {

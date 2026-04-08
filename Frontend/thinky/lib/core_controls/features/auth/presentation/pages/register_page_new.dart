@@ -8,6 +8,9 @@ import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/shared_controls/widgets/buttons/primary_button.dart';
 import 'package:thinky/shared_controls/widgets/inputs/app_text_field.dart';
+import 'package:thinky/shared_controls/widgets/social_button.dart';
+import 'package:thinky/shared_controls/widgets/or_divider.dart';
+import 'package:thinky/shared_controls/widgets/error_message_banner.dart';
 import '../controllers/auth_controller.dart';
 
 /// RegisterPage - Refactored to use Riverpod for state management
@@ -56,7 +59,7 @@ class RegisterPage extends ConsumerWidget {
                   const SizedBox(height: AppDimens.lg + 2),
                   
                   // Social signup buttons
-                  _SocialSignupButton(
+                  SocialButton(
                     icon: 'assets/auth/icons/facebook.png',
                     label: 'CONTINUE WITH FACEBOOK',
                     filled: true,
@@ -65,19 +68,18 @@ class RegisterPage extends ConsumerWidget {
                   
                   const SizedBox(height: AppDimens.md),
                   
-                  _SocialSignupButton(
+                  SocialButton(
                     icon: 'assets/auth/icons/google.png',
                     label: 'CONTINUE WITH GOOGLE',
-                    filled: false,
                     onPressed: () {},
                   ),
                   
                   // OR divider
-                  const _OrDivider(),
+                  const OrDivider(text: 'OR SIGN UP WITH EMAIL'),
                   
                   // Error message
                   if (formState.errorMessage != null)
-                    _ErrorMessage(message: formState.errorMessage!),
+                    ErrorMessageBanner(message: formState.errorMessage!),
                   
                   // Username field
                   AppTextField(
@@ -176,108 +178,6 @@ class RegisterPage extends ConsumerWidget {
   }
 }
 
-/// Social signup button widget
-class _SocialSignupButton extends StatelessWidget {
-  final String icon;
-  final String label;
-  final bool filled;
-  final VoidCallback onPressed;
-
-  const _SocialSignupButton({
-    required this.icon,
-    required this.label,
-    required this.filled,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final content = Stack(
-      alignment: Alignment.center,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 18),
-            child: Image.asset(icon, height: 20, width: 20),
-          ),
-        ),
-        Text(
-          label,
-          style: AppTypography.buttonSecondary.copyWith(
-            color: filled ? Colors.white : AppColors.textGrey,
-          ),
-        ),
-      ],
-    );
-
-    if (filled) {
-      return SizedBox(
-        height: AppDimens.buttonHeight,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.facebookBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimens.radiusRound),
-            ),
-            elevation: 0,
-          ),
-          child: content,
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: AppDimens.buttonHeight,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textGrey,
-          side: const BorderSide(color: AppColors.borderLight),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimens.radiusRound),
-          ),
-        ),
-        child: content,
-      ),
-    );
-  }
-}
-
-/// OR divider widget
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppDimens.lg),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Divider(color: AppColors.borderLight, thickness: 1),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppDimens.lg),
-            child: Text(
-              'OR SIGN UP WITH EMAIL',
-              style: AppTypography.badge.copyWith(
-                color: AppColors.textMuted,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-              ),
-            ),
-          ),
-          const Expanded(
-            child: Divider(color: AppColors.borderLight, thickness: 1),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Password field with visibility toggle
 class _PasswordField extends StatelessWidget {
   final String hintText;
@@ -304,35 +204,6 @@ class _PasswordField extends StatelessWidget {
           color: AppColors.textGrey,
         ),
         onPressed: onToggleVisibility,
-      ),
-    );
-  }
-}
-
-/// Error message widget
-class _ErrorMessage extends StatelessWidget {
-  final String message;
-
-  const _ErrorMessage({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimens.md),
-      margin: const EdgeInsets.only(bottom: AppDimens.lg),
-      decoration: BoxDecoration(
-        color: AppColors.errorLight,
-        borderRadius: BorderRadius.circular(AppDimens.inputRadius),
-        border: Border.all(color: AppColors.error.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: AppColors.errorDark),
-          const SizedBox(width: AppDimens.sm),
-          Expanded(
-            child: Text(message, style: AppTypography.error),
-          ),
-        ],
       ),
     );
   }

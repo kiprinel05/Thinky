@@ -110,5 +110,77 @@
         "missions": "Misiuni",
         "workshop": "Atelier",
         "profile": "Profil"
+    },
+    "Common": {
+        "retry": "Reîncearcă",
+        "tryAgain": "Încearcă Din Nou",
+        "close": "Închide",
+        "cancel": "Anulează",
+        "confirm": "Confirmă",
+        "backToMissions": "Înapoi la Misiuni",
+        "loading": "Se încarcă...",
+        "error": "Eroare",
+        "success": "Succes",
+        "missionComplete": "Misiune Completă!",
+        "comingSoon": "În curând!",
+        "networkError": "Eroare de Rețea",
+        "connectionTimeout": "Conexiune Expirată",
+        "sessionExpired": "Sesiune Expirată",
+        "serverError": "Eroare Server"
+    },
+    "GroupingSorting": {
+        "title": "Grupează Imaginile",
+        "subtitle": "Sortează elementele în categoriile corecte",
+        "instruction": "Trage fiecare imagine în categoria corectă",
+        "submit": "Trimite Sortarea",
+        "allSorted": "Toate elementele sortate!",
+        "missionComplete": "Misiune Completă!",
+        "tryAgain": "Încearcă Din Nou",
+        "continueAction": "Continuă"
+    },
+    "Vocabulary": {
+        "title": "Potrivirea Cuvintelor",
+        "subtitle": "Selectează imaginea care se potrivește cu cuvântul",
+        "submitAnswer": "Trimite Răspunsul",
+        "nextWord": "Următorul Cuvânt",
+        "missionComplete": "Misiune Completă!",
+        "tryAgain": "Încearcă Din Nou",
+        "seeResults": "Vezi Rezultatele"
+    },
+    "DescribeImage": {
+        "title": "Descrie Imaginea",
+        "instruction": "Apasă înregistrare și descrie ce vezi",
+        "tapToRecord": "Apasă pentru Înregistrare",
+        "listening": "Ascult...",
+        "processing": "Procesez...",
+        "youSaid": "Ai spus:"
+    },
+    "PatternMission": {
+        "title": "Completează Modelul",
+        "instruction": "Ce urmează?",
+        "chooseNext": "Alege următorul:",
+        "checkAnswer": "Verifică Răspunsul",
+        "nextPattern": "Următorul Model",
+        "tryAgain": "Încearcă Din Nou"
+    },
+    "Profile": {
+        "title": "Profil",
+        "settings": "Setări",
+        "language": "Limbă",
+        "english": "English",
+        "romanian": "Română",
+        "logout": "Deconectare",
+        "logoutConfirm": "Ești sigur că vrei să te deconectezi?",
+        "aboutThinky": "Despre Thinky",
+        "helpFaq": "Ajutor & Întrebări"
+    },
+    "Workshop": {
+        "title": "Atelier",
+        "myMissions": "Misiunile Mele",
+        "createMission": "Creează Misiune",
+        "missionPublished": "Misiune publicată!",
+        "searchMissions": "Caută misiuni...",
+        "downloadSuccess": "Misiune descărcată!",
+        "downloadFailed": "Descărcare eșuată"
     }
 }

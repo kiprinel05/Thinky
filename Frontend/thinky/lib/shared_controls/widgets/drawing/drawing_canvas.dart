@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 /// A point in the drawing with its color and stroke width
 class DrawingPoint {
@@ -64,7 +65,7 @@ class DrawingCanvasState extends State<DrawingCanvas> {
       final boundary = keyToUse.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       
       if (boundary == null) {
-        debugPrint('DrawingCanvas: Could not find render boundary');
+        ErrorLogger().logError('DrawingCanvas: Could not find render boundary');
         return null;
       }
 
@@ -72,13 +73,13 @@ class DrawingCanvasState extends State<DrawingCanvas> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       
       if (byteData == null) {
-        debugPrint('DrawingCanvas: Could not convert to byte data');
+        ErrorLogger().logError('DrawingCanvas: Could not convert to byte data');
         return null;
       }
 
       return byteData.buffer.asUint8List();
-    } catch (e) {
-      debugPrint('DrawingCanvas: Error exporting to PNG: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       return null;
     }
   }

@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
+import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 class WorkshopDetailPage extends StatefulWidget {
   final int missionId;
@@ -44,7 +46,8 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
         _isDownloaded = downloaded;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -66,33 +69,13 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Mission downloaded!',
-              style: GoogleFonts.alata(),
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-            ),
-          ),
-        );
+        ErrorHandlerUI.showSuccess(context, 'Mission downloaded!');
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() => _isDownloading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Download failed: $e',
-              style: GoogleFonts.alata(),
-            ),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        ErrorHandlerUI.showError(context, 'Download failed: $e');
       }
     }
   }

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
@@ -189,8 +189,8 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
       // Mission complete
       try {
         await MissionService.completeMission(-8);
-      } catch (e) {
-        debugPrint('Failed to mark describe mission complete: $e');
+      } catch (e, stack) {
+        ErrorLogger().logError(e, stackTrace: stack);
       }
       state = state.copyWith(phase: DescribeMissionPhase.missionComplete);
       return;

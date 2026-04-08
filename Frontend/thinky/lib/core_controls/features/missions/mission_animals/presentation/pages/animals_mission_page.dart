@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../../data/animals_models.dart';
 import '../../data/animals_repository.dart';
 import '../controllers/animals_controller.dart';

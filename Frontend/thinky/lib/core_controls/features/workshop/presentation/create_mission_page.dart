@@ -5,6 +5,8 @@ import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
+import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 class CreateMissionPage extends StatefulWidget {
   const CreateMissionPage({super.key});
@@ -94,19 +96,11 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Mission published!', style: GoogleFonts.alata()),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-            ),
-          ),
-        );
+        ErrorHandlerUI.showSuccess(context, 'Mission published!');
         context.pop();
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isPublishing = false);
@@ -114,13 +108,7 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: GoogleFonts.alata()),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    ErrorHandlerUI.showError(context, message);
   }
 
   @override

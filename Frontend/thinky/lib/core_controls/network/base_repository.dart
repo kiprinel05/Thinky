@@ -158,7 +158,9 @@ abstract class BaseRepository {
       try {
         final errorData = jsonDecode(response.body);
         message = errorData['detail'] ?? message;
-      } catch (_) {}
+      } catch (e) {
+        ErrorLogger().logDebug('Could not parse error body: $e');
+      }
       return Result.failure(
         ServerException(message, statusCode: response.statusCode),
       );

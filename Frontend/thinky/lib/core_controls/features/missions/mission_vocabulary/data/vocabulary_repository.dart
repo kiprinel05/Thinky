@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'vocabulary_models.dart';
@@ -16,8 +16,8 @@ class VocabularyRepository {
         return VocabStartResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to start vocabulary mission: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('VocabularyRepository.startMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -36,8 +36,8 @@ class VocabularyRepository {
         return VocabAnswerResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to submit answer: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('VocabularyRepository.submitAnswer error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -50,8 +50,8 @@ class VocabularyRepository {
         return VocabProgressResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get progress: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('VocabularyRepository.getProgress error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import '../../shared/missions_repository.dart';
 import 'missions_state.dart';
 
@@ -96,7 +97,8 @@ class MissionsController extends BaseAsyncController<MissionsState> {
         return true;
       }
       return false;
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       return false;
     }
   }
@@ -105,7 +107,8 @@ class MissionsController extends BaseAsyncController<MissionsState> {
   Mission? getMissionById(int id) {
     try {
       return state.missions.firstWhere((m) => m.id == id);
-    } catch (_) {
+    } catch (e) {
+      ErrorLogger().logDebug('Mission not found: $e');
       return null;
     }
   }

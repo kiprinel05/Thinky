@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'controllers/color_circle_controller.dart';
 
 /// Color Circle Mission Page
@@ -87,30 +88,14 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   Future<void> _onCheckDrawing() async {
     final canvasState = _canvasStateKey.currentState;
     if (canvasState == null || !canvasState.hasDrawing) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Color the circle first!',
-            style: GoogleFonts.alata(),
-          ),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      ErrorHandlerUI.showWarning(context, 'Color the circle first!');
       return;
     }
     
     // Export canvas to PNG
     final imageBytes = await canvasState.exportToPng();
     if (imageBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Could not capture drawing. Try again!',
-            style: GoogleFonts.alata(),
-          ),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      ErrorHandlerUI.showError(context, 'Could not capture drawing. Try again!');
       return;
     }
     

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
-import 'package:thinky/base_controls/base_repository.dart';
+import 'package:thinky/core_controls/network/base_repository.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
@@ -81,7 +81,9 @@ class NumbersRepository extends BaseRepository {
         try {
           final errorData = jsonDecode(response.body);
           message = errorData['detail'] ?? message;
-        } catch (_) {}
+        } catch (e) {
+          ErrorLogger().logDebug('Could not parse error body: $e');
+        }
         return Result.failure(
           ServerException(message, statusCode: response.statusCode),
         );

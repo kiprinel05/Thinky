@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'reset_password_page.dart';
 
 class VerifyCodePage extends StatefulWidget {
@@ -83,13 +84,16 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       String errorMsg = 'An error occurred';
       if (e.toString().contains('detail')) {
         try {
           final errorData = jsonDecode(e.toString().split('detail')[1]);
           errorMsg = errorData['detail'] ?? errorMsg;
-        } catch (_) {}
+        } catch (e) {
+          ErrorLogger().logDebug('Could not parse response: $e');
+        }
       } else {
         errorMsg = e.toString().replaceAll('Exception: ', '');
       }

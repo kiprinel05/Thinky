@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'animals_models.dart';
@@ -16,8 +16,8 @@ class AnimalsRepository {
         return MissionProgressResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to start mission: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.startMission error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -30,8 +30,8 @@ class AnimalsRepository {
         return RoundResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get round: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.getRound error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -46,8 +46,8 @@ class AnimalsRepository {
         return GuessResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to make guess: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.makeGuess error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -68,8 +68,8 @@ class AnimalsRepository {
         return VerifyGuessResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to verify guess: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.verifyGuess error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -82,8 +82,8 @@ class AnimalsRepository {
         return TeachingImagesResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get teaching images: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.getTeachingImages error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -102,8 +102,8 @@ class AnimalsRepository {
         return ValidateTeachingResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to validate teaching: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.validateTeaching error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
@@ -116,8 +116,8 @@ class AnimalsRepository {
         return MissionProgressResponse.fromJson(jsonDecode(response.body));
       }
       throw Exception('Failed to get progress: ${response.statusCode}');
-    } catch (e) {
-      debugPrint('AnimalsRepository.getProgress error: $e');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 class LeaderboardEntryModel {
   final int userId;
@@ -115,7 +116,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       if (!mounted) return;
       setState(() {
         _error = e.toString();

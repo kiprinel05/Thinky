@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/grouping_models.dart';
@@ -216,8 +216,8 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
       // Mark mission as complete
       try {
         await MissionService.completeMission(-6); // -6 = grouping mission
-      } catch (e) {
-        debugPrint('Failed to mark mission complete: $e');
+      } catch (e, stack) {
+        ErrorLogger().logError(e, stackTrace: stack);
       }
       state = state.copyWith(phase: GroupingMissionPhase.missionComplete);
     } else {

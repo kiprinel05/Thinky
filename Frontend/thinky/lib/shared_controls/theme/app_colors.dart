@@ -41,6 +41,9 @@ abstract class AppColors {
   // ══════════════════════════════════════════════════════════════════════════
   
   static const Color success = Color(0xFF4CAF50);
+  static const Color successLight = Color(0xFFE8F5E9);
+  static const Color warning = Color(0xFFFF9800);
+  static const Color warningLight = Color(0xFFFFF3E0);
   static const Color error = Color(0xFFFF7043);
   static const Color errorLight = Color(0xFFFFEBEE);
   static const Color errorDark = Color(0xFFD32F2F);
@@ -65,4 +68,28 @@ abstract class AppColors {
   
   static const Color overlayDark = Color(0x80000000); // 50% black
   static const Color overlayLight = Color(0x40FFFFFF); // 25% white
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MISSION-SPECIFIC ACCENT COLORS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  static const Color patternPurple = Color(0xFF9C27B0);
+  static const Color numbersPrimary = Color(0xFF5C6BC0);
+  static const Color drawingRed = Color(0xFFF44336);
+  static const Color drawingBlue = Color(0xFF2196F3);
+  static const Color goldAccent = Color(0xFFFFD700);
+  static const Color orangeAccent = Color(0xFFFFA500);
+  static const Color correctGreen = Color(0xFF66BB6A);
+  static const Color incorrectRed = Color(0xFFFF5252);
+  static const Color darkGoldenrod = Color(0xFFB8860B);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // NEUTRAL / UTILITY COLORS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  static const Color transparent = Color(0x00000000);
+  static const Color black = Color(0xFF000000);
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color grey = Color(0xFF9E9E9E);
+  static const Color greyLight = Color(0xFFE0E0E0);
 }

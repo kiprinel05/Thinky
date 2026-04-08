@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 /// Collects current app context to send alongside mascot chat messages.
 class ContextCollector {
@@ -10,14 +11,18 @@ class ContextCollector {
     try {
       final location = router.routerDelegate.currentConfiguration.last.matchedLocation;
       currentPage = _readablePageName(location);
-    } catch (_) {}
+    } catch (e) {
+      ErrorLogger().logDebug('Context collection failed: $e');
+    }
 
     // Workshop missions
     int installedMissions = 0;
     try {
       final missions = await WorkshopStorage.getDownloadedMissions();
       installedMissions = missions.length;
-    } catch (_) {}
+    } catch (e) {
+      ErrorLogger().logDebug('Context collection failed: $e');
+    }
 
     return {
       'current_page': currentPage,

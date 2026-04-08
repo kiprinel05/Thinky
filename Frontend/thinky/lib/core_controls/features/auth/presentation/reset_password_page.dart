@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/features/welcome/presentation/welcome_page.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;
@@ -73,8 +74,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               (route) => false,
             );
           }
-        } catch (e) {
-          // If auto-login fails, just show success and navigate back
+        } catch (e, stack) {
+          ErrorLogger().logError(e, stackTrace: stack);
           if (mounted) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const WelcomePage()),
@@ -89,13 +90,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       String errorMsg = 'An error occurred';
       if (e.toString().contains('detail')) {
         try {
           final errorData = jsonDecode(e.toString().split('detail')[1]);
           errorMsg = errorData['detail'] ?? errorMsg;
-        } catch (_) {}
+        } catch (e) {
+          ErrorLogger().logDebug('Could not parse response: $e');
+        }
       } else {
         errorMsg = e.toString().replaceAll('Exception: ', '');
       }

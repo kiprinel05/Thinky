@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:thinky/core_controls/services/api_client.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 
 class MascotService {
   static Future<String> sendMessage(
@@ -18,7 +19,8 @@ class MascotService {
       } else {
         return 'Oops! Am o problemă de conexiune. Încearcă din nou! 🤖';
       }
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       return 'Nu mă pot conecta la server acum. Încearcă mai târziu! 🤖';
     }
   }

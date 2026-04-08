@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/features/missions/mission_pattern/data/pattern_models.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import '../controllers/pattern_controller.dart';
 
 class PatternMissionPage extends ConsumerWidget {
@@ -276,7 +277,9 @@ class _ShapeWidget extends StatelessWidget {
        // Check if hex digits
        try {
          return Color(int.parse(colorStr, radix: 16) + 0xFF000000);
-       } catch (_) {}
+       } catch (e) {
+         ErrorLogger().logDebug('Invalid hex color: $e');
+       }
     }
     switch(colorStr.toLowerCase()) {
       case 'red': return Colors.red;

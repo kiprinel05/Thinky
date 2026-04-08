@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
-import 'package:thinky/shared_controls/widgets/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
+import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 
 class WorkshopBrowsePage extends StatefulWidget {
@@ -69,7 +70,8 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         _hasMore = _missions.length < _total;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
         _error = e.toString();
         _isLoading = false;
