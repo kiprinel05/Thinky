@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' as async_lib;
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -22,7 +22,7 @@ class ExceptionMapper {
       return const ValidationException('Data format error. Please try again.');
     }
 
-    if (error is TimeoutException) {
+    if (error is async_lib.TimeoutException) {
       return const TimeoutException('The connection timed out. Please try again.');
     }
     

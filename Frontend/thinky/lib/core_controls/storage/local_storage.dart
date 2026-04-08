@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// LocalStorage - Wrapper for SharedPreferences
@@ -7,6 +8,10 @@ class LocalStorage {
   late SharedPreferences _prefs;
 
   LocalStorage._();
+
+  /// Protected constructor for testing subclasses
+  @visibleForTesting
+  LocalStorage.forTesting();
 
   /// Get singleton instance
   static Future<LocalStorage> getInstance() async {

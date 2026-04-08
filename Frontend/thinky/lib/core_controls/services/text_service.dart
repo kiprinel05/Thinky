@@ -52,6 +52,12 @@ class TextService {
     _initialized = true;
   }
 
+  @visibleForTesting
+  static void resetForTesting() {
+    _texts = {};
+    _initialized = false;
+  }
+
   /// Get a string value from the loaded JSON
   /// [category] corresponds to the top-level key (e.g. "Misc")
   /// [key] corresponds to the nested key (e.g. "test")
