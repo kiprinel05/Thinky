@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/core_controls/services/theme_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -36,35 +39,37 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<void> _handleLogout() async {
+    final colors = context.appColors;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimens.radiusXl),
         ),
         title: Text(
-          'Logout',
+          ProfileTexts.logout,
           style: GoogleFonts.alata(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         content: Text(
-          'Are you sure you want to log out?',
+          ProfileTexts.logoutConfirm,
           style: GoogleFonts.alata(
             fontSize: 15,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Cancel',
+              Common.cancel,
               style: GoogleFonts.alata(
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -72,7 +77,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
-              'Logout',
+              ProfileTexts.logout,
               style: GoogleFonts.alata(
                 color: AppColors.primaryPurple,
                 fontWeight: FontWeight.w700,
@@ -95,9 +100,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final currentLocale = ref.watch(languageProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    ref.watch(textRefreshProvider);
+
+    final colors = context.appColors;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primaryPurple),
@@ -112,14 +121,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     expandedHeight: 0,
                     floating: true,
                     pinned: true,
-                    backgroundColor: AppColors.backgroundWhite,
+                    backgroundColor: colors.background,
                     elevation: 0,
                     title: Text(
-                      'Profile',
+                      ProfileTexts.title,
                       style: GoogleFonts.alata(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     centerTitle: true,
@@ -135,9 +144,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildProfileHeader(),
+                          _buildProfileHeader(colors),
                           const SizedBox(height: AppDimens.xl),
-                          _buildSettingsSection(currentLocale),
+                          _buildSettingsSection(currentLocale, themeMode, colors),
                           const SizedBox(height: AppDimens.xl),
                           _buildLogoutButton(),
                           const SizedBox(height: AppDimens.xl),
@@ -151,10 +160,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildProfileHeader() {
-    final displayName = _userData?['username'] ??
-        _userData?['guestName'] ??
-        'User';
+  Widget _buildProfileHeader(AppColorsExtension colors) {
+    final displayName =
+        _userData?['username'] ?? _userData?['guestName'] ?? 'User';
     final isGuest = _userData?['isGuest'] == true;
 
     return FadeInWidget(
@@ -162,9 +170,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         width: double.infinity,
         padding: const EdgeInsets.all(AppDimens.xl),
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(AppDimens.radiusXl),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryPurple.withValues(alpha: 0.06),
@@ -201,7 +209,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               style: GoogleFonts.alata(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 letterSpacing: -0.3,
               ),
               textAlign: TextAlign.center,
@@ -212,7 +220,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 _userData!['email'],
                 style: GoogleFonts.alata(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -229,12 +237,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                isGuest ? 'Guest' : 'User',
+                isGuest ? ProfileTexts.guest : ProfileTexts.user,
                 style: GoogleFonts.alata(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: isGuest
-                      ? const Color(0xFFB8860B)
+                      ? AppColors.darkGoldenrod
                       : AppColors.primaryPurple,
                 ),
               ),
@@ -245,7 +253,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildSettingsSection(Locale currentLocale) {
+  Widget _buildSettingsSection(
+      Locale currentLocale, ThemeMode themeMode, AppColorsExtension colors) {
     return FadeInWidget(
       delay: const Duration(milliseconds: 100),
       child: Column(
@@ -254,27 +263,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: AppDimens.sm),
             child: Text(
-              'Settings',
+              ProfileTexts.settings,
               style: GoogleFonts.alata(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
           _buildSettingCard(
+            colors: colors,
             children: [
-              _buildLanguageRow(currentLocale),
-              _buildDivider(),
+              _buildThemeRow(themeMode, colors),
+              _buildDivider(colors),
+              _buildLanguageRow(currentLocale, colors),
+              _buildDivider(colors),
               _buildSettingTile(
                 icon: Icons.info_outline_rounded,
-                title: 'About Thinky',
+                title: ProfileTexts.aboutThinky,
+                colors: colors,
                 onTap: () => context.push(RouteNames.about),
               ),
-              _buildDivider(),
+              _buildDivider(colors),
               _buildSettingTile(
                 icon: Icons.help_outline_rounded,
-                title: 'Help & FAQ',
+                title: ProfileTexts.helpFaq,
+                colors: colors,
                 onTap: () => context.push(RouteNames.help),
               ),
             ],
@@ -284,12 +298,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildSettingCard({required List<Widget> children}) {
+  Widget _buildSettingCard(
+      {required List<Widget> children, required AppColorsExtension colors}) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-        border: Border.all(color: AppColors.borderLight, width: 1),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -302,7 +317,51 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildLanguageRow(Locale currentLocale) {
+  Widget _buildThemeRow(ThemeMode themeMode, AppColorsExtension colors) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.lg,
+        vertical: AppDimens.md,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primaryPurple.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: AppColors.primaryPurple,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: AppDimens.md),
+          Expanded(
+            child: Text(
+              ProfileTexts.darkMode,
+              style: GoogleFonts.alata(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: colors.textPrimary,
+              ),
+            ),
+          ),
+          Switch.adaptive(
+            value: themeMode == ThemeMode.dark,
+            activeColor: AppColors.primaryPurple,
+            onChanged: (_) {
+              ref.read(themeModeProvider.notifier).toggleDarkMode();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageRow(Locale currentLocale, AppColorsExtension colors) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.lg,
@@ -325,20 +384,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(width: AppDimens.md),
           Expanded(
             child: Text(
-              'Language',
+              ProfileTexts.language,
               style: GoogleFonts.alata(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
           DropdownButton<String>(
             value: currentLocale.languageCode,
             underline: const SizedBox(),
-            icon: const Icon(
+            dropdownColor: colors.surface,
+            icon: Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textHint,
+              color: colors.textHint,
             ),
             borderRadius: BorderRadius.circular(12),
             items: [
@@ -346,11 +406,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 value: 'en',
                 child: Row(
                   children: [
-                    Text('🇺🇸 ', style: TextStyle(fontSize: 16)),
+                    const Text('🇺🇸 ', style: TextStyle(fontSize: 16)),
                     Text(
-                      'English',
+                      ProfileTexts.english,
                       style: GoogleFonts.alata(
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -361,11 +421,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 value: 'ro',
                 child: Row(
                   children: [
-                    Text('🇷🇴 ', style: TextStyle(fontSize: 16)),
+                    const Text('🇷🇴 ', style: TextStyle(fontSize: 16)),
                     Text(
-                      'Română',
+                      ProfileTexts.romanian,
                       style: GoogleFonts.alata(
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -384,23 +444,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(AppColorsExtension colors) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppDimens.lg),
-      child: Divider(
-        height: 1,
-        color: AppColors.borderLight,
-      ),
+      child: Divider(height: 1, color: colors.divider),
     );
   }
 
   Widget _buildSettingTile({
     required IconData icon,
     required String title,
+    required AppColorsExtension colors,
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppDimens.radiusMd),
@@ -426,14 +484,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   style: GoogleFonts.alata(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: AppColors.textHint,
+                color: colors.textHint,
               ),
             ],
           ),
@@ -446,7 +504,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return FadeInWidget(
       delay: const Duration(milliseconds: 200),
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           onTap: _handleLogout,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
@@ -460,20 +518,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               borderRadius: BorderRadius.circular(AppDimens.radiusLg),
               border: Border.all(
                 color: AppColors.error.withValues(alpha: 0.2),
-                width: 1,
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.logout_rounded,
                   size: 20,
                   color: AppColors.error,
                 ),
                 const SizedBox(width: AppDimens.sm),
                 Text(
-                  'LOGOUT',
+                  ProfileTexts.logout.toUpperCase(),
                   style: GoogleFonts.alata(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,

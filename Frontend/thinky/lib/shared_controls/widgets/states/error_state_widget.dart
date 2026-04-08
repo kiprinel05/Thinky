@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
 
 class ErrorStateWidget extends StatelessWidget {
@@ -20,6 +21,7 @@ class ErrorStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -34,7 +36,9 @@ class ErrorStateWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
@@ -43,7 +47,7 @@ class ErrorStateWidget extends StatelessWidget {
                 onPressed: onRetry,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryPurple,
-                  foregroundColor: AppColors.backgroundWhite,
+                  foregroundColor: colors.background,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
@@ -23,14 +24,15 @@ class LoginPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formState = ref.watch(loginFormProvider);
     final formController = ref.read(loginFormProvider.notifier);
+    final colors = context.appColors;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: colors.textPrimary,
       ),
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           // Background image

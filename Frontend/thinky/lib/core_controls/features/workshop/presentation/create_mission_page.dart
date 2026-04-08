@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class CreateMissionPage extends StatefulWidget {
   const CreateMissionPage({super.key});
@@ -44,22 +46,21 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
   Future<void> _publish() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Validate all questions
     for (int i = 0; i < _questions.length; i++) {
       final q = _questions[i];
       if (q.textController.text.trim().isEmpty) {
-        _showError('Question ${i + 1} text is empty');
+        _showError('${WorkshopTexts.questionLabel} ${i + 1} ${WorkshopTexts.questionTextEmpty}');
         return;
       }
       final nonEmptyAnswers = q.answers
           .where((a) => a.controller.text.trim().isNotEmpty)
           .toList();
       if (nonEmptyAnswers.length < 2) {
-        _showError('Question ${i + 1} needs at least 2 answers');
+        _showError('${WorkshopTexts.questionLabel} ${i + 1} ${WorkshopTexts.questionNeedsAnswers}');
         return;
       }
       if (q.correctIndex >= nonEmptyAnswers.length) {
-        _showError('Question ${i + 1}: select a valid correct answer');
+        _showError('${WorkshopTexts.questionLabel} ${i + 1}: ${WorkshopTexts.questionSelectCorrect}');
         return;
       }
     }
@@ -96,7 +97,7 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
       );
 
       if (mounted) {
-        ErrorHandlerUI.showSuccess(context, 'Mission published!');
+        ErrorHandlerUI.showSuccess(context, WorkshopTexts.missionPublishedMsg);
         context.pop();
       }
     } catch (e, stack) {
@@ -113,21 +114,22 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Create Mission',
+          WorkshopTexts.createMission,
           style: GoogleFonts.alata(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -139,42 +141,36 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
             AppDimens.lg, AppDimens.sm, AppDimens.lg, 100,
           ),
           children: [
-            // Title
-            _buildLabel('Title'),
+            _buildLabel(WorkshopTexts.missionTitle),
             _buildTextField(
               controller: _titleController,
-              hint: 'e.g. Capital Cities Quiz',
+              hint: WorkshopTexts.missionTitleHint,
               validator: (v) =>
-                  v == null || v.trim().length < 3 ? 'Title must be at least 3 characters' : null,
+                  v == null || v.trim().length < 3 ? WorkshopTexts.missionTitleError : null,
             ),
             const SizedBox(height: AppDimens.md),
-
-            // Description
-            _buildLabel('Description (optional)'),
+            _buildLabel(WorkshopTexts.description),
             _buildTextField(
               controller: _descriptionController,
-              hint: 'Describe your mission...',
+              hint: WorkshopTexts.descriptionHint,
               maxLines: 3,
             ),
             const SizedBox(height: AppDimens.md),
-
-            // Tags
-            _buildLabel('Tags (comma separated)'),
+            _buildLabel(WorkshopTexts.tags),
             _buildTextField(
               controller: _tagsController,
-              hint: 'e.g. geography, science, fun',
+              hint: WorkshopTexts.tagsHint,
             ),
             const SizedBox(height: AppDimens.xl),
 
-            // Questions header
             Row(
               children: [
                 Text(
-                  'Questions',
+                  WorkshopTexts.questions,
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -182,19 +178,17 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
                   '${_questions.length}',
                   style: GoogleFonts.alata(
                     fontSize: 14,
-                    color: AppColors.textMuted,
+                    color: colors.textMuted,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: AppDimens.md),
 
-            // Question cards
             ..._questions.asMap().entries.map((entry) {
               return _buildQuestionCard(entry.key, entry.value);
             }),
 
-            // Add question button
             const SizedBox(height: AppDimens.md),
             OutlinedButton.icon(
               onPressed: _addQuestion,
@@ -208,13 +202,12 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
               ),
               icon: const Icon(Icons.add_rounded, size: 20),
               label: Text(
-                'Add Question',
+                WorkshopTexts.addQuestion,
                 style: GoogleFonts.alata(fontWeight: FontWeight.w600),
               ),
             ),
             const SizedBox(height: AppDimens.xl),
 
-            // Publish button
             SizedBox(
               height: 52,
               child: ElevatedButton.icon(
@@ -238,7 +231,7 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
                       )
                     : const Icon(Icons.publish_rounded, size: 22),
                 label: Text(
-                  _isPublishing ? 'Publishing...' : 'Publish to Workshop',
+                  _isPublishing ? WorkshopTexts.publishing : WorkshopTexts.publishButton,
                   style: GoogleFonts.alata(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -253,6 +246,7 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
   }
 
   Widget _buildLabel(String text) {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.xs),
       child: Text(
@@ -260,7 +254,7 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
         style: GoogleFonts.alata(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: AppColors.textSecondary,
+          color: colors.textSecondary,
         ),
       ),
     );
@@ -272,16 +266,17 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
+    final colors = context.appColors;
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      style: GoogleFonts.alata(fontSize: 14, color: AppColors.textPrimary),
+      style: GoogleFonts.alata(fontSize: 14, color: colors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.alata(fontSize: 14, color: AppColors.textHint),
+        hintStyle: GoogleFonts.alata(fontSize: 14, color: colors.textHint),
         filled: true,
-        fillColor: AppColors.backgroundGrey,
+        fillColor: colors.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimens.radiusMd),
           borderSide: BorderSide.none,
@@ -295,13 +290,14 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
   }
 
   Widget _buildQuestionCard(int index, _QuestionData question) {
+    final colors = context.appColors;
     return Container(
       margin: const EdgeInsets.only(bottom: AppDimens.md),
       padding: const EdgeInsets.all(AppDimens.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: colors.background,
         borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -313,7 +309,6 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Question header
           Row(
             children: [
               Container(
@@ -336,11 +331,11 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
               ),
               const SizedBox(width: AppDimens.sm),
               Text(
-                'Question',
+                WorkshopTexts.questionLabel,
                 style: GoogleFonts.alata(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -356,19 +351,17 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
           ),
           const SizedBox(height: AppDimens.sm),
 
-          // Question text
           _buildTextField(
             controller: question.textController,
-            hint: 'Enter your question...',
+            hint: WorkshopTexts.questionHint,
           ),
           const SizedBox(height: AppDimens.md),
 
-          // Answers
           Text(
-            'Answers (tap ✓ to mark correct)',
+            WorkshopTexts.answersLabel,
             style: GoogleFonts.alata(
               fontSize: 12,
-              color: AppColors.textMuted,
+              color: colors.textMuted,
             ),
           ),
           const SizedBox(height: AppDimens.sm),
@@ -382,7 +375,6 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
               padding: const EdgeInsets.only(bottom: AppDimens.xs),
               child: Row(
                 children: [
-                  // Correct answer selector
                   GestureDetector(
                     onTap: () => setState(() => question.correctIndex = aIndex),
                     child: AnimatedContainer(
@@ -390,27 +382,26 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: isCorrect ? AppColors.success : AppColors.backgroundGrey,
+                        color: isCorrect ? AppColors.success : colors.surface,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         Icons.check_rounded,
                         size: 16,
-                        color: isCorrect ? Colors.white : AppColors.textHint,
+                        color: isCorrect ? Colors.white : colors.textHint,
                       ),
                     ),
                   ),
                   const SizedBox(width: AppDimens.sm),
-                  // Answer text
                   Expanded(
                     child: TextFormField(
                       controller: answer.controller,
-                      style: GoogleFonts.alata(fontSize: 13, color: AppColors.textPrimary),
+                      style: GoogleFonts.alata(fontSize: 13, color: colors.textPrimary),
                       decoration: InputDecoration(
-                        hintText: 'Answer ${aIndex + 1}',
-                        hintStyle: GoogleFonts.alata(fontSize: 13, color: AppColors.textHint),
+                        hintText: '${WorkshopTexts.answerHint} ${aIndex + 1}',
+                        hintStyle: GoogleFonts.alata(fontSize: 13, color: colors.textHint),
                         filled: true,
-                        fillColor: AppColors.backgroundGrey,
+                        fillColor: colors.inputFill,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppDimens.radiusSm),
                           borderSide: BorderSide.none,
@@ -423,11 +414,10 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
                       ),
                     ),
                   ),
-                  // Remove answer
                   if (question.answers.length > 2)
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 16),
-                      color: AppColors.textHint,
+                      color: colors.textHint,
                       onPressed: () => setState(() {
                         question.answers.removeAt(aIndex);
                         if (question.correctIndex >= question.answers.length) {
@@ -442,13 +432,12 @@ class _CreateMissionPageState extends State<CreateMissionPage> {
             );
           }),
 
-          // Add answer button
           if (question.answers.length < 6)
             TextButton.icon(
               onPressed: () => setState(() => question.answers.add(_AnswerData())),
               icon: const Icon(Icons.add_rounded, size: 16),
               label: Text(
-                'Add answer',
+                WorkshopTexts.addAnswer,
                 style: GoogleFonts.alata(fontSize: 12),
               ),
               style: TextButton.styleFrom(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thinky/core/errors/exceptions.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 
 class ErrorHandlerUI {
   static void showSuccess(BuildContext context, String message) {
@@ -16,7 +17,8 @@ class ErrorHandlerUI {
   }
 
   static void showInfo(BuildContext context, String message) {
-    _showSnackBar(context, message, backgroundColor: AppColors.textPrimary);
+    _showSnackBar(context, message,
+        backgroundColor: context.appColors.textPrimary);
   }
 
   static void _showSnackBar(
@@ -28,7 +30,7 @@ class ErrorHandlerUI {
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(color: AppColors.backgroundWhite),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,

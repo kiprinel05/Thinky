@@ -196,6 +196,9 @@ class ProfileTexts {
   static String get logoutConfirm => TextService.getString('Profile', 'logoutConfirm');
   static String get aboutThinky => TextService.getString('Profile', 'aboutThinky');
   static String get helpFaq => TextService.getString('Profile', 'helpFaq');
+  static String get darkMode => TextService.getString('Profile', 'darkMode');
+  static String get guest => TextService.getString('Profile', 'guest');
+  static String get user => TextService.getString('Profile', 'user');
 }
 
 /// Accessors for 'Workshop' texts
@@ -207,6 +210,52 @@ class WorkshopTexts {
   static String get searchMissions => TextService.getString('Workshop', 'searchMissions');
   static String get downloadSuccess => TextService.getString('Workshop', 'downloadSuccess');
   static String get downloadFailed => TextService.getString('Workshop', 'downloadFailed');
+  static String get lockedSubtitle => TextService.getString('Workshop', 'lockedSubtitle');
+  static String get loginButton => TextService.getString('Workshop', 'loginButton');
+  static String get createAccountButton => TextService.getString('Workshop', 'createAccountButton');
+  static String get create => TextService.getString('Workshop', 'create');
+  static String get discoverSubtitle => TextService.getString('Workshop', 'discoverSubtitle');
+  static String get couldNotLoad => TextService.getString('Workshop', 'couldNotLoad');
+  static String get couldNotLoadMission => TextService.getString('Workshop', 'couldNotLoadMission');
+  static String get noMissions => TextService.getString('Workshop', 'noMissions');
+  static String get beFirst => TextService.getString('Workshop', 'beFirst');
+  static String get recent => TextService.getString('Workshop', 'recent');
+  static String get popular => TextService.getString('Workshop', 'popular');
+  static String get missionNotFound => TextService.getString('Workshop', 'missionNotFound');
+  static String get seeResults => TextService.getString('Workshop', 'seeResults');
+  static String get nextQuestion => TextService.getString('Workshop', 'nextQuestion');
+  static String get playAgain => TextService.getString('Workshop', 'playAgain');
+  static String get perfect => TextService.getString('Workshop', 'perfect');
+  static String get quizComplete => TextService.getString('Workshop', 'quizComplete');
+  static String get downloading => TextService.getString('Workshop', 'downloading');
+  static String get playQuiz => TextService.getString('Workshop', 'playQuiz');
+  static String get downloadMissionButton => TextService.getString('Workshop', 'downloadMissionButton');
+  static String get questionsCount => TextService.getString('Workshop', 'questionsCount');
+  static String get questionLabel => TextService.getString('Workshop', 'questionLabel');
+  static String get byAuthor => TextService.getString('Workshop', 'byAuthor');
+  static String get correct => TextService.getString('Workshop', 'correct');
+  static String get couldNotLoadYourMissions => TextService.getString('Workshop', 'couldNotLoadYourMissions');
+  static String get noMissionsCreated => TextService.getString('Workshop', 'noMissionsCreated');
+  static String get createFirstMission => TextService.getString('Workshop', 'createFirstMission');
+  static String get questionTextEmpty => TextService.getString('Workshop', 'questionTextEmpty');
+  static String get questionNeedsAnswers => TextService.getString('Workshop', 'questionNeedsAnswers');
+  static String get questionSelectCorrect => TextService.getString('Workshop', 'questionSelectCorrect');
+  static String get missionTitle => TextService.getString('Workshop', 'missionTitle');
+  static String get missionTitleHint => TextService.getString('Workshop', 'missionTitleHint');
+  static String get missionTitleError => TextService.getString('Workshop', 'missionTitleError');
+  static String get description => TextService.getString('Workshop', 'description');
+  static String get descriptionHint => TextService.getString('Workshop', 'descriptionHint');
+  static String get tags => TextService.getString('Workshop', 'tags');
+  static String get tagsHint => TextService.getString('Workshop', 'tagsHint');
+  static String get questions => TextService.getString('Workshop', 'questions');
+  static String get addQuestion => TextService.getString('Workshop', 'addQuestion');
+  static String get publishing => TextService.getString('Workshop', 'publishing');
+  static String get publishButton => TextService.getString('Workshop', 'publishButton');
+  static String get questionHint => TextService.getString('Workshop', 'questionHint');
+  static String get answersLabel => TextService.getString('Workshop', 'answersLabel');
+  static String get answerHint => TextService.getString('Workshop', 'answerHint');
+  static String get addAnswer => TextService.getString('Workshop', 'addAnswer');
+  static String get missionPublishedMsg => TextService.getString('Workshop', 'missionPublished');
 }
 
 /// Accessors for 'Nav' texts (bottom navigation bar)

@@ -1,18 +1,21 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
-class QuizIntroPage extends StatelessWidget {
+class QuizIntroPage extends ConsumerWidget {
   final VoidCallback onStart;
 
   const QuizIntroPage({super.key, required this.onStart});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(

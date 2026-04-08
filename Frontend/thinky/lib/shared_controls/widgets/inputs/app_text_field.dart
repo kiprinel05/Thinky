@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_colors_extension.dart';
 import '../../theme/app_typography.dart';
 import '../../theme/app_dimens.dart';
 
@@ -41,6 +42,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
@@ -58,7 +60,7 @@ class AppTextField extends StatelessWidget {
         errorText: errorText,
         hintStyle: AppTypography.inputHint,
         filled: true,
-        fillColor: AppColors.backgroundGrey,
+        fillColor: colors.inputFill,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimens.inputPaddingHorizontal,
           vertical: AppDimens.inputPaddingVertical,
@@ -110,6 +112,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return AppTextField(
       controller: widget.controller,
       hintText: widget.hintText,
@@ -119,7 +122,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
       suffixIcon: IconButton(
         icon: Icon(
           _obscureText ? Icons.visibility : Icons.visibility_off,
-          color: AppColors.textGrey,
+          color: colors.iconColor,
         ),
         onPressed: () {
           setState(() {

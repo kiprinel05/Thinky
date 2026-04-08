@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../../data/animals_models.dart';
@@ -56,6 +57,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final state = ref.watch(animalsControllerProvider);
 
     return Scaffold(

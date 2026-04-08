@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
@@ -9,6 +10,7 @@ import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class WorkshopBrowsePage extends StatefulWidget {
   const WorkshopBrowsePage({super.key});
@@ -90,10 +92,11 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     if (_isGuest) return _buildLockedState();
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,8 +112,9 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildLockedState() {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -133,20 +137,20 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Workshop',
+                  WorkshopTexts.title,
                   style: GoogleFonts.alata(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Logheaz\u0103-te pentru a accesa\nmisiuni create de comunitate',
+                  WorkshopTexts.lockedSubtitle,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.alata(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                     height: 1.5,
                   ),
                 ),
@@ -165,7 +169,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Logheaz\u0103-te',
+                      WorkshopTexts.loginButton,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -177,7 +181,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                 TextButton(
                   onPressed: () => context.go(RouteNames.register),
                   child: Text(
-                    'Creeaz\u0103 un cont',
+                    WorkshopTexts.createAccountButton,
                     style: GoogleFonts.alata(
                       fontSize: 14,
                       color: AppColors.primaryPurple,
@@ -194,6 +198,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildHeader() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppDimens.lg, AppDimens.lg, AppDimens.lg, AppDimens.sm,
@@ -205,11 +210,11 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
             child: Row(
               children: [
                 Text(
-                  'Workshop',
+                  WorkshopTexts.title,
                   style: GoogleFonts.alata(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -227,7 +232,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                         const Icon(Icons.add_rounded, color: Colors.white, size: 18),
                         const SizedBox(width: 4),
                         Text(
-                          'Create',
+                          WorkshopTexts.create,
                           style: GoogleFonts.alata(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -245,10 +250,10 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
           FadeInWidget(
             delay: const Duration(milliseconds: 100),
             child: Text(
-              'Discover community-made missions',
+              WorkshopTexts.discoverSubtitle,
               style: GoogleFonts.alata(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -258,6 +263,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildSearchBar() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.lg,
@@ -265,22 +271,22 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: colors.inputFill,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
         ),
         child: TextField(
           controller: _searchController,
           onSubmitted: (_) => _onSearch(),
-          style: GoogleFonts.alata(fontSize: 14, color: AppColors.textPrimary),
+          style: GoogleFonts.alata(fontSize: 14, color: colors.textPrimary),
           decoration: InputDecoration(
-            hintText: 'Search missions...',
+            hintText: WorkshopTexts.searchMissions,
             hintStyle: GoogleFonts.alata(
               fontSize: 14,
-              color: AppColors.textHint,
+              color: colors.textHint,
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.search_rounded,
-              color: AppColors.textHint,
+              color: colors.textHint,
               size: 20,
             ),
             suffixIcon: _searchController.text.isNotEmpty
@@ -304,6 +310,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildSortChips() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.lg,
@@ -311,15 +318,15 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
       ),
       child: Row(
         children: [
-          _buildChip('Recent', 'recent'),
+          _buildChip(WorkshopTexts.recent, 'recent'),
           const SizedBox(width: AppDimens.sm),
-          _buildChip('Popular', 'popular'),
+          _buildChip(WorkshopTexts.popular, 'popular'),
           const Spacer(),
           Text(
             '$_total missions',
             style: GoogleFonts.alata(
               fontSize: 12,
-              color: AppColors.textMuted,
+              color: colors.textMuted,
             ),
           ),
         ],
@@ -328,6 +335,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildChip(String label, String value) {
+    final colors = context.appColors;
     final isActive = _sortBy == value;
     return GestureDetector(
       onTap: () => _onSortChanged(value),
@@ -340,7 +348,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         decoration: BoxDecoration(
           color: isActive
               ? AppColors.primaryPurple
-              : AppColors.backgroundGrey,
+              : colors.surface,
           borderRadius: BorderRadius.circular(AppDimens.radiusCircle),
         ),
         child: Text(
@@ -348,7 +356,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
           style: GoogleFonts.alata(
             fontSize: 12,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            color: isActive ? Colors.white : AppColors.textSecondary,
+            color: isActive ? Colors.white : colors.textSecondary,
           ),
         ),
       ),
@@ -356,6 +364,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildBody() {
+    final colors = context.appColors;
     if (_isLoading && _missions.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryPurple),
@@ -367,20 +376,20 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.textHint),
+            Icon(Icons.cloud_off_rounded, size: 48, color: colors.textHint),
             const SizedBox(height: AppDimens.md),
             Text(
-              'Could not load missions',
+              WorkshopTexts.couldNotLoad,
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppDimens.md),
             TextButton(
               onPressed: () => _loadMissions(refresh: true),
               child: Text(
-                'Try again',
+                Common.tryAgain,
                 style: GoogleFonts.alata(color: AppColors.primaryPurple),
               ),
             ),
@@ -394,21 +403,21 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.extension_off_rounded, size: 48, color: AppColors.textHint),
+            Icon(Icons.extension_off_rounded, size: 48, color: colors.textHint),
             const SizedBox(height: AppDimens.md),
             Text(
-              'No missions yet',
+              WorkshopTexts.noMissions,
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Be the first to create one!',
+              WorkshopTexts.beFirst,
               style: GoogleFonts.alata(
                 fontSize: 13,
-                color: AppColors.textHint,
+                color: colors.textHint,
               ),
             ),
           ],
@@ -426,7 +435,6 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         itemCount: _missions.length + (_hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= _missions.length) {
-            // Load more trigger
             _page++;
             _loadMissions();
             return const Padding(
@@ -446,15 +454,16 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   }
 
   Widget _buildMissionCard(WorkshopMission mission) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: () => context.push('/workshop/mission/${mission.id}'),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppDimens.md),
         padding: const EdgeInsets.all(AppDimens.md),
         decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
+          color: colors.background,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(color: colors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -465,7 +474,6 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
         ),
         child: Row(
           children: [
-            // Mission type icon
             Container(
               width: 48,
               height: 48,
@@ -480,7 +488,6 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
               ),
             ),
             const SizedBox(width: AppDimens.md),
-            // Mission info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,17 +497,17 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                     style: GoogleFonts.alata(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'by ${mission.authorName}',
+                    '${WorkshopTexts.byAuthor} ${mission.authorName}',
                     style: GoogleFonts.alata(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                   if (mission.tags.isNotEmpty) ...[
@@ -514,14 +521,14 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundGrey,
+                            color: colors.surface,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             tag,
                             style: GoogleFonts.alata(
                               fontSize: 10,
-                              color: AppColors.textMuted,
+                              color: colors.textMuted,
                             ),
                           ),
                         );
@@ -531,20 +538,19 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
                 ],
               ),
             ),
-            // Download count
             Column(
               children: [
                 Icon(
                   Icons.download_rounded,
                   size: 16,
-                  color: AppColors.textHint,
+                  color: colors.textHint,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${mission.downloadCount}',
                   style: GoogleFonts.alata(
                     fontSize: 11,
-                    color: AppColors.textMuted,
+                    color: colors.textMuted,
                   ),
                 ),
               ],

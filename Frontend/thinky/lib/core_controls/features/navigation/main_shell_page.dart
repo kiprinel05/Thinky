@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
-import 'package:thinky/core_controls/features/mascot/presentation/mascot_floating_button.dart';
 
 /// MainShellPage — wraps the main app pages with a floating, pill-shaped
 /// bottom navigation island inspired by iOS Dynamic Island.
@@ -99,18 +99,18 @@ class _MainShellPageState extends State<MainShellPage>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final selectedIndex = _currentIndex(context);
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bgColor = colors.background;
 
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: _handleScroll,
         child: Stack(
           children: [
-            // Page content fills the entire screen
             Positioned.fill(child: widget.child),
 
-            // Gradient fade above nav — visible at top, fades out on scroll
             Positioned(
               left: 0,
               right: 0,
@@ -122,17 +122,17 @@ class _MainShellPageState extends State<MainShellPage>
                   curve: Curves.easeInOut,
                   child: Container(
                     height: bottomPadding + 120,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
                         colors: [
-                          Color(0xB3FFFFFF),
-                          Color(0x80FFFFFF),
-                          Color(0x33FFFFFF),
-                          Color(0x00FFFFFF),
+                          bgColor.withValues(alpha: 0.7),
+                          bgColor.withValues(alpha: 0.5),
+                          bgColor.withValues(alpha: 0.2),
+                          bgColor.withValues(alpha: 0.0),
                         ],
-                        stops: [0.0, 0.3, 0.6, 1.0],
+                        stops: const [0.0, 0.3, 0.6, 1.0],
                       ),
                     ),
                   ),
@@ -140,13 +140,12 @@ class _MainShellPageState extends State<MainShellPage>
               ),
             ),
 
-            // Floating nav island — positioned at the bottom
             Positioned(
               left: 0,
               right: 0,
               bottom: bottomPadding + 8,
               child: Center(
-                child: _buildNavIsland(selectedIndex),
+                child: _buildNavIsland(selectedIndex, colors),
               ),
             ),
           ],
@@ -155,14 +154,13 @@ class _MainShellPageState extends State<MainShellPage>
     );
   }
 
-  Widget _buildNavIsland(int selectedIndex) {
+  Widget _buildNavIsland(int selectedIndex, AppColorsExtension colors) {
     return SizedBox(
       width: double.infinity,
       child: Stack(
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         children: [
-          // Full-width shadow layer — spans the entire page width
           Positioned(
             left: 20,
             right: 20,
@@ -188,12 +186,11 @@ class _MainShellPageState extends State<MainShellPage>
               ),
             ),
           ),
-          // The island pill
           Container(
             height: 54,
-            width: 300, // Widened to accommodate 5 tabs including Leaderboard
+            width: 300,
             decoration: BoxDecoration(
-              color: AppColors.backgroundWhite,
+              color: colors.background,
               borderRadius: BorderRadius.circular(27),
               boxShadow: [
                 BoxShadow(
@@ -216,6 +213,7 @@ class _MainShellPageState extends State<MainShellPage>
                   index: index,
                   selectedIndex: selectedIndex,
                   icon: _icons[index],
+                  colors: colors,
                 );
               }),
             ),
@@ -229,6 +227,7 @@ class _MainShellPageState extends State<MainShellPage>
     required int index,
     required int selectedIndex,
     required IconData icon,
+    required AppColorsExtension colors,
   }) {
     final isSelected = selectedIndex == index;
 
@@ -263,7 +262,7 @@ class _MainShellPageState extends State<MainShellPage>
                 size: isSelected ? 22 : 20,
                 color: isSelected
                     ? AppColors.primaryPurple
-                    : AppColors.textHint,
+                    : colors.textHint,
               ),
             ),
           ),

@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 
-class IntroPage extends StatelessWidget {
+class IntroPage extends ConsumerWidget {
   const IntroPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/backgrounds/background.png',
-              fit: BoxFit.cover,
-            ),
+            top: 0, left: 0, right: 0,
+            child: Image.asset('assets/backgrounds/background.png', fit: BoxFit.cover),
           ),
           SafeArea(
             child: Center(
@@ -30,15 +32,11 @@ class IntroPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SizedBox(height: 8),
-                    // Top section: logo & illustration
                     Column(
                       children: [
                         SizedBox(
                           height: 70,
-                          child: Image.asset(
-                            'assets/logos/logo.png',
-                            fit: BoxFit.contain,
-                          ),
+                          child: Image.asset('assets/logos/logo.png', fit: BoxFit.contain),
                         ),
                         const SizedBox(height: 24),
                         AspectRatio(
@@ -53,7 +51,6 @@ class IntroPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // Middle text
                     Column(
                       children: [
                         Text(
@@ -62,7 +59,7 @@ class IntroPage extends StatelessWidget {
                           style: GoogleFonts.alata(
                             fontSize: 30,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF222222),
+                            color: colors.textPrimary,
                             height: 1.25,
                           ),
                         ),
@@ -73,12 +70,11 @@ class IntroPage extends StatelessWidget {
                           style: GoogleFonts.alata(
                             fontSize: 16,
                             height: 1.5,
-                            color: const Color.fromRGBO(161, 164, 178, 1),
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
                     ),
-                    // Bottom actions
                     Column(
                       children: [
                         SizedBox(
@@ -86,7 +82,7 @@ class IntroPage extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () => context.push(RouteNames.register),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8E97FD),
+                              backgroundColor: AppColors.primaryPurple,
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(38),
@@ -108,7 +104,7 @@ class IntroPage extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () => context.push(RouteNames.guestName),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFFDFD),
+                              backgroundColor: colors.surface,
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(38),
@@ -117,7 +113,7 @@ class IntroPage extends StatelessWidget {
                             child: Text(
                               Intro.guest,
                               style: GoogleFonts.alata(
-                                color: const Color(0xFF8E97FD),
+                                color: AppColors.primaryPurple,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
@@ -132,7 +128,7 @@ class IntroPage extends StatelessWidget {
                             Text(
                               Intro.haveAccount,
                               style: GoogleFonts.alata(
-                                color: const Color(0xFF8A8A8F),
+                                color: colors.textSecondary,
                                 fontSize: 14,
                               ),
                             ),
@@ -141,7 +137,7 @@ class IntroPage extends StatelessWidget {
                               child: Text(
                                 Intro.logIn,
                                 style: GoogleFonts.alata(
-                                  color: const Color(0xFF8E97FD),
+                                  color: AppColors.primaryPurple,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                 ),

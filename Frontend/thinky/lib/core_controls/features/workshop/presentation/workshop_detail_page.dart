@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
@@ -9,6 +10,7 @@ import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class WorkshopDetailPage extends StatefulWidget {
   final int missionId;
@@ -69,13 +71,13 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
       });
 
       if (mounted) {
-        ErrorHandlerUI.showSuccess(context, 'Mission downloaded!');
+        ErrorHandlerUI.showSuccess(context, WorkshopTexts.downloadSuccess);
       }
     } catch (e, stack) {
       ErrorLogger().logError(e, stackTrace: stack);
       setState(() => _isDownloading = false);
       if (mounted) {
-        ErrorHandlerUI.showError(context, 'Download failed: $e');
+        ErrorHandlerUI.showError(context, '${WorkshopTexts.downloadFailed}: $e');
       }
     }
   }
@@ -87,13 +89,14 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
       ),
@@ -108,20 +111,21 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
   }
 
   Widget _buildError() {
+    final colors = context.appColors;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.textHint),
+          Icon(Icons.error_outline_rounded, size: 48, color: colors.textHint),
           const SizedBox(height: AppDimens.md),
           Text(
-            'Could not load mission',
-            style: GoogleFonts.alata(fontSize: 16, color: AppColors.textSecondary),
+            WorkshopTexts.couldNotLoadMission,
+            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
           ),
           const SizedBox(height: AppDimens.md),
           TextButton(
             onPressed: _loadMission,
-            child: Text('Try again', style: GoogleFonts.alata(color: AppColors.primaryPurple)),
+            child: Text(Common.tryAgain, style: GoogleFonts.alata(color: AppColors.primaryPurple)),
           ),
         ],
       ),
@@ -129,6 +133,7 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
   }
 
   Widget _buildContent() {
+    final colors = context.appColors;
     final mission = _mission!;
 
     return SingleChildScrollView(
@@ -138,7 +143,6 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header icon
           FadeInWidget(
             child: Center(
               child: Container(
@@ -158,7 +162,6 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
           ),
           const SizedBox(height: AppDimens.lg),
 
-          // Title
           FadeInWidget(
             delay: const Duration(milliseconds: 100),
             child: Text(
@@ -166,43 +169,41 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
               style: GoogleFonts.alata(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
           const SizedBox(height: 6),
 
-          // Author & stats
           FadeInWidget(
             delay: const Duration(milliseconds: 150),
             child: Row(
               children: [
-                Icon(Icons.person_outline_rounded, size: 16, color: AppColors.textSecondary),
+                Icon(Icons.person_outline_rounded, size: 16, color: colors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   mission.authorName,
-                  style: GoogleFonts.alata(fontSize: 13, color: AppColors.textSecondary),
+                  style: GoogleFonts.alata(fontSize: 13, color: colors.textSecondary),
                 ),
                 const SizedBox(width: AppDimens.md),
-                Icon(Icons.download_rounded, size: 16, color: AppColors.textSecondary),
+                Icon(Icons.download_rounded, size: 16, color: colors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   '${mission.downloadCount}',
-                  style: GoogleFonts.alata(fontSize: 13, color: AppColors.textSecondary),
+                  style: GoogleFonts.alata(fontSize: 13, color: colors.textSecondary),
                 ),
                 const SizedBox(width: AppDimens.md),
-                Icon(Icons.quiz_rounded, size: 16, color: AppColors.textSecondary),
+                Icon(Icons.quiz_rounded, size: 16, color: colors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
-                  '${mission.questions.length} questions',
-                  style: GoogleFonts.alata(fontSize: 13, color: AppColors.textSecondary),
+                  '${mission.questions.length} ${WorkshopTexts.questionsCount}',
+                  style: GoogleFonts.alata(fontSize: 13, color: colors.textSecondary),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppDimens.md),
 
-          // Tags
           if (mission.tags.isNotEmpty)
             FadeInWidget(
               delay: const Duration(milliseconds: 200),
@@ -229,7 +230,6 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
             ),
           const SizedBox(height: AppDimens.lg),
 
-          // Description
           if (mission.description != null && mission.description!.isNotEmpty)
             FadeInWidget(
               delay: const Duration(milliseconds: 250),
@@ -237,29 +237,28 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
                 mission.description!,
                 style: GoogleFonts.alata(
                   fontSize: 14,
-                  color: AppColors.textGrey,
+                  color: colors.iconColor,
                   height: 1.5,
                 ),
               ),
             ),
           const SizedBox(height: AppDimens.lg),
 
-          // Version info
           FadeInWidget(
             delay: const Duration(milliseconds: 300),
             child: Container(
               padding: const EdgeInsets.all(AppDimens.md),
               decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(AppDimens.radiusMd),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 18, color: AppColors.textMuted),
+                  Icon(Icons.info_outline_rounded, size: 18, color: colors.textMuted),
                   const SizedBox(width: AppDimens.sm),
                   Text(
                     'Version ${mission.version} • ${mission.missionType.toUpperCase()}',
-                    style: GoogleFonts.alata(fontSize: 12, color: AppColors.textMuted),
+                    style: GoogleFonts.alata(fontSize: 12, color: colors.textMuted),
                   ),
                 ],
               ),
@@ -267,7 +266,6 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
           ),
           const SizedBox(height: AppDimens.xl),
 
-          // Download / Play button
           FadeInWidget(
             delay: const Duration(milliseconds: 350),
             child: SizedBox(
@@ -306,10 +304,10 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
                       ),
                 label: Text(
                   _isDownloading
-                      ? 'Downloading...'
+                      ? WorkshopTexts.downloading
                       : _isDownloaded
-                          ? 'Play Quiz'
-                          : 'Download Mission',
+                          ? WorkshopTexts.playQuiz
+                          : WorkshopTexts.downloadMissionButton,
                   style: GoogleFonts.alata(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

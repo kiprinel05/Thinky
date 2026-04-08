@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 
@@ -31,7 +32,7 @@ class _HelpPageState extends State<HelpPage> {
     _FaqItem(
       question: 'Cum funcționează mascota Pixy?',
       answer:
-          'Pixy este mascota ta digitală care „învață” din interacțiunile tale. Pe măsură ce completezi misiuni și îi dai feedback, Pixy simulează cum un model de IA se îmbunătățește din exemple. Poți și să vorbești cu Pixy în secțiunea de chat!',
+          'Pixy este mascota ta digitală care „învață" din interacțiunile tale. Pe măsură ce completezi misiuni și îi dai feedback, Pixy simulează cum un model de IA se îmbunătățește din exemple. Poți și să vorbești cu Pixy în secțiunea de chat!',
     ),
     _FaqItem(
       question: 'Ce sunt misiunile și cum câștig puncte?',
@@ -67,25 +68,26 @@ class _HelpPageState extends State<HelpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
             pinned: true,
-            backgroundColor: AppColors.backgroundWhite,
+            backgroundColor: colors.background,
             elevation: 0,
             leading: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundGrey,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    size: 18, color: AppColors.textPrimary),
+                child: Icon(Icons.arrow_back_ios_new_rounded,
+                    size: 18, color: colors.textPrimary),
               ),
               onPressed: () => context.pop(),
             ),
@@ -96,7 +98,7 @@ class _HelpPageState extends State<HelpPage> {
                 style: GoogleFonts.alata(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -125,14 +127,15 @@ class _HelpPageState extends State<HelpPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final colors = context.appColors;
     return FadeInWidget(
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppDimens.xl),
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(AppDimens.radiusXl),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(color: colors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryPurple.withValues(alpha: 0.06),
@@ -166,7 +169,7 @@ class _HelpPageState extends State<HelpPage> {
                     style: GoogleFonts.alata(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -174,7 +177,7 @@ class _HelpPageState extends State<HelpPage> {
                     'Găsește răspunsuri la cele mai comune întrebări despre Thinky.',
                     style: GoogleFonts.alata(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -187,6 +190,7 @@ class _HelpPageState extends State<HelpPage> {
   }
 
   Widget _buildFaqList(BuildContext context) {
+    final colors = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -195,7 +199,7 @@ class _HelpPageState extends State<HelpPage> {
           style: GoogleFonts.alata(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppDimens.lg),
@@ -213,6 +217,7 @@ class _HelpPageState extends State<HelpPage> {
   }
 
   Widget _buildFaqTile(int index) {
+    final colors = context.appColors;
     final faq = _faqs[index];
     final isExpanded = _expandedIndex == index;
 
@@ -233,13 +238,13 @@ class _HelpPageState extends State<HelpPage> {
           padding: const EdgeInsets.all(AppDimens.lg),
           decoration: BoxDecoration(
             color: isExpanded
-                ? Colors.white
-                : AppColors.backgroundGrey,
+                ? colors.cardColor
+                : colors.surface,
             borderRadius: BorderRadius.circular(AppDimens.radiusMd),
             border: Border.all(
               color: isExpanded
                   ? AppColors.primaryPurple.withValues(alpha: 0.2)
-                  : AppColors.borderLight,
+                  : colors.border,
               width: 1,
             ),
             boxShadow: isExpanded
@@ -263,7 +268,7 @@ class _HelpPageState extends State<HelpPage> {
                       style: GoogleFonts.alata(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -287,7 +292,7 @@ class _HelpPageState extends State<HelpPage> {
                     style: GoogleFonts.alata(
                       fontSize: 14,
                       height: 1.5,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ),

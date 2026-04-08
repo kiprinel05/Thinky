@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,7 @@ void main() {
   late MockClient mockClient;
 
   setUp(() {
+    dotenv.testLoad(fileInput: 'API_BASE_URL=http://localhost:8000\n');
     mockClient = MockClient();
     ApiClient.client = mockClient;
     SharedPreferences.setMockInitialValues({});

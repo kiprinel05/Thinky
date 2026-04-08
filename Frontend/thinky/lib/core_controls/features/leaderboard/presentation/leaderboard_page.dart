@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
@@ -128,8 +129,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,6 +146,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 
   Widget _buildHeader() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppDimens.lg,
@@ -162,7 +165,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                   style: GoogleFonts.alata(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: AppDimens.sm),
@@ -178,7 +181,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               'See how you compare with other players',
               style: GoogleFonts.alata(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -188,6 +191,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 
   Widget _buildFilters() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.lg,
@@ -199,7 +203,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             'Include Workshop missions',
             style: GoogleFonts.alata(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           const Spacer(),
@@ -217,6 +221,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 
   Widget _buildBody() {
+    final colors = context.appColors;
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryPurple),
@@ -228,14 +233,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline_rounded,
-                size: 40, color: AppColors.textHint),
+            Icon(Icons.error_outline_rounded,
+                size: 40, color: colors.textHint),
             const SizedBox(height: AppDimens.md),
             Text(
               'Could not load leaderboard',
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: AppDimens.sm),
@@ -256,14 +261,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.leaderboard_outlined,
-                size: 40, color: AppColors.textHint),
+            Icon(Icons.leaderboard_outlined,
+                size: 40, color: colors.textHint),
             const SizedBox(height: AppDimens.md),
             Text(
               'No players yet',
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -271,7 +276,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               'Complete some missions to appear here.',
               style: GoogleFonts.alata(
                 fontSize: 13,
-                color: AppColors.textHint,
+                color: colors.textHint,
               ),
             ),
           ],
@@ -304,6 +309,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 
   Widget _buildStatsCard(LeaderboardStatsModel stats) {
+    final colors = context.appColors;
     final values = [
       stats.minPoints,
       stats.averagePoints,
@@ -318,7 +324,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       child: Container(
         padding: const EdgeInsets.all(AppDimens.md),
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
         ),
         child: Column(
@@ -329,7 +335,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               style: GoogleFonts.alata(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: AppDimens.sm),
@@ -358,7 +364,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     label: 'Min',
                     value: stats.minPoints,
                     maxValue: maxValue,
-                    color: AppColors.textHint,
+                    color: colors.textHint,
                   ),
                   const SizedBox(width: AppDimens.sm),
                   _buildBar(
@@ -388,13 +394,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     required String value,
     required IconData icon,
   }) {
+    final colors = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.md,
         vertical: AppDimens.xs + 2,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -406,7 +413,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             '$label: $value',
             style: GoogleFonts.alata(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -420,6 +427,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     required double maxValue,
     required Color color,
   }) {
+    final colors = context.appColors;
     final heightFactor = maxValue > 0 ? (value / maxValue).clamp(0.1, 1.0) : 0.1;
     return Expanded(
       child: Column(
@@ -450,7 +458,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             label,
             style: GoogleFonts.alata(
               fontSize: 11,
-              color: AppColors.textMuted,
+              color: colors.textMuted,
             ),
           ),
         ],
@@ -459,6 +467,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   }
 
   Widget _buildEntryTile(int index, LeaderboardEntryModel entry) {
+    final colors = context.appColors;
     final rank = index + 1;
     final isTop3 = rank <= 3;
     Color badgeColor;
@@ -478,7 +487,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         badgeIcon = Icons.emoji_events_rounded;
         break;
       default:
-        badgeColor = AppColors.backgroundGrey;
+        badgeColor = colors.surface;
     }
 
     return FadeInWidget(
@@ -487,9 +496,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         margin: const EdgeInsets.only(bottom: AppDimens.sm),
         padding: const EdgeInsets.all(AppDimens.md),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardColor,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(color: colors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -518,7 +527,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                         style: GoogleFonts.alata(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
               ),
@@ -534,7 +543,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                       fontSize: 15,
                       fontWeight:
                           isTop3 ? FontWeight.w700 : FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -544,7 +553,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     '${entry.missionsCompleted} missions • ${entry.workshopMissionsCompleted} workshop',
                     style: GoogleFonts.alata(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -570,4 +579,3 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     );
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
@@ -22,14 +23,15 @@ class RegisterPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formState = ref.watch(registerFormProvider);
     final formController = ref.read(registerFormProvider.notifier);
+    final colors = context.appColors;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: colors.textPrimary,
       ),
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           // Background image
@@ -138,7 +140,7 @@ class RegisterPage extends ConsumerWidget {
                       Text(
                         'Already have an account? ',
                         style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                       TextButton(
@@ -201,7 +203,7 @@ class _PasswordField extends StatelessWidget {
       suffixIcon: IconButton(
         icon: Icon(
           obscureText ? Icons.visibility : Icons.visibility_off,
-          color: AppColors.textGrey,
+          color: context.appColors.iconColor,
         ),
         onPressed: onToggleVisibility,
       ),

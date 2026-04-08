@@ -22,7 +22,7 @@ void main() {
       final mission = Mission.fromJson(json);
       expect(mission.id, 1);
       expect(mission.title, 'T');
-      expect(mission.progress.isCompleted, true);
+      expect(mission.progress?.isCompleted, true);
       
       // We don't necessarily have toJson for check generally, but if we did we'd test it. 
       // Assuming deserialization is the key part for frontend.

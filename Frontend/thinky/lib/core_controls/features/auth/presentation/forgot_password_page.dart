@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'verify_code_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -67,58 +69,50 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryPurple = Color(0xFF8E97FD);
+    final colors = context.appColors;
 
     InputDecoration inputDecoration(String hint) => InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.alata(
-        color: const Color(0xFFB7BAC3),
-        fontSize: 14,
-      ),
+      hintStyle: GoogleFonts.alata(color: colors.textHint, fontSize: 14),
       filled: true,
-      fillColor: const Color(0xFFF2F3F7),
+      fillColor: colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderSide: BorderSide(color: colors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderSide: BorderSide(color: AppColors.primaryPurple),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
     );
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: colors.textPrimary,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/auth/login/background.png',
-              fit: BoxFit.cover,
-            ),
+            top: 0, left: 0, right: 0,
+            child: Image.asset('assets/auth/login/background.png', fit: BoxFit.cover),
           ),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: _isEmailSent
-                  ? _buildSuccessState(primaryPurple)
+                  ? _buildSuccessState(colors)
                   : Form(
                       key: _formKey,
                       child: Column(
@@ -130,6 +124,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             style: GoogleFonts.alata(
                               fontSize: 26,
                               fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -137,7 +132,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             'Don\'t worry! Enter your email address and we\'ll send you a 6-digit code to reset your password.',
                             style: GoogleFonts.alata(
                               fontSize: 14,
-                              color: const Color(0xFF8A8A8F),
+                              color: colors.textSecondary,
                               height: 1.5,
                             ),
                           ),
@@ -147,24 +142,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               padding: const EdgeInsets.all(12),
                               margin: const EdgeInsets.only(bottom: 16),
                               decoration: BoxDecoration(
-                                color: Colors.red.shade50,
+                                color: AppColors.error.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.red.shade300),
+                                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: Colors.red.shade700,
-                                  ),
+                                  const Icon(Icons.error_outline, color: AppColors.error),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: GoogleFonts.alata(
-                                        color: Colors.red.shade700,
-                                        fontSize: 12,
-                                      ),
+                                      style: GoogleFonts.alata(color: AppColors.error, fontSize: 12),
                                     ),
                                   ),
                                 ],
@@ -174,13 +163,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           TextFormField(
                             controller: _emailController,
                             decoration: inputDecoration('Email address'),
+                            style: TextStyle(color: colors.textPrimary),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Email is required';
                               }
-                              if (!value.contains('@') ||
-                                  !value.contains('.')) {
+                              if (!value.contains('@') || !value.contains('.')) {
                                 return 'Please enter a valid email';
                               }
                               return null;
@@ -190,34 +179,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           SizedBox(
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : _handleResetPassword,
+                              onPressed: _isLoading ? null : _handleResetPassword,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryPurple,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
+                                backgroundColor: AppColors.primaryPurple,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                                 elevation: 0,
                               ),
                               child: _isLoading
                                   ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
+                                      height: 20, width: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                       ),
                                     )
                                   : Text(
                                       'SEND CODE',
-                                      style: GoogleFonts.alata(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                      style: GoogleFonts.alata(color: Colors.white, fontWeight: FontWeight.w700),
                                     ),
                             ),
                           ),
@@ -227,17 +205,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             children: [
                               Text(
                                 'Remember your password? ',
-                                style: GoogleFonts.alata(
-                                  fontSize: 12,
-                                  color: const Color(0xFF8A8A8F),
-                                ),
+                                style: GoogleFonts.alata(fontSize: 12, color: colors.textSecondary),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(),
                                 child: Text(
                                   'LOG IN',
                                   style: GoogleFonts.alata(
-                                    color: primaryPurple,
+                                    color: AppColors.primaryPurple,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -255,7 +230,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
-  Widget _buildSuccessState(Color primaryPurple) {
+  Widget _buildSuccessState(AppColorsExtension colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -264,69 +239,60 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.green.shade50,
+            color: AppColors.success.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.check_circle_outline,
-            size: 50,
-            color: Colors.green.shade600,
-          ),
+          child: const Icon(Icons.check_circle_outline, size: 50, color: AppColors.success),
         ),
         const SizedBox(height: 24),
         Text(
           'Check your email',
-          style: GoogleFonts.alata(fontSize: 26, fontWeight: FontWeight.w700),
+          style: GoogleFonts.alata(
+            fontSize: 26,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
         ),
         const SizedBox(height: 12),
-                          Text(
-                            'We\'ve sent a 6-digit code to\n${_emailController.text}',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.alata(
-                              fontSize: 14,
-                              color: const Color(0xFF8A8A8F),
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          SizedBox(
-                            height: 56,
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _navigateToVerifyCode,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryPurple,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(28),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: Text(
-                                'ENTER CODE',
-                                style: GoogleFonts.alata(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isEmailSent = false;
-                                _emailController.clear();
-                              });
-                            },
-                            child: Text(
-                              'Didn\'t receive the code?',
-                              style: GoogleFonts.alata(
-                                color: primaryPurple,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
+        Text(
+          'We\'ve sent a 6-digit code to\n${_emailController.text}',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.alata(fontSize: 14, color: colors.textSecondary, height: 1.5),
+        ),
+        const SizedBox(height: 40),
+        SizedBox(
+          height: 56,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _navigateToVerifyCode,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryPurple,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+              elevation: 0,
+            ),
+            child: Text(
+              'ENTER CODE',
+              style: GoogleFonts.alata(color: Colors.white, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _isEmailSent = false;
+              _emailController.clear();
+            });
+          },
+          child: Text(
+            'Didn\'t receive the code?',
+            style: GoogleFonts.alata(
+              color: AppColors.primaryPurple,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ],
     );
   }

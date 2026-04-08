@@ -8,6 +8,7 @@ import 'package:thinky/core_controls/services/app_state_service.dart'; // Keep f
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -45,6 +46,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     return Scaffold(
       backgroundColor: const Color(0xFF9AA2FD),
       body: SafeArea(
@@ -90,6 +92,7 @@ class WelcomePage1 extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     final authState = ref.watch(authStateProvider);
     final userName = authState.user?.username ?? authState.user?.guestName ?? 'there';
 
@@ -212,7 +215,7 @@ class WelcomePage1 extends ConsumerWidget {
   }
 }
 
-class WelcomePage2 extends StatelessWidget {
+class WelcomePage2 extends ConsumerWidget {
   final VoidCallback onNext;
   final bool isFirstPage;
 
@@ -223,7 +226,8 @@ class WelcomePage2 extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     return Stack(
       children: [
         Positioned(

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
@@ -10,17 +11,12 @@ import 'dart:convert';
 
 import 'api_client_test.mocks.dart';
 
-// Reuse the generated mock from api_client_test.mocks.dart since we need the same http.Client mock
-// We can just point to it or regenerate it. To keep it simple, let's assume we can reuse or just generate again.
-// Actually, it's better to generate mocks for this file too to be self-contained, 
-// or define a shared mocks file.
-// For now, let's just use the same annotation and it will generate `auth_service_test.mocks.dart`.
-
 @GenerateMocks([http.Client])
 void main() {
   late MockClient mockClient;
 
   setUp(() {
+    dotenv.testLoad(fileInput: 'API_BASE_URL=http://localhost:8000\n');
     mockClient = MockClient();
     ApiClient.client = mockClient;
     SharedPreferences.setMockInitialValues({});

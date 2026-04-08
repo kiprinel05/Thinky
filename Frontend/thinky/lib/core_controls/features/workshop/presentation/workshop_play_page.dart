@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class WorkshopPlayPage extends StatefulWidget {
   final int missionId;
@@ -64,28 +66,29 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
+      return Scaffold(
+        backgroundColor: colors.background,
+        body: const Center(child: CircularProgressIndicator(color: AppColors.primaryPurple)),
       );
     }
 
     if (_mission == null) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios_rounded, color: colors.textPrimary),
             onPressed: () => context.pop(),
           ),
         ),
         body: Center(
           child: Text(
-            'Mission not found',
-            style: GoogleFonts.alata(fontSize: 16, color: AppColors.textSecondary),
+            WorkshopTexts.missionNotFound,
+            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
           ),
         ),
       );
@@ -96,17 +99,18 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
   }
 
   Widget _buildQuiz() {
+    final colors = context.appColors;
     final question = _mission!.questions[_currentQuestion];
     final total = _mission!.questions.length;
     final progress = (_currentQuestion + 1) / total;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: colors.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.close_rounded, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -114,7 +118,7 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
           style: GoogleFonts.alata(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -122,7 +126,6 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Gradient header background similar to default quiz
             Positioned(
               top: 0,
               left: 0,
@@ -147,19 +150,17 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppDimens.sm),
-                  // Progress bar styled like mission quiz
                   _buildStyledProgress(progress, total),
                   const SizedBox(height: AppDimens.lg),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          // Question card
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(AppDimens.lg),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colors.cardColor,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
@@ -182,7 +183,7 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
-                                    'Question ${_currentQuestion + 1}',
+                                    '${WorkshopTexts.questionLabel} ${_currentQuestion + 1}',
                                     style: GoogleFonts.alata(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
@@ -196,21 +197,20 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                                   style: GoogleFonts.alata(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
+                                    color: colors.textPrimary,
                                     height: 1.4,
                                   ),
                                 ),
                                 const SizedBox(height: AppDimens.lg),
-                                // Answer buttons
                                 ...question.answers.asMap().entries.map((entry) {
                                   final i = entry.key;
                                   final answer = entry.value;
                                   final isCorrect = i == question.correctAnswerIndex;
                                   final isSelected = _selectedAnswer == i;
 
-                                  Color bgColor = const Color(0xFFF2F3F7);
-                                  Color borderColor = const Color(0xFFE0E2EA);
-                                  Color textColor = AppColors.textPrimary;
+                                  Color bgColor = colors.inputFill;
+                                  Color borderColor = colors.border;
+                                  Color textColor = colors.textPrimary;
                                   Gradient? gradient;
                                   List<BoxShadow>? shadows;
 
@@ -307,7 +307,6 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                             ),
                           ),
                           const SizedBox(height: AppDimens.xl),
-                          // Next button
                           if (_answered)
                             Padding(
                               padding: const EdgeInsets.only(
@@ -332,8 +331,8 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                                   child: Text(
                                     _currentQuestion + 1 >=
                                             _mission!.questions.length
-                                        ? 'See Results'
-                                        : 'Next Question',
+                                        ? WorkshopTexts.seeResults
+                                        : WorkshopTexts.nextQuestion,
                                     style: GoogleFonts.alata(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -363,7 +362,7 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Question ${_currentQuestion + 1} of $total',
+              '${WorkshopTexts.questionLabel} ${_currentQuestion + 1} ${Quiz.ofLabel} $total',
               style: GoogleFonts.alata(
                 color: Colors.white,
                 fontSize: 14,
@@ -429,12 +428,13 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
   }
 
   Widget _buildResults() {
+    final colors = context.appColors;
     final total = _mission!.questions.length;
     final percentage = ((_correctCount / total) * 100).round();
     final isPerfect = _correctCount == total;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppDimens.lg),
@@ -442,7 +442,6 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              // Result icon
               Container(
                 width: 100,
                 height: 100,
@@ -460,19 +459,19 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
               ),
               const SizedBox(height: AppDimens.xl),
               Text(
-                isPerfect ? 'Perfect!' : 'Quiz Complete!',
+                isPerfect ? WorkshopTexts.perfect : WorkshopTexts.quizComplete,
                 style: GoogleFonts.alata(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppDimens.sm),
               Text(
-                '$_correctCount / $total correct ($percentage%)',
+                '$_correctCount / $total ${WorkshopTexts.correct} ($percentage%)',
                 style: GoogleFonts.alata(
                   fontSize: 18,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppDimens.sm),
@@ -480,12 +479,11 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                 _mission!.title,
                 style: GoogleFonts.alata(
                   fontSize: 14,
-                  color: AppColors.textMuted,
+                  color: colors.textMuted,
                 ),
                 textAlign: TextAlign.center,
               ),
               const Spacer(),
-              // Buttons
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -508,7 +506,7 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Play Again',
+                    WorkshopTexts.playAgain,
                     style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -520,14 +518,14 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    side: const BorderSide(color: Color(0xFFE8E8ED)),
+                    foregroundColor: colors.textSecondary,
+                    side: BorderSide(color: colors.border),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                     ),
                   ),
                   child: Text(
-                    'Back to Missions',
+                    Common.backToMissions,
                     style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),

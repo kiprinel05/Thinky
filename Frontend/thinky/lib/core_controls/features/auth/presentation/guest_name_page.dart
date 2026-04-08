@@ -8,6 +8,9 @@ import 'package:thinky/base_controls/base_page.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_state.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 class GuestNamePage extends BasePage {
@@ -17,20 +20,16 @@ class GuestNamePage extends BasePage {
   Widget buildBody(BuildContext context, WidgetRef ref) {
     return const _GuestNameForm();
   }
-  
+
   @override
-  // Hide standard BasePage loading/error overlay to use custom UI?
-  // Actually BasePage is Stateless, so we can just use buildBody.
-  // But we want to handle state changes here.
-  // Let's implement _GuestNameForm as ConsumerStatefulWidget
   Widget? buildAppBar(BuildContext context) => AppBar(
-    backgroundColor: Colors.white,
+    backgroundColor: context.appColors.background,
     elevation: 0,
-    foregroundColor: Colors.black,
+    foregroundColor: context.appColors.textPrimary,
   );
-  
+
   @override
-  Color get backgroundColor => Colors.white;
+  Color get backgroundColor => AppColors.backgroundWhite;
 }
 
 class _GuestNameForm extends ConsumerStatefulWidget {
@@ -43,7 +42,7 @@ class _GuestNameForm extends ConsumerStatefulWidget {
 class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -54,32 +53,27 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
-    // Dismiss keyboard
+
     FocusScope.of(context).unfocus();
 
     final controller = ref.read(authStateProvider.notifier);
-    
+
     final success = await controller.registerGuest(
       name: _nameController.text.trim(),
     );
 
     if (success && mounted) {
-      // Navigate to Welcome
       context.go(RouteNames.welcome);
     }
-    // Error is handled by AuthController state, monitored in build (if we used BasePage listener)
-    // Here we can show a snackbar if error exists in state? 
-    // Ideally BaseController handles showing error if we watch state.
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryPurple = Color(0xFF8E97FD);
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     final authState = ref.watch(authStateProvider);
     final isLoading = authState.isLoading;
 
-    // Listen for error changes to show snackbar manually if not using BasePage's auto error
     ref.listen<AuthState>(authStateProvider, (previous, next) {
       final error = next.errorMessage;
       if (next.isError && error != null) {
@@ -90,27 +84,27 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
     InputDecoration inputDecoration(String hint) => InputDecoration(
       hintText: hint,
       hintStyle: GoogleFonts.alata(
-        color: const Color(0xFFB7BAC3),
+        color: colors.textHint,
         fontSize: 14,
       ),
       filled: true,
-      fillColor: const Color(0xFFF2F3F7),
+      fillColor: colors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderSide: BorderSide(color: colors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderSide: BorderSide(color: AppColors.primaryPurple),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
     );
 
@@ -139,22 +133,22 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                     style: GoogleFonts.alata(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 18),
                   Text(
                     Auth.guestNameSubtitle,
                     style: GoogleFonts.alata(
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                       fontSize: 12,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
-                  // Form Fields
                   TextFormField(
                     controller: _nameController,
                     decoration: inputDecoration(Auth.guestNameHint),
+                    style: TextStyle(color: colors.textPrimary),
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _handleContinue(),
                     validator: (value) {
@@ -174,7 +168,7 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _handleContinue,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryPurple,
+                        backgroundColor: AppColors.primaryPurple,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),
@@ -190,8 +184,8 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
                               ),
                             )
                           : Text(
-                                Auth.continueAction,
-                                style: GoogleFonts.alata(
+                              Auth.continueAction,
+                              style: GoogleFonts.alata(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
                               ),

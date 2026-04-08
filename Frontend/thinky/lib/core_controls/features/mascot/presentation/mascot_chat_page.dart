@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/services/mascot_service.dart';
 import 'package:thinky/core_controls/services/context_collector.dart';
@@ -90,14 +91,15 @@ class _MascotChatPageState extends State<MascotChatPage>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: Column(
         children: [
           _buildHeader(),
           Expanded(
             child: Container(
-              color: AppColors.backgroundWhite,
+              color: colors.background,
               child: ListView.builder(
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(
@@ -123,6 +125,7 @@ class _MascotChatPageState extends State<MascotChatPage>
   }
 
   Widget _buildHeader() {
+    final colors = context.appColors;
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppDimens.sm,
@@ -131,9 +134,9 @@ class _MascotChatPageState extends State<MascotChatPage>
         AppDimens.lg,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
+        color: colors.surface,
         border: Border(
-          bottom: BorderSide(color: AppColors.borderLight, width: 1),
+          bottom: BorderSide(color: colors.border, width: 1),
         ),
         boxShadow: [
           BoxShadow(
@@ -149,14 +152,14 @@ class _MascotChatPageState extends State<MascotChatPage>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.borderLight, width: 1),
+                border: Border.all(color: colors.border, width: 1),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios_new_rounded,
                 size: 18,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             onPressed: () => context.pop(),
@@ -194,7 +197,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                       style: GoogleFonts.alata(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
@@ -202,7 +205,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                       style: GoogleFonts.alata(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -217,6 +220,7 @@ class _MascotChatPageState extends State<MascotChatPage>
   }
 
   Widget _buildMessageBubble(_ChatMessage message, int index) {
+    final colors = context.appColors;
     final isUser = message.isUser;
     final isWelcome = index == 0 && !isUser;
 
@@ -242,7 +246,7 @@ class _MascotChatPageState extends State<MascotChatPage>
               decoration: BoxDecoration(
                 color: isUser
                     ? AppColors.primaryPurple
-                    : AppColors.backgroundWhite,
+                    : colors.background,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(18),
                   topRight: const Radius.circular(18),
@@ -252,7 +256,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                 border: isUser
                     ? null
                     : Border.all(
-                        color: AppColors.borderLight,
+                        color: colors.border,
                         width: 1,
                       ),
                 boxShadow: [
@@ -274,7 +278,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                         height: 1.5,
                         color: isUser
                             ? Colors.white
-                            : AppColors.textPrimary,
+                            : colors.textPrimary,
                         fontWeight: isUser
                             ? FontWeight.w500
                             : FontWeight.w400,
@@ -288,6 +292,7 @@ class _MascotChatPageState extends State<MascotChatPage>
   }
 
   Widget _buildWelcomeContent(String text) {
+    final colors = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -296,7 +301,7 @@ class _MascotChatPageState extends State<MascotChatPage>
           style: GoogleFonts.alata(
             fontSize: 15,
             height: 1.5,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppDimens.sm),
@@ -363,6 +368,7 @@ class _MascotChatPageState extends State<MascotChatPage>
   }
 
   Widget _buildTypingIndicator() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.md),
       child: Row(
@@ -376,14 +382,14 @@ class _MascotChatPageState extends State<MascotChatPage>
               vertical: AppDimens.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.backgroundWhite,
+              color: colors.background,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(18),
                 topRight: const Radius.circular(18),
                 bottomLeft: const Radius.circular(4),
                 bottomRight: const Radius.circular(18),
               ),
-              border: Border.all(color: AppColors.borderLight, width: 1),
+              border: Border.all(color: colors.border, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -430,6 +436,7 @@ class _MascotChatPageState extends State<MascotChatPage>
   }
 
   Widget _buildInputBar() {
+    final colors = context.appColors;
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppDimens.lg,
@@ -438,7 +445,7 @@ class _MascotChatPageState extends State<MascotChatPage>
         MediaQuery.of(context).padding.bottom + 80,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: colors.background,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -453,9 +460,9 @@ class _MascotChatPageState extends State<MascotChatPage>
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.backgroundGrey,
+                color: colors.inputFill,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.borderLight, width: 1),
+                border: Border.all(color: colors.border, width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.03),
@@ -471,14 +478,14 @@ class _MascotChatPageState extends State<MascotChatPage>
                 minLines: 1,
                 style: GoogleFonts.alata(
                   fontSize: 15,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Scrie un mesaj...',
                   hintStyle: GoogleFonts.alata(
                     fontSize: 15,
-                    color: AppColors.textHint,
+                    color: colors.textHint,
                     fontWeight: FontWeight.w400,
                   ),
                   border: InputBorder.none,

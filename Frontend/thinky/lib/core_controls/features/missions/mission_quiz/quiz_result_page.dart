@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart' show Quiz;
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'domain/quiz_models.dart';
 import 'quiz_answers_page.dart';
 
-class QuizResultPage extends StatelessWidget {
+class QuizResultPage extends ConsumerWidget {
   final QuizResult result;
   final List<Question> questions;
   final Map<int, int> selectedAnswers;
@@ -21,7 +23,8 @@ class QuizResultPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     final percentage = result.percentage;
     final isExcellent = percentage >= 80;
     final isGood = percentage >= 60;

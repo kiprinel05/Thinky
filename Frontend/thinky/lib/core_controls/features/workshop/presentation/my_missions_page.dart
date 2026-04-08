@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class MyMissionsPage extends StatefulWidget {
   const MyMissionsPage({super.key});
@@ -49,21 +51,22 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'My Missions',
+          WorkshopTexts.myMissions,
           style: GoogleFonts.alata(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -81,20 +84,21 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
   }
 
   Widget _buildError() {
+    final colors = context.appColors;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.textHint),
+          Icon(Icons.error_outline_rounded, size: 48, color: colors.textHint),
           const SizedBox(height: AppDimens.md),
           Text(
-            'Could not load your missions',
-            style: GoogleFonts.alata(fontSize: 16, color: AppColors.textSecondary),
+            WorkshopTexts.couldNotLoadYourMissions,
+            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
           ),
           const SizedBox(height: AppDimens.md),
           TextButton(
             onPressed: _loadMyMissions,
-            child: Text('Try again', style: GoogleFonts.alata(color: AppColors.primaryPurple)),
+            child: Text(Common.tryAgain, style: GoogleFonts.alata(color: AppColors.primaryPurple)),
           ),
         ],
       ),
@@ -102,15 +106,16 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
   }
 
   Widget _buildEmpty() {
+    final colors = context.appColors;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.create_rounded, size: 48, color: AppColors.textHint),
+          Icon(Icons.create_rounded, size: 48, color: colors.textHint),
           const SizedBox(height: AppDimens.md),
           Text(
-            "You haven't created any missions yet",
-            style: GoogleFonts.alata(fontSize: 16, color: AppColors.textSecondary),
+            WorkshopTexts.noMissionsCreated,
+            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
           ),
           const SizedBox(height: AppDimens.md),
           ElevatedButton.icon(
@@ -125,7 +130,7 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
             ),
             icon: const Icon(Icons.add_rounded, size: 20),
             label: Text(
-              'Create your first mission',
+              WorkshopTexts.createFirstMission,
               style: GoogleFonts.alata(fontWeight: FontWeight.w600),
             ),
           ),
@@ -152,15 +157,16 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
   }
 
   Widget _buildMissionCard(WorkshopMission mission) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: () => context.push('/workshop/mission/${mission.id}'),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppDimens.md),
         padding: const EdgeInsets.all(AppDimens.md),
         decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
+          color: colors.background,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -171,7 +177,6 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
         ),
         child: Row(
           children: [
-            // Icon
             Container(
               width: 44,
               height: 44,
@@ -186,7 +191,6 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
               ),
             ),
             const SizedBox(width: AppDimens.md),
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +200,7 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
                     style: GoogleFonts.alata(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -206,24 +210,23 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
                     children: [
                       Text(
                         'v${mission.version}',
-                        style: GoogleFonts.alata(fontSize: 12, color: AppColors.textMuted),
+                        style: GoogleFonts.alata(fontSize: 12, color: colors.textMuted),
                       ),
                       const SizedBox(width: AppDimens.md),
-                      Icon(Icons.download_rounded, size: 14, color: AppColors.textHint),
+                      Icon(Icons.download_rounded, size: 14, color: colors.textHint),
                       const SizedBox(width: 2),
                       Text(
                         '${mission.downloadCount}',
-                        style: GoogleFonts.alata(fontSize: 12, color: AppColors.textMuted),
+                        style: GoogleFonts.alata(fontSize: 12, color: colors.textMuted),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            // Edit icon
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textHint,
+              color: colors.textHint,
             ),
           ],
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
 
 class EmptyStateWidget extends StatelessWidget {
@@ -16,6 +16,7 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -25,12 +26,14 @@ class EmptyStateWidget extends StatelessWidget {
             Icon(
               icon,
               size: iconSize,
-              color: AppColors.textMuted.withAlpha(128),
+              color: colors.textMuted.withAlpha(128),
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.textMuted),
+              style: AppTypography.bodyMedium.copyWith(
+                color: colors.textMuted,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

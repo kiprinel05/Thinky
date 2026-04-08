@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/core_controls/services/theme_service.dart';
 import 'package:thinky/core_controls/routing/app_router.dart';
 import 'package:thinky/shared_controls/theme/app_theme.dart';
 
-/// ThinkyApp - Main application widget
-/// Uses Riverpod for state management and go_router for navigation
 class ThinkyApp extends ConsumerWidget {
   const ThinkyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(languageProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    // Force rebuild when translations are reloaded
+    ref.watch(textRefreshProvider);
 
     return MaterialApp.router(
       title: 'Thinky',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: AppRouter.router,
       locale: locale,
       supportedLocales: const [

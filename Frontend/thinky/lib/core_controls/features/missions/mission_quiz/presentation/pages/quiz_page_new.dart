@@ -10,6 +10,7 @@ import '../controllers/quiz_controller.dart';
 import '../controllers/quiz_state.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
 // We might need to import these if we extract them or just define here
 // import 'quiz_result_page.dart'; // We will inline or use existing
@@ -28,6 +29,7 @@ class QuizPageNew extends BasePage {
   
   @override
   Widget buildBody(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     // Watch state
     final state = ref.watch(quizStateProvider);
     final controller = ref.read(quizStateProvider.notifier);
@@ -52,17 +54,18 @@ class QuizPageNew extends BasePage {
   }
 }
 
-class _QuizContent extends StatefulWidget {
+class _QuizContent extends ConsumerStatefulWidget {
   final QuizState state;
   final QuizController controller;
 
   const _QuizContent({required this.state, required this.controller});
 
   @override
-  State<_QuizContent> createState() => _QuizContentState();
+  ConsumerState<_QuizContent> createState() => _QuizContentState();
 }
 
-class _QuizContentState extends State<_QuizContent> with SingleTickerProviderStateMixin {
+class _QuizContentState extends ConsumerState<_QuizContent>
+    with SingleTickerProviderStateMixin {
   late AnimationController _pixyAnimationController;
   late Animation<double> _pixyScaleAnimation;
 
@@ -108,6 +111,7 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     // If result exists, show Result View
     if (widget.state.quizResult != null) {
       return _QuizResultView(result: widget.state.quizResult!);
@@ -538,13 +542,14 @@ class _QuizContentState extends State<_QuizContent> with SingleTickerProviderSta
   }
 }
 
-class _QuizResultView extends StatelessWidget {
+class _QuizResultView extends ConsumerWidget {
   final QuizResult result;
 
   const _QuizResultView({required this.result});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

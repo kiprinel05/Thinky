@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
@@ -8,20 +9,23 @@ import 'package:thinky/core_controls/services/mission_service.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
-class MissionsMenuPage extends StatefulWidget {
+class MissionsMenuPage extends ConsumerStatefulWidget {
   const MissionsMenuPage({super.key});
 
   @override
-  State<MissionsMenuPage> createState() => _MissionsMenuPageState();
+  ConsumerState<MissionsMenuPage> createState() => _MissionsMenuPageState();
 }
 
-class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProviderStateMixin {
+class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
+    with TickerProviderStateMixin {
   List<Mission> _missions = [];
   List<WorkshopMissionDetail> _workshopMissions = [];
   bool _isLoading = true;
@@ -95,8 +99,10 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -140,7 +146,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       style: GoogleFonts.alata(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF222222),
+                        color: colors.textPrimary,
                         height: 1.2,
                       ),
                     ),
@@ -153,12 +159,12 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF8A8A8F),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildTabToggle(),
+                  _buildTabToggle(colors),
                   const SizedBox(height: 24),
                   _selectedTab == 0
                       ? (_isLoading
@@ -492,13 +498,13 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
     );
   }
 
-  Widget _buildTabToggle() {
+  Widget _buildTabToggle(AppColorsExtension colors) {
     return FadeInWidget(
       delay: const Duration(milliseconds: 350),
       child: Container(
         height: 46,
         decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
+          color: colors.background,
           borderRadius: BorderRadius.circular(23),
           boxShadow: [
             BoxShadow(
@@ -517,15 +523,15 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
         padding: const EdgeInsets.all(4),
         child: Row(
           children: [
-            _buildToggleOption('Default', 0, Icons.grid_view_rounded),
-            _buildToggleOption('Workshop', 1, Icons.extension_rounded),
+            _buildToggleOption('Default', 0, Icons.grid_view_rounded, colors),
+            _buildToggleOption('Workshop', 1, Icons.extension_rounded, colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildToggleOption(String label, int index, IconData icon) {
+  Widget _buildToggleOption(String label, int index, IconData icon, AppColorsExtension colors) {
     final isSelected = _selectedTab == index;
     return Expanded(
       child: GestureDetector(
@@ -554,7 +560,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                     size: isSelected ? 19 : 20,
                     color: isSelected
                         ? AppColors.primaryPurple
-                        : AppColors.textHint,
+                        : colors.textHint,
                   ),
                   if (isSelected) ...[
                     const SizedBox(width: 6),
@@ -583,13 +589,13 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
           padding: const EdgeInsets.symmetric(vertical: 60),
           child: Column(
             children: [
-              Icon(Icons.extension_off_rounded, size: 48, color: const Color(0xFFBBBBC5)),
+              Icon(Icons.extension_off_rounded, size: 48, color: context.appColors.textHint),
               const SizedBox(height: 12),
               Text(
                 'No downloaded missions',
                 style: GoogleFonts.alata(
                   fontSize: 16,
-                  color: const Color(0xFF8A8A8F),
+                  color: context.appColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -597,7 +603,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                 'Browse the Workshop to find missions!',
                 style: GoogleFonts.alata(
                   fontSize: 13,
-                  color: const Color(0xFFBBBBC5),
+                  color: context.appColors.textHint,
                 ),
               ),
             ],
@@ -625,9 +631,9 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE8E8ED)),
+        color: context.appColors.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.appColors.border),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -663,7 +669,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                     style: GoogleFonts.alata(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF222222),
+                      color: context.appColors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -673,7 +679,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                     'by ${mission.authorName} · ${mission.questions.length} questions',
                     style: GoogleFonts.alata(
                       fontSize: 12,
-                      color: const Color(0xFF8A8A8F),
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                 ],

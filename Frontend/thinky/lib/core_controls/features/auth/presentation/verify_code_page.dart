@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'reset_password_page.dart';
 
 class VerifyCodePage extends StatefulWidget {
   final String email;
 
-  const VerifyCodePage({
-    super.key,
-    required this.email,
-  });
+  const VerifyCodePage({super.key, required this.email});
 
   @override
   State<VerifyCodePage> createState() => _VerifyCodePageState();
@@ -47,7 +46,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
 
   Future<void> _verifyCode() async {
     final code = _codeControllers.map((c) => c.text).join();
-    
+
     if (code.length != 6 || !code.contains(RegExp(r'^\d+$'))) {
       setState(() {
         _errorMessage = 'Please enter a valid 6-digit code';
@@ -70,10 +69,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (_) => ResetPasswordPage(
-                email: widget.email,
-                code: code,
-              ),
+              builder: (_) => ResetPasswordPage(email: widget.email, code: code),
             ),
           );
         }
@@ -106,47 +102,42 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryPurple = Color(0xFF8E97FD);
+    final colors = context.appColors;
 
     InputDecoration inputDecoration() => InputDecoration(
-          filled: true,
-          fillColor: const Color(0xFFF2F3F7),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Colors.transparent),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: primaryPurple, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Colors.red),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Colors.red, width: 2),
-          ),
-        );
+      filled: true,
+      fillColor: colors.inputFill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: colors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: AppColors.primaryPurple, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.error, width: 2),
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: colors.textPrimary,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/auth/login/background.png',
-              fit: BoxFit.cover,
-            ),
+            top: 0, left: 0, right: 0,
+            child: Image.asset('assets/auth/login/background.png', fit: BoxFit.cover),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -162,6 +153,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                       style: GoogleFonts.alata(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -169,7 +161,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                       'We sent a 6-digit code to\n${widget.email}',
                       style: GoogleFonts.alata(
                         fontSize: 14,
-                        color: const Color(0xFF8A8A8F),
+                        color: colors.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -179,31 +171,24 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: AppColors.error.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.red.shade300),
+                          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.error_outline,
-                              color: Colors.red.shade700,
-                            ),
+                            const Icon(Icons.error_outline, color: AppColors.error),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 _errorMessage!,
-                                style: GoogleFonts.alata(
-                                  color: Colors.red.shade700,
-                                  fontSize: 12,
-                                ),
+                                style: GoogleFonts.alata(color: AppColors.error, fontSize: 12),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ],
-                    // Code input fields
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
@@ -211,9 +196,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                         mainAxisSize: MainAxisSize.min,
                         children: List.generate(6, (index) {
                           return Container(
-                            margin: EdgeInsets.only(
-                              right: index < 5 ? 8 : 0,
-                            ),
+                            margin: EdgeInsets.only(right: index < 5 ? 8 : 0),
                             width: 44,
                             height: 52,
                             child: TextFormField(
@@ -225,7 +208,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                               style: GoogleFonts.alata(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF222222),
+                                color: colors.textPrimary,
                                 letterSpacing: 0,
                                 height: 1.2,
                               ),
@@ -234,12 +217,7 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                                 contentPadding: EdgeInsets.zero,
                               ),
                               onChanged: (value) => _onCodeChanged(index, value),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return null; // Will be validated on submit
-                                }
-                                return null;
-                              },
+                              validator: (value) => null,
                             ),
                           );
                         }),
@@ -251,28 +229,21 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _verifyCode,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
+                          backgroundColor: AppColors.primaryPurple,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                           elevation: 0,
                         ),
                         child: _isLoading
                             ? const SizedBox(
-                                height: 20,
-                                width: 20,
+                                height: 20, width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
                             : Text(
                                 'VERIFY CODE',
-                                style: GoogleFonts.alata(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: GoogleFonts.alata(color: Colors.white, fontWeight: FontWeight.w700),
                               ),
                       ),
                     ),
@@ -282,17 +253,14 @@ class _VerifyCodePageState extends State<VerifyCodePage> {
                       children: [
                         Text(
                           'Didn\'t receive the code? ',
-                          style: GoogleFonts.alata(
-                            fontSize: 12,
-                            color: const Color(0xFF8A8A8F),
-                          ),
+                          style: GoogleFonts.alata(fontSize: 12, color: colors.textSecondary),
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
                           child: Text(
                             'RESEND',
                             style: GoogleFonts.alata(
-                              color: primaryPurple,
+                              color: AppColors.primaryPurple,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),

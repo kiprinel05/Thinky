@@ -16,7 +16,9 @@ class ErrorMessageBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.errorLight,
         borderRadius: BorderRadius.circular(AppDimens.inputRadius),
-        border: Border.all(color: AppColors.error.withAlpha(128)),
+        border: Border.all(
+          color: AppColors.error.withAlpha(128),
+        ),
       ),
       child: Row(
         children: [

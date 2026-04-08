@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 
@@ -10,25 +11,26 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
             pinned: true,
-            backgroundColor: AppColors.backgroundWhite,
+            backgroundColor: colors.background,
             elevation: 0,
             leading: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundGrey,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    size: 18, color: AppColors.textPrimary),
+                child: Icon(Icons.arrow_back_ios_new_rounded,
+                    size: 18, color: colors.textPrimary),
               ),
               onPressed: () => context.pop(),
             ),
@@ -39,7 +41,7 @@ class AboutPage extends StatelessWidget {
                 style: GoogleFonts.alata(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -74,14 +76,15 @@ class AboutPage extends StatelessWidget {
   }
 
   Widget _buildHeroSection(BuildContext context) {
+    final colors = context.appColors;
     return FadeInWidget(
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(AppDimens.xl),
         decoration: BoxDecoration(
-          color: AppColors.backgroundGrey,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(AppDimens.radiusXl),
-          border: Border.all(color: AppColors.borderLight, width: 1),
+          border: Border.all(color: colors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryPurple.withValues(alpha: 0.06),
@@ -118,7 +121,7 @@ class AboutPage extends StatelessWidget {
               style: GoogleFonts.alata(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
@@ -128,7 +131,7 @@ class AboutPage extends StatelessWidget {
               style: GoogleFonts.alata(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -141,39 +144,45 @@ class AboutPage extends StatelessWidget {
     return FadeInWidget(
       delay: const Duration(milliseconds: 100),
       child: _buildSectionCard(
+        context,
         icon: Icons.rocket_launch_rounded,
         title: 'Our Mission',
         content:
-            'Thinky este o aplicație interactivă, educativă și gamificată, destinată copiilor cu vârsta între 7 și 12 ani. Prin jocuri și interacțiuni cu mascota digitală Pixy, copiii învață conceptele de bază din inteligența artificială. Pe parcurs, mascota este „antrenată” de copil, simulând procesul real de învățare al unui model de IA.',
+            'Thinky este o aplicație interactivă, educativă și gamificată, destinată copiilor cu vârsta între 7 și 12 ani. Prin jocuri și interacțiuni cu mascota digitală Pixy, copiii învață conceptele de bază din inteligența artificială. Pe parcurs, mascota este „antrenată" de copil, simulând procesul real de învățare al unui model de IA.',
       ),
     );
   }
 
   Widget _buildObjectivesSection(BuildContext context) {
+    final colors = context.appColors;
     return FadeInWidget(
       delay: const Duration(milliseconds: 200),
       child: _buildSectionCard(
+        context,
         icon: Icons.flag_rounded,
         title: 'Obiective principale',
         content: '',
         children: [
           _buildObjectiveItem(
             'Introducerea notiunilor de IA într-un mod prietenos și intuitiv.',
+            colors,
           ),
           const SizedBox(height: AppDimens.sm),
           _buildObjectiveItem(
-            'Simularea unui model simplu de IA care „învață” în timp real din interacțiunile copilului.',
+            'Simularea unui model simplu de IA care „învață" în timp real din interacțiunile copilului.',
+            colors,
           ),
           const SizedBox(height: AppDimens.sm),
           _buildObjectiveItem(
             'Utilizarea unei mascote animate care servește drept ghid, partener și model de învățare.',
+            colors,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildObjectiveItem(String text) {
+  Widget _buildObjectiveItem(String text, AppColorsExtension colors) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -193,7 +202,7 @@ class AboutPage extends StatelessWidget {
             style: GoogleFonts.alata(
               fontSize: 14,
               height: 1.5,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ),
@@ -202,6 +211,7 @@ class AboutPage extends StatelessWidget {
   }
 
   Widget _buildFeaturesSection(BuildContext context) {
+    final colors = context.appColors;
     final features = [
       ('Misiuni interactive', Icons.gamepad_rounded),
       ('Workshop creativ', Icons.extension_rounded),
@@ -219,7 +229,7 @@ class AboutPage extends StatelessWidget {
             style: GoogleFonts.alata(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: AppDimens.lg),
@@ -232,10 +242,10 @@ class AboutPage extends StatelessWidget {
                   vertical: AppDimens.md,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundGrey,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                   border: Border.all(
-                    color: AppColors.borderLight,
+                    color: colors.border,
                     width: 1,
                   ),
                 ),
@@ -259,7 +269,7 @@ class AboutPage extends StatelessWidget {
                       style: GoogleFonts.alata(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ],
@@ -273,6 +283,7 @@ class AboutPage extends StatelessWidget {
   }
 
   Widget _buildFooter(BuildContext context) {
+    final colors = context.appColors;
     return FadeInWidget(
       delay: const Duration(milliseconds: 400),
       child: Center(
@@ -282,7 +293,7 @@ class AboutPage extends StatelessWidget {
               'Made with ❤️ for curious minds',
               style: GoogleFonts.alata(
                 fontSize: 13,
-                color: AppColors.textHint,
+                color: colors.textHint,
               ),
             ),
             const SizedBox(height: 4),
@@ -290,7 +301,7 @@ class AboutPage extends StatelessWidget {
               'Thinky © 2025',
               style: GoogleFonts.alata(
                 fontSize: 12,
-                color: AppColors.textMuted,
+                color: colors.textMuted,
               ),
             ),
           ],
@@ -299,19 +310,21 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard({
+  Widget _buildSectionCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String content,
     List<Widget>? children,
   }) {
+    final colors = context.appColors;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimens.lg),
       decoration: BoxDecoration(
-        color: AppColors.backgroundGrey,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-        border: Border.all(color: AppColors.borderLight, width: 1),
+        border: Border.all(color: colors.border, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -339,7 +352,7 @@ class AboutPage extends StatelessWidget {
                 style: GoogleFonts.alata(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ],
@@ -351,7 +364,7 @@ class AboutPage extends StatelessWidget {
               style: GoogleFonts.alata(
                 fontSize: 14,
                 height: 1.6,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],

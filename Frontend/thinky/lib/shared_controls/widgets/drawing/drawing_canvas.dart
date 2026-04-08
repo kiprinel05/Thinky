@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 
 /// A point in the drawing with its color and stroke width
 class DrawingPoint {
@@ -30,9 +32,9 @@ class DrawingCanvas extends StatefulWidget {
 
   const DrawingCanvas({
     super.key,
-    this.selectedColor = Colors.blue,
+    this.selectedColor = AppColors.drawingBlue,
     this.strokeWidth = 8.0,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor = AppColors.white,
     this.onDrawingChanged,
     this.repaintKey,
     this.isEraserMode = false,
@@ -145,7 +147,7 @@ class DrawingCanvasState extends State<DrawingCanvas> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: AppColors.black.withOpacity(0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -238,25 +240,26 @@ class ColorPalette extends StatelessWidget {
   });
 
   static const List<Color> defaultColors = [
-    Color(0xFF2196F3), // Blue
-    Color(0xFFF44336), // Red
-    Color(0xFF4CAF50), // Green
-    Color(0xFFFFEB3B), // Yellow
-    Color(0xFF9C27B0), // Purple
-    Color(0xFFFF9800), // Orange
-    Color(0xFF000000), // Black
+    AppColors.drawingBlue,
+    AppColors.drawingRed,
+    AppColors.success,
+    Color(0xFFFFEB3B), // Yellow — no matching AppColors token
+    AppColors.patternPurple,
+    AppColors.orangeAccent,
+    AppColors.black,
   ];
 
   @override
   Widget build(BuildContext context) {
+    final appColors = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: AppColors.black.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -273,16 +276,16 @@ class ColorPalette extends StatelessWidget {
                 width: isEraserSelected ? 44 : 36,
                 height: isEraserSelected ? 44 : 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
+                  color: AppColors.greyLight,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isEraserSelected ? Colors.white : Colors.transparent,
+                    color: isEraserSelected ? AppColors.white : AppColors.transparent,
                     width: 3,
                   ),
                   boxShadow: [
                     if (isEraserSelected)
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: AppColors.grey.withOpacity(0.5),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),
@@ -290,7 +293,7 @@ class ColorPalette extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.delete_outline_rounded,
-                  color: isEraserSelected ? Colors.white : Colors.grey.shade700,
+                  color: isEraserSelected ? AppColors.white : appColors.iconColor,
                   size: 20,
                 ),
               ),
@@ -309,7 +312,7 @@ class ColorPalette extends StatelessWidget {
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? Colors.white : Colors.transparent,
+                    color: isSelected ? AppColors.white : AppColors.transparent,
                     width: 3,
                   ),
                   boxShadow: [
@@ -322,7 +325,7 @@ class ColorPalette extends StatelessWidget {
                   ],
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 20)
+                    ? const Icon(Icons.check, color: AppColors.white, size: 20)
                     : null,
               ),
             );

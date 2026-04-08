@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
 
@@ -19,6 +20,7 @@ class SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final content = Stack(
       alignment: Alignment.center,
       children: [
@@ -32,7 +34,7 @@ class SocialButton extends StatelessWidget {
         Text(
           label,
           style: AppTypography.buttonSecondary.copyWith(
-            color: filled ? Colors.white : AppColors.textGrey,
+            color: filled ? AppColors.white : colors.iconColor,
           ),
         ),
       ],
@@ -60,8 +62,8 @@ class SocialButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textGrey,
-          side: const BorderSide(color: AppColors.borderLight),
+          foregroundColor: colors.iconColor,
+          side: BorderSide(color: colors.border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimens.radiusRound),
           ),
