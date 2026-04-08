@@ -16,6 +16,7 @@ import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/skeletons/mission_card_skeleton.dart';
 
 class MissionsMenuPage extends ConsumerStatefulWidget {
   const MissionsMenuPage({super.key});
@@ -168,9 +169,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                   const SizedBox(height: 24),
                   _selectedTab == 0
                       ? (_isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
+                          ? const MissionCardsSkeleton()
                           : _buildMissionsGrid(context))
                       : _buildWorkshopGrid(),
                   const SizedBox(height: 24),
@@ -308,6 +307,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                   child: Image.asset(
                     'assets/missions/$missionPath/background.png',
                     fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -321,6 +321,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                     'assets/missions/$missionPath/vector1.png',
                     width: 60,
                     height: 60,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -333,6 +334,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                     'assets/missions/$missionPath/vector2.png',
                     width: 50,
                     height: 50,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -346,6 +348,11 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                           ? 'assets/missions/quiz/quiz.png'
                           : 'assets/missions/$missionPath/card_drawing.png',
                       fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.extension_rounded,
+                        size: 48,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
                 ),

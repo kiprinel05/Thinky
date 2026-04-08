@@ -1,8 +1,6 @@
-import 'package:http/http.dart' as http;
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/core_controls/network/base_repository.dart';
-import 'package:thinky/core_controls/storage/local_storage.dart';
 import 'package:thinky/shared/models/result.dart';
 import '../presentation/controllers/missions_state.dart';
 
@@ -19,25 +17,14 @@ class MissionsRepository extends BaseRepository {
         return missionsList.map((m) => Mission.fromJson(m)).toList();
       },
     ).then((result) {
-      // Handle fallback on failure if unauthorized/network error logic requires it?
-      // BaseRepository handles 401. 
-      // Original logic had fallback for 401/403 OR network error.
-      // We can intercept failure here.
-      
       if (result.isFailure) {
-        // If auth error or network error, fallback to offline?
-        // Original: "if 401/403 -> offline", "catch e -> offline".
-        // BaseRepository wraps exceptions in Result.failure.
-        
         final error = result.errorOrNull;
-        if (error is UnauthorizedException || error is NetworkException || error is TimeoutException) {
-           return Result.success(_getOfflineMissions());
+        if (error is UnauthorizedException ||
+            error is NetworkException ||
+            error is TimeoutException) {
+          return Result.success(_getOfflineMissions());
         }
-        // Also if server error? Original said "else throw" for other codes.
-        // But "catch e -> offline".
-        // So safe to fallback generally?
-        // Let's fallback if error.
-        return Result.success(_getOfflineMissions());
+        return result;
       }
       return result;
     });
@@ -45,34 +32,17 @@ class MissionsRepository extends BaseRepository {
 
   /// Complete a mission
   Future<Result<void, ApiException>> completeMission(int missionId) async {
-    // Original used post.
-    // Returns void (status check).
-    
-    // BaseRepository post returns T.
-    // We can use a dummy type or just check success.
-    
-    // Actually BaseRepository doesn't have a specific `postVoid` method, 
-    // but we can usage `post<void>` if parser returns null?
-    // Or just use `post<bool>` and return true.
-    
-    // Original logic: check 200/201.
-    
     final result = await post<bool>(
       endpoint: ApiEndpoints.missionComplete(missionId),
-      body: {}, // Empty body? Original didn't send body, just endpoint? 
-      // Original: http.post(url, headers). No body param used?
-      // BaseRepository post requires body.
-      // If endpoint handles query params or path params, body might be empty.
-      // Original code: http.post(..., headers). No body.
-      // I'll send empty map.
+      body: {},
       parser: (_) => true,
     );
-    
+
     if (result.isSuccess) return const Result.success(null);
     return Result.failure(result.errorOrNull!);
   }
 
-  /// Offline fallback missions - ALL UNLOCKED FOR TESTING
+  /// Offline fallback missions used when the API is unreachable
   List<Mission> _getOfflineMissions() {
     return [
       const Mission(
@@ -89,7 +59,7 @@ class MissionsRepository extends BaseRepository {
         name: 'Colors',
         imageUrl: 'assets/missions/colors.png',
         color: '#FFB59E',
-        isLocked: false, // UNLOCKED FOR TESTING
+        isLocked: true,
         order: 2,
         isCompleted: false,
       ),
@@ -98,7 +68,7 @@ class MissionsRepository extends BaseRepository {
         name: 'Draw Shapes',
         imageUrl: 'assets/missions/shapes.png',
         color: '#8E97FD',
-        isLocked: false, // UNLOCKED FOR TESTING
+        isLocked: true,
         order: 3,
         isCompleted: false,
         missionPath: 'draw_shapes',
@@ -108,7 +78,7 @@ class MissionsRepository extends BaseRepository {
         name: 'Numbers',
         imageUrl: 'assets/missions/numbers.png',
         color: '#6CB28E',
-        isLocked: false, // UNLOCKED FOR TESTING
+        isLocked: true,
         order: 4,
         isCompleted: false,
       ),

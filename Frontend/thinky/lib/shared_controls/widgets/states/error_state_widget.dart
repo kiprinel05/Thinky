@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_typography.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  final String retryText;
+  final String? retryText;
   final IconData icon;
   final double iconSize;
 
@@ -14,7 +15,7 @@ class ErrorStateWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
-    this.retryText = 'Try again',
+    this.retryText,
     this.icon = Icons.error_outline,
     this.iconSize = 60,
   });
@@ -22,6 +23,8 @@ class ErrorStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final resolvedRetryText = retryText ?? Common.tryAgain;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -53,7 +56,7 @@ class ErrorStateWidget extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 ),
-                child: Text(retryText),
+                child: Text(resolvedRetryText),
               ),
             ],
           ],

@@ -7,6 +7,7 @@ import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/skeletons/list_tile_skeleton.dart';
 
 class LeaderboardEntryModel {
   final int userId;
@@ -223,9 +224,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   Widget _buildBody() {
     final colors = context.appColors;
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryPurple),
-      );
+      return const ListTileSkeleton(itemCount: 8);
     }
 
     if (_error != null) {

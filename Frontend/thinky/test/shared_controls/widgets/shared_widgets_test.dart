@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:thinky/core_controls/services/text_service.dart';
 import 'package:thinky/shared_controls/widgets/error_message_banner.dart';
 import 'package:thinky/shared_controls/widgets/or_divider.dart';
 import 'package:thinky/shared_controls/widgets/states/error_state_widget.dart';
@@ -8,6 +9,11 @@ import 'package:thinky/shared_controls/widgets/states/loading_state_widget.dart'
 import 'package:thinky/test_support/test_wrappers/test_app_wrapper.dart';
 
 void main() {
+  setUp(() {
+    TextService.loadFromMap({
+      'Common': {'tryAgain': 'Try Again'},
+    });
+  });
   group('ErrorMessageBanner', () {
     testWidgets('renders the message text', (tester) async {
       // Arrange
@@ -88,7 +94,7 @@ void main() {
       );
 
       // Assert
-      expect(find.widgetWithText(ElevatedButton, 'Try again'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Try Again'), findsOneWidget);
     });
 
     testWidgets('hides retry button when onRetry is null', (tester) async {
@@ -101,7 +107,7 @@ void main() {
 
       // Assert
       expect(find.byType(ElevatedButton), findsNothing);
-      expect(find.text('Try again'), findsNothing);
+      expect(find.text('Try Again'), findsNothing);
     });
 
     testWidgets('onRetry callback fires on tap', (tester) async {
@@ -117,7 +123,7 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.text('Try again'));
+      await tester.tap(find.text('Try Again'));
       await tester.pump();
 
       // Assert

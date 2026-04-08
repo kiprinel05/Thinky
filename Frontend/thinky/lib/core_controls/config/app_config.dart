@@ -1,15 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AppConfig {
-  // Loaded from .env file
-  // Pentru Chrome/Web: http://localhost:8000
-  // Pentru emulator Android: http://10.0.2.2:8000
-  // Pentru telefon real: http://192.168.x.x:8000
-  
+  // --- Environment ---
   static String get baseUrl => dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000';
-  
   static String get apiBaseUrl => '$baseUrl/api/v1';
-  
+
+  // --- Debug flags (controlled via .env, off by default in production) ---
+  static bool get isDebug =>
+      kDebugMode || dotenv.env['DEBUG_MODE']?.toLowerCase() == 'true';
+
+  static bool get useOfflineMissions =>
+      dotenv.env['USE_OFFLINE_MISSIONS']?.toLowerCase() == 'true';
+
+  // --- Auth endpoints ---
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';
   static const String guestEndpoint = '/auth/guest';

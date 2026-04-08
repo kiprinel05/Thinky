@@ -9,6 +9,7 @@ import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/shared_controls/skeletons/list_tile_skeleton.dart';
 
 class MyMissionsPage extends StatefulWidget {
   const MyMissionsPage({super.key});
@@ -72,9 +73,7 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryPurple),
-            )
+          ? const ListTileSkeleton()
           : _error != null
               ? _buildError()
               : _missions.isEmpty

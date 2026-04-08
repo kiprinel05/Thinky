@@ -5,16 +5,12 @@ import 'api_client.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 
 class MissionService {
-  // Set to true to force offline missions (all unlocked for testing)
-  static const bool USE_OFFLINE_MISSIONS = true; // ENABLED for testing - all missions unlocked
-  
   static Future<MissionListResponse> getMissions() async {
-    // Force offline mode for testing
-    if (USE_OFFLINE_MISSIONS) {
-      ErrorLogger().logInfo('MissionService: Using offline missions (forced for testing)');
+    if (AppConfig.useOfflineMissions) {
+      ErrorLogger().logInfo('MissionService: Using offline missions (AppConfig.useOfflineMissions=true)');
       return _offlineMissions();
     }
-    
+
     try {
       final response = await ApiClient.get('/missions');
       if (response.statusCode == 200) {
@@ -32,12 +28,11 @@ class MissionService {
   }
 
   static Future<void> completeMission(int missionId, {double? score}) async {
-    // Skip API call for offline missions (negative IDs)
     if (missionId < 0) {
       ErrorLogger().logInfo('MissionService: Offline mission $missionId completed locally');
       return;
     }
-    
+
     try {
       final response = await ApiClient.post(
         '/missions/$missionId/complete',
@@ -51,7 +46,6 @@ class MissionService {
     }
   }
 
-  // ALL UNLOCKED FOR TESTING
   static MissionListResponse _offlineMissions() {
     final now = DateTime.now();
     return MissionListResponse(missions: [
@@ -65,10 +59,7 @@ class MissionService {
         height: 200,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -2,
-          isCompleted: false,
-        ),
+        progress: MissionProgress(missionId: -2, isCompleted: false),
         isLocked: false,
       ),
       Mission(
@@ -81,10 +72,7 @@ class MissionService {
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -1,
-          isCompleted: false,
-        ),
+        progress: MissionProgress(missionId: -1, isCompleted: false),
         isLocked: false,
       ),
       Mission(
@@ -97,11 +85,8 @@ class MissionService {
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -5,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -5, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -3,
@@ -113,10 +98,7 @@ class MissionService {
         height: 200,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -3,
-          isCompleted: false,
-        ),
+        progress: MissionProgress(missionId: -3, isCompleted: false),
         isLocked: false,
       ),
       Mission(
@@ -129,11 +111,8 @@ class MissionService {
         height: 200,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -4,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -4, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -6,
@@ -145,11 +124,8 @@ class MissionService {
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -6,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -6, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -7,
@@ -161,27 +137,21 @@ class MissionService {
         height: 200,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -7,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -7, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -8,
         title: 'Describe It',
         missionPath: 'describe_image',
         description: 'Describe what you see in the image using your voice!',
-        orderIndex: 9,
+        orderIndex: 7,
         backgroundColor: '#FF7043',
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -8,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -8, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -9,
@@ -193,29 +163,22 @@ class MissionService {
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -9,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -9, isCompleted: false),
+        isLocked: false,
       ),
       Mission(
         id: -10,
-        title: 'Învățăm numerele cu Pixy',
+        title: 'Learn Numbers with Pixy',
         missionPath: 'numbers',
-        description: 'Ajută-l pe Pixy să recunoască numerele de la 1 la 5!',
+        description: 'Help Pixy recognize numbers from 1 to 5!',
         orderIndex: 9,
         backgroundColor: '#FF9A5C',
         height: 220,
         isActive: true,
         createdAt: now,
-        progress: MissionProgress(
-          missionId: -10,
-          isCompleted: false,
-        ),
-        isLocked: false, // UNLOCKED FOR TESTING
+        progress: MissionProgress(missionId: -10, isCompleted: false),
+        isLocked: false,
       ),
     ]);
   }
 }
-
