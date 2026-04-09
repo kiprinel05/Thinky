@@ -21,7 +21,7 @@ class WorkshopBrowsePage extends StatefulWidget {
 
 class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   final _searchController = TextEditingController();
-  List<WorkshopMission> _missions = [];
+  final List<WorkshopMission> _missions = [];
   bool _isLoading = true;
   bool _isGuest = true;
   String? _error;

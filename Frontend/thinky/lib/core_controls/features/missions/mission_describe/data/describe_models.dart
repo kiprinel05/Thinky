@@ -1,6 +1,7 @@
 /// Models for the Describe Mission
 ///
 /// Represents data structures for "Describe what you see in the image."
+library;
 
 class DescribeImageInfo {
   final String imageId;

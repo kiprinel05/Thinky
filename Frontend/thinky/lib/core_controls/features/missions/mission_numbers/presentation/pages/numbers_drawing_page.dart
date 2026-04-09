@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
-import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../../domain/numbers_models.dart';
 import '../controllers/numbers_controller.dart';
 import '../controllers/numbers_state.dart';

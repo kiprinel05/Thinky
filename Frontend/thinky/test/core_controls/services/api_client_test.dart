@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'dart:convert';
-import 'dart:async';
 
 import 'api_client_test.mocks.dart';
 

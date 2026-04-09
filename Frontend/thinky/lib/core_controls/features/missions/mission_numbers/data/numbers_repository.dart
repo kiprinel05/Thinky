@@ -4,7 +4,6 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 import 'package:thinky/core_controls/network/base_repository.dart';
-import 'package:thinky/core_controls/config/app_config.dart';
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/shared/models/result.dart';

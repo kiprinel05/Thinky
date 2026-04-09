@@ -7,6 +7,7 @@ import 'package:thinky/core_controls/features/welcome/presentation/welcome_page.
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;
@@ -153,7 +154,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           children: [
             Positioned(
               top: 0, left: 0, right: 0,
-              child: Image.asset('assets/auth/login/background.png', fit: BoxFit.cover),
+              child: Image.asset(AppAssets.authLoginBackground, fit: BoxFit.cover),
             ),
             SafeArea(
               child: Center(
@@ -211,7 +212,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         children: [
           Positioned(
             top: 0, left: 0, right: 0,
-            child: Image.asset('assets/auth/login/background.png', fit: BoxFit.cover),
+            child: Image.asset(AppAssets.authLoginBackground, fit: BoxFit.cover),
           ),
           SafeArea(
             child: SingleChildScrollView(

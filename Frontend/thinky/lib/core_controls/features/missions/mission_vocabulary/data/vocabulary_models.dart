@@ -1,6 +1,7 @@
 /// Models for Vocabulary Mission
 ///
 /// Represents data structures for the "Word-Image Matching" mission.
+library;
 
 class VocabImage {
   final int id;

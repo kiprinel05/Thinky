@@ -12,6 +12,7 @@ import 'package:thinky/shared_controls/widgets/inputs/app_text_field.dart';
 import 'package:thinky/shared_controls/widgets/social_button.dart';
 import 'package:thinky/shared_controls/widgets/or_divider.dart';
 import 'package:thinky/shared_controls/widgets/error_message_banner.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import '../controllers/auth_controller.dart';
 
@@ -41,7 +42,7 @@ class LoginPage extends ConsumerWidget {
             left: 0,
             right: 0,
             child: Image.asset(
-              'assets/auth/login/background.png',
+              AppAssets.authLoginBackground,
               fit: BoxFit.cover,
             ),
           ),
@@ -56,14 +57,14 @@ class LoginPage extends ConsumerWidget {
                   // Title
                   Text(
                     'Welcome Back!',
-                    style: AppTypography.h1,
+                    style: AppTypography.h1.copyWith(color: colors.textPrimary),
                   ),
                   
                   const SizedBox(height: AppDimens.lg + 2),
                   
                   // Social login buttons
                   SocialButton(
-                    icon: 'assets/auth/icons/facebook.png',
+                    icon: AppAssets.authFacebookIcon,
                     label: 'CONTINUE WITH FACEBOOK',
                     filled: true,
                     onPressed: () {},
@@ -72,7 +73,7 @@ class LoginPage extends ConsumerWidget {
                   const SizedBox(height: AppDimens.md),
                   
                   SocialButton(
-                    icon: 'assets/auth/icons/google.png',
+                    icon: AppAssets.authGoogleIcon,
                     label: 'CONTINUE WITH GOOGLE',
                     onPressed: () {},
                   ),
@@ -118,7 +119,9 @@ class LoginPage extends ConsumerWidget {
                       child: Text(
                         'Forgot Password?',
                         style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.primaryPurple,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.primaryPurpleLight
+                              : AppColors.primaryPurple,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

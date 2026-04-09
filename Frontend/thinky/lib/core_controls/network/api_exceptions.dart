@@ -4,8 +4,8 @@ import 'package:thinky/core/errors/exceptions.dart';
 abstract class ApiException extends AppException {
   final int? statusCode;
 
-  const ApiException(String message, [this.statusCode])
-      : super(message, code: 'API_ERROR');
+  const ApiException(super.message, [this.statusCode])
+      : super(code: 'API_ERROR');
 
   @override
   String toString() => message;
@@ -13,14 +13,12 @@ abstract class ApiException extends AppException {
 
 /// Network connectivity error (no internet, timeout)
 class NetworkException extends ApiException {
-  const NetworkException([String message = 'Network error occurred'])
-      : super(message);
+  const NetworkException([super.message = 'Network error occurred']);
 }
 
 /// Request timeout error
 class TimeoutException extends ApiException {
-  const TimeoutException([String message = 'Request timed out'])
-      : super(message);
+  const TimeoutException([super.message = 'Request timed out']);
 }
 
 /// Server returned an error response (4xx, 5xx)
@@ -71,12 +69,10 @@ class ValidationException extends ApiException {
 
 /// Authentication error (login failed, wrong credentials)
 class AuthException extends ApiException {
-  const AuthException(String message, [int? statusCode])
-      : super(message, statusCode);
+  const AuthException(super.message, [super.statusCode]);
 }
 
 /// Local storage/cache error
 class CacheException extends ApiException {
-  const CacheException([String message = 'Cache error occurred'])
-      : super(message);
+  const CacheException([super.message = 'Cache error occurred']);
 }

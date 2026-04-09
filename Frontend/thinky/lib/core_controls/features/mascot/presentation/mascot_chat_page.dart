@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/core_controls/services/mascot_service.dart';
 import 'package:thinky/core_controls/services/context_collector.dart';
 
@@ -40,7 +43,7 @@ class _MascotChatPageState extends State<MascotChatPage>
     )..repeat();
 
     _messages.add(_ChatMessage(
-      text: 'Salut! Eu sunt Pixy 🤖\nCum te pot ajuta cu aplicația?',
+      text: MascotTexts.greeting,
       isUser: false,
     ));
   }
@@ -91,36 +94,41 @@ class _MascotChatPageState extends State<MascotChatPage>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Container(
-              color: colors.background,
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: EdgeInsets.fromLTRB(
-                  AppDimens.lg,
-                  AppDimens.md,
-                  AppDimens.lg,
-                  AppDimens.sm,
+    return Consumer(
+      builder: (context, ref, _) {
+        ref.watch(textRefreshProvider);
+        final colors = context.appColors;
+        return Scaffold(
+          backgroundColor: colors.background,
+          body: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: Container(
+                  color: colors.background,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      AppDimens.lg,
+                      AppDimens.md,
+                      AppDimens.lg,
+                      AppDimens.sm,
+                    ),
+                    itemCount: _messages.length + (_isTyping ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _messages.length && _isTyping) {
+                        return _buildTypingIndicator();
+                      }
+                      return _buildMessageBubble(_messages[index], index);
+                    },
+                  ),
                 ),
-                itemCount: _messages.length + (_isTyping ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length && _isTyping) {
-                    return _buildTypingIndicator();
-                  }
-                  return _buildMessageBubble(_messages[index], index);
-                },
               ),
-            ),
+              _buildInputBar(),
+            ],
           ),
-          _buildInputBar(),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -193,7 +201,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Pixy',
+                      MascotTexts.title,
                       style: GoogleFonts.alata(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -201,7 +209,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                       ),
                     ),
                     Text(
-                      'Asistent AI',
+                      MascotTexts.subtitle,
                       style: GoogleFonts.alata(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -309,9 +317,9 @@ class _MascotChatPageState extends State<MascotChatPage>
           spacing: 6,
           runSpacing: 6,
           children: [
-            _buildSuggestionChip('Ce misiuni am?'),
-            _buildSuggestionChip('Cum funcționează Pixy?'),
-            _buildSuggestionChip('Explică-mi Workshop'),
+            _buildSuggestionChip(MascotTexts.suggest1),
+            _buildSuggestionChip(MascotTexts.suggest2),
+            _buildSuggestionChip(MascotTexts.suggest3),
           ],
         ),
       ],
@@ -482,7 +490,7 @@ class _MascotChatPageState extends State<MascotChatPage>
                   fontWeight: FontWeight.w500,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Scrie un mesaj...',
+                  hintText: MascotTexts.inputHint,
                   hintStyle: GoogleFonts.alata(
                     fontSize: 15,
                     color: colors.textHint,

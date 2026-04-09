@@ -17,6 +17,7 @@ dependencies:
   
   # Network
   http: ^1.1.0
+  connectivity_plus: ^6.1.0
   
   # Local Storage
   shared_preferences: ^2.2.2
@@ -61,8 +62,8 @@ flutter:
     - assets/missions/color_circle/
     - assets/missions/draw_shapes/
     - assets/missions/geometric_shapes/
-    - assets/missions/missions/
-    - assets/missions/missions/presentation/
+    - assets/missions/shell/
+    - assets/missions/catalog/
     - assets/missions/pixy_learns/
     - assets/missions/pixy_learns/images/
     - assets/missions/quiz/

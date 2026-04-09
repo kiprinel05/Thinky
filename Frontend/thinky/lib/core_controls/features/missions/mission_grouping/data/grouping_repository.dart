@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'grouping_models.dart';
 
 /// Repository for Grouping Mission API calls
@@ -68,7 +69,7 @@ class GroupingRepository {
     if (parts.length >= 2) {
       final category = parts[parts.length - 2];
       final filename = parts[parts.length - 1];
-      return 'assets/missions/group_sorting/images/$category/$filename';
+      return AppAssets.groupSortingImage(category, filename);
     }
     return null;
   }

@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import '../models/auth_response.dart';
 import 'api_client.dart';
-import 'app_state_service.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';

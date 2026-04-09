@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'base_state.dart';
 
 /// BaseController - Abstract base class for all StateNotifier controllers
@@ -58,8 +59,12 @@ abstract class BaseAsyncController<T extends BaseState> extends BaseController<T
       safeUpdate(successState(result));
       return result;
     } catch (e, stack) {
-      final message = defaultErrorMessage ?? e.toString();
-      ErrorLogger().logError('Async Error in ${runtimeType}: $message', stackTrace: stack);
+      final message =
+          defaultErrorMessage ?? UserFacingErrorMapper.map(e);
+      ErrorLogger().logError(
+        'Async Error in $runtimeType: ${e.toString()}',
+        stackTrace: stack,
+      );
       safeUpdate(errorState(message));
       return null;
     }
@@ -76,9 +81,12 @@ abstract class BaseAsyncController<T extends BaseState> extends BaseController<T
       safeUpdate(successState(result));
       return result;
     } catch (e, stack) {
-      ErrorLogger().logError('Silent Error in ${runtimeType}: $e', stackTrace: stack);
+      ErrorLogger().logError(
+        'Silent Error in $runtimeType: ${e.toString()}',
+        stackTrace: stack,
+      );
       if (errorState != null) {
-        safeUpdate(errorState(e.toString()));
+        safeUpdate(errorState(UserFacingErrorMapper.map(e)));
       }
       return null;
     }

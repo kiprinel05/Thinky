@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart' show Quiz;
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'domain/quiz_models.dart';
 import 'quiz_answers_page.dart';
 
@@ -25,6 +27,8 @@ class QuizResultPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(textRefreshProvider);
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final percentage = result.percentage;
     final isExcellent = percentage >= 80;
     final isGood = percentage >= 60;
@@ -36,18 +40,27 @@ class QuizResultPage extends ConsumerWidget {
             ? AppColors.primaryPurple
             : const Color(0xFFFF9A5C); // warm orange
 
+    final gradientColors = isDark
+        ? [
+            const Color(0xFF3D4266),
+            const Color(0xFF323654),
+            colors.background,
+          ]
+        : const [
+            Color(0xFFB8BEFD),
+            Color(0xFF9AA2FD),
+            Color(0xFF8E97FD),
+          ];
+    final gradientStops = isDark ? const [0.0, 0.45, 1.0] : const [0.0, 0.4, 1.0];
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFB8BEFD),
-              Color(0xFF9AA2FD),
-              Color(0xFF8E97FD),
-            ],
-            stops: [0.0, 0.4, 1.0],
+            colors: gradientColors,
+            stops: gradientStops,
           ),
         ),
         child: SafeArea(
@@ -62,7 +75,7 @@ class QuizResultPage extends ConsumerWidget {
                   height: 180,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.08),
                   ),
                 ),
               ),
@@ -74,7 +87,7 @@ class QuizResultPage extends ConsumerWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.06),
+                    color: Colors.white.withValues(alpha: isDark ? 0.04 : 0.06),
                   ),
                 ),
               ),
@@ -86,7 +99,7 @@ class QuizResultPage extends ConsumerWidget {
                     leading: IconButton(
                       icon: Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         size: 20,
                       ),
                       onPressed: () => Navigator.of(context).pop(true),
@@ -105,7 +118,7 @@ class QuizResultPage extends ConsumerWidget {
                           ScaleInWidget(
                             delay: const Duration(milliseconds: 200),
                             child: Image.asset(
-                              'assets/missions/quiz/happy.png',
+                              AppAssets.missionQuizHappy,
                               height: 130,
                               fit: BoxFit.contain,
                             ),
@@ -148,16 +161,17 @@ class QuizResultPage extends ConsumerWidget {
                                 horizontal: 24,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: colors.cardColor,
                                 borderRadius: BorderRadius.circular(28),
+                                border: Border.all(color: colors.border),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.06),
+                                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                                     blurRadius: 24,
                                     offset: const Offset(0, 12),
                                   ),
                                   BoxShadow(
-                                    color: accentColor.withOpacity(0.15),
+                                    color: accentColor.withValues(alpha: 0.15),
                                     blurRadius: 20,
                                     offset: const Offset(0, 6),
                                   ),
@@ -181,7 +195,7 @@ class QuizResultPage extends ConsumerWidget {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: accentColor.withOpacity(0.12),
+                                      color: accentColor.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: Text(
@@ -207,7 +221,7 @@ class QuizResultPage extends ConsumerWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.alata(
                                   fontSize: 15,
-                                  color: Colors.white.withOpacity(0.92),
+                                  color: isDark ? colors.textSecondary : Colors.white.withValues(alpha: 0.92),
                                   height: 1.5,
                                 ),
                               ),
@@ -223,7 +237,7 @@ class QuizResultPage extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(28),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.06),
+                                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
                                     blurRadius: 16,
                                     offset: const Offset(0, 6),
                                   ),
@@ -252,7 +266,7 @@ class QuizResultPage extends ConsumerWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(28),
                                   ),
-                                  backgroundColor: Colors.white.withOpacity(0.15),
+                                  backgroundColor: Colors.white.withValues(alpha: isDark ? 0.1 : 0.15),
                                 ),
                                 child: Text(
                                   Quiz.showDetailedResults,
@@ -276,12 +290,12 @@ class QuizResultPage extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(28),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.12),
+                                    color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
                                   BoxShadow(
-                                    color: AppColors.primaryPurple.withOpacity(0.3),
+                                    color: AppColors.primaryPurple.withValues(alpha: isDark ? 0.35 : 0.3),
                                     blurRadius: 16,
                                     offset: const Offset(0, 4),
                                   ),
@@ -290,7 +304,7 @@ class QuizResultPage extends ConsumerWidget {
                               child: ElevatedButton(
                                 onPressed: onContinue,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: isDark ? colors.surface : Colors.white,
                                   foregroundColor: AppColors.primaryPurple,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 18,
@@ -303,7 +317,7 @@ class QuizResultPage extends ConsumerWidget {
                                 child: Text(
                                   Quiz.continueToMissions,
                                   style: GoogleFonts.alata(
-                                    color: AppColors.primaryPurple,
+                                    color: isDark ? AppColors.primaryPurpleLight : AppColors.primaryPurple,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
                                     letterSpacing: 0.5,

@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'controllers/color_circle_controller.dart';
 
 /// Color Circle Mission Page
@@ -88,14 +92,14 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   Future<void> _onCheckDrawing() async {
     final canvasState = _canvasStateKey.currentState;
     if (canvasState == null || !canvasState.hasDrawing) {
-      ErrorHandlerUI.showWarning(context, 'Color the circle first!');
+      ErrorHandlerUI.showWarning(context, Drawing.colorCircleFirst);
       return;
     }
     
     // Export canvas to PNG
     final imageBytes = await canvasState.exportToPng();
     if (imageBytes == null) {
-      ErrorHandlerUI.showError(context, 'Could not capture drawing. Try again!');
+      ErrorHandlerUI.showError(context, Drawing.captureError);
       return;
     }
     
@@ -126,30 +130,28 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(colorCircleControllerProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F5),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Stack(
           children: [
-            // Background decorations
-            _buildBackground(),
+            _buildBackground(isDark),
             
-            // Main content
             Column(
               children: [
-                // App bar
-                _buildAppBar(),
+                _buildAppBar(colors),
                 
-                // Pixy mascot with emotion
-                _buildPixySection(state),
+                _buildPixySection(state, colors),
                 
-                // Drawing canvas with pre-drawn circle
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildCanvasSection(state),
+                    child: _buildCanvasSection(state, colors),
                   ),
                 ),
                 
@@ -179,26 +181,24 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                     24,
                     MediaQuery.of(context).padding.bottom + 80,
                   ),
-                  child: _buildActionButtons(state),
+                  child: _buildActionButtons(state, colors),
                 ),
               ],
             ),
             
-            // Thinking overlay
-            if (state.isAnalyzing) _buildThinkingOverlay(),
-            
-            // Result overlay
-            if (state.showResult) _buildResultOverlay(state),
+            if (state.isAnalyzing) _buildThinkingOverlay(colors),
+            if (state.showResult) _buildResultOverlay(state, colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBackground() {
+  Widget _buildBackground(bool isDark) {
+    final topA = isDark ? 0.2 : 0.3;
+    final botA = isDark ? 0.14 : 0.22;
     return Stack(
       children: [
-        // Top gradient blob - orange theme
         Positioned(
           top: -100,
           right: -50,
@@ -209,14 +209,13 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFFFF5722).withOpacity(0.3),
-                  const Color(0xFFFF5722).withOpacity(0.0),
+                  AppColors.drawingRed.withValues(alpha: topA),
+                  AppColors.drawingRed.withValues(alpha: 0.0),
                 ],
               ),
             ),
           ),
         ),
-        // Bottom gradient blob
         Positioned(
           bottom: -50,
           left: -80,
@@ -227,8 +226,8 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFFE91E63).withOpacity(0.2),
-                  const Color(0xFFE91E63).withOpacity(0.0),
+                  AppColors.missionPeach.withValues(alpha: botA),
+                  AppColors.missionPeach.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -238,55 +237,54 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(AppColorsExtension colors) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Back button
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 10,
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios_new,
                 size: 20,
-                color: Color(0xFF3F414E),
+                color: colors.textPrimary,
               ),
             ),
           ),
           
           const SizedBox(width: 16),
           
-          // Title
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Creative Mission',
+                  Drawing.subtitle,
                   style: GoogleFonts.alata(
                     fontSize: 12,
-                    color: const Color(0xFFFF5722),
+                    color: AppColors.drawingRed,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
-                  'Color the Circle Red',
+                  Drawing.colorCircleTitle,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF3F414E),
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -297,7 +295,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     );
   }
 
-  Widget _buildPixySection(ColorCircleState state) {
+  Widget _buildPixySection(ColorCircleState state, AppColorsExtension colors) {
     String pixyAsset = _getPixyAsset(state.pixyEmotion);
     String message = _getPixyMessage(state);
     
@@ -321,11 +319,12 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 shape: BoxShape.circle,
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFF5722).withOpacity(0.3),
+                    color: AppColors.drawingRed.withValues(alpha: 0.28),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -335,10 +334,10 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                 child: Image.asset(
                   pixyAsset,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.smart_toy,
                     size: 40,
-                    color: Color(0xFFFF5722),
+                    color: AppColors.drawingRed,
                   ),
                 ),
               ),
@@ -347,16 +346,16 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
           
           const SizedBox(width: 16),
           
-          // Speech bubble
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 10,
                   ),
                 ],
@@ -365,7 +364,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                 message,
                 style: GoogleFonts.alata(
                   fontSize: 14,
-                  color: const Color(0xFF3F414E),
+                  color: colors.textPrimary,
                   height: 1.4,
                 ),
               ),
@@ -379,32 +378,34 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   String _getPixyAsset(String emotion) {
     switch (emotion) {
       case 'thinking':
-        return 'assets/welcome/page2/thinking.png';
+        return AppAssets.welcomePage2Thinking;
       case 'happy':
       case 'encouraging':
-        return 'assets/welcome/page1/hello.png';
+        return AppAssets.welcomePage1Hello;
       default:
-        return 'assets/welcome/page1/hello.png';
+        return AppAssets.welcomePage1Hello;
     }
   }
 
   String _getPixyMessage(ColorCircleState state) {
     if (state.isAnalyzing) {
-      return 'Hmm, let me check your coloring... 🤔';
+      return Drawing.colorCircleThinking;
     }
     if (state.showResult && state.analysisResult != null) {
       return state.analysisResult!.message;
     }
-    return 'Color the circle using RED! Stay inside the lines! 🎨';
+    return Drawing.colorCircleInstruction;
   }
 
-  Widget _buildCanvasSection(ColorCircleState state) {
+  Widget _buildCanvasSection(ColorCircleState state, AppColorsExtension colors) {
+    final outlineColor = Color.lerp(colors.textSecondary, colors.border, 0.35)!;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -414,23 +415,21 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
         borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
-            // Drawing canvas (for user input)
             DrawingCanvas(
               key: _canvasStateKey,
               repaintKey: _canvasKey,
               selectedColor: state.selectedColor,
-              strokeWidth: 20.0, // Thicker for coloring
-              backgroundColor: Colors.white,
+              strokeWidth: 20.0,
+              backgroundColor: colors.surface,
               isEraserMode: _isEraserSelected,
               onDrawingChanged: () {
                 ref.read(colorCircleControllerProvider.notifier).setHasDrawing(true);
               },
             ),
-            // Pre-drawn circle outline overlay
             IgnorePointer(
               child: CustomPaint(
                 size: Size.infinite,
-                painter: CircleOutlinePainter(),
+                painter: CircleOutlinePainter(strokeColor: outlineColor),
               ),
             ),
           ],
@@ -439,10 +438,9 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     );
   }
 
-  Widget _buildActionButtons(ColorCircleState state) {
+  Widget _buildActionButtons(ColorCircleState state, AppColorsExtension colors) {
     return Row(
       children: [
-        // Clear button
         Expanded(
           flex: 1,
           child: GestureDetector(
@@ -450,10 +448,10 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFE0E0E0),
+                  color: colors.border,
                   width: 1.5,
                 ),
               ),
@@ -461,18 +459,18 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.refresh,
-                      color: Color(0xFF8A8A8F),
+                      color: colors.iconColor,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Clear',
+                      Drawing.clear,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF8A8A8F),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -484,7 +482,6 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
         
         const SizedBox(width: 16),
         
-        // Check drawing button
         Expanded(
           flex: 2,
           child: GestureDetector(
@@ -492,15 +489,15 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF5722), Color(0xFFFF8A65)],
+                gradient: LinearGradient(
+                  colors: [AppColors.drawingRed, AppColors.orangeAccent],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFF5722).withOpacity(0.4),
+                    color: AppColors.drawingRed.withValues(alpha: 0.4),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -508,7 +505,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               ),
               child: Center(
                 child: Text(
-                  'Check Coloring ✨',
+                  Drawing.checkColoringSparkle,
                   style: GoogleFonts.alata(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -523,20 +520,21 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     );
   }
 
-  Widget _buildThinkingOverlay() {
+  Widget _buildThinkingOverlay(AppColorsExtension colors) {
     return Container(
-      color: Colors.black.withOpacity(0.3),
+      color: Colors.black.withValues(alpha: 0.32),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 30,
                 ),
               ],
@@ -544,7 +542,6 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Thinking Pixy
                 AnimatedBuilder(
                   animation: _thinkingRotation,
                   builder: (context, child) {
@@ -556,18 +553,18 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                   child: Container(
                     width: 100,
                     height: 100,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFF8F5),
+                    decoration: BoxDecoration(
+                      color: colors.inputFill,
                       shape: BoxShape.circle,
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/welcome/page2/thinking.png',
+                        AppAssets.welcomePage2Thinking,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, __, ___) => Icon(
                           Icons.smart_toy,
                           size: 50,
-                          color: Color(0xFFFF5722),
+                          color: AppColors.drawingRed,
                         ),
                       ),
                     ),
@@ -577,31 +574,31 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                 const SizedBox(height: 20),
                 
                 Text(
-                  'Pixy is checking...',
+                  Drawing.pixyCheckingTitle,
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF3F414E),
+                    color: colors.textPrimary,
                   ),
                 ),
                 
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Looking at your beautiful coloring! 🎨',
+                  Drawing.colorCircleAnalyzingSub,
                   style: GoogleFonts.alata(
                     fontSize: 14,
-                    color: const Color(0xFF8A8A8F),
+                    color: colors.textSecondary,
                   ),
                 ),
                 
                 const SizedBox(height: 20),
                 
-                const SizedBox(
+                SizedBox(
                   width: 40,
                   height: 40,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF5722)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.drawingRed),
                     strokeWidth: 3,
                   ),
                 ),
@@ -613,16 +610,17 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     );
   }
 
-  Widget _buildResultOverlay(ColorCircleState state) {
+  Widget _buildResultOverlay(ColorCircleState state, AppColorsExtension colors) {
     final result = state.analysisResult;
     if (result == null) return const SizedBox.shrink();
     
     final isCorrect = result.isCorrect;
+    final accent = isCorrect ? AppColors.success : AppColors.warning;
     
     return SlideTransition(
       position: _resultSlide,
       child: Container(
-        color: Colors.black.withOpacity(0.4),
+        color: Colors.black.withValues(alpha: 0.42),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Center(
@@ -630,12 +628,12 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               margin: const EdgeInsets.all(32),
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: (isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF9800))
-                        .withOpacity(0.3),
+                    color: accent.withValues(alpha: 0.28),
                     blurRadius: 30,
                     spreadRadius: 5,
                   ),
@@ -644,23 +642,21 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Result icon
                   Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isCorrect
-                            ? [const Color(0xFF4CAF50), const Color(0xFF81C784)]
-                            : [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
+                            ? [AppColors.success, AppColors.correctGreen]
+                            : [AppColors.warning, AppColors.orangeAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: (isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF9800))
-                              .withOpacity(0.4),
+                          color: accent.withValues(alpha: 0.4),
                           blurRadius: 20,
                           spreadRadius: 2,
                         ),
@@ -675,45 +671,46 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                   
                   const SizedBox(height: 24),
                   
-                  // Title
                   Text(
-                    isCorrect ? 'Perfect! 🎉' : 'Almost there!',
+                    isCorrect ? Drawing.resultPerfect : Drawing.almostTitle,
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF3F414E),
+                      color: colors.textPrimary,
                     ),
                   ),
                   
                   const SizedBox(height: 12),
                   
-                  // Message
                   Text(
                     result.message,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 16,
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                       height: 1.5,
                     ),
                   ),
                   
                   const SizedBox(height: 32),
                   
-                  // Action buttons
                   if (isCorrect)
                     _buildGradientButton(
                       onTap: _onComplete,
-                      label: 'Continue',
-                      colors: [const Color(0xFF4CAF50), const Color(0xFF81C784)],
+                      label: Drawing.continueAction,
+                      gradientColors: [AppColors.success, AppColors.correctGreen],
                     )
                   else
                     Column(
                       children: [
                         _buildGradientButton(
                           onTap: _onTryAgain,
-                          label: 'Try Again',
-                          colors: [const Color(0xFFFF5722), const Color(0xFFFF8A65)],
+                          label: Drawing.tryAgain,
+                          gradientColors: [
+                            AppColors.drawingRed,
+                            AppColors.orangeAccent,
+                          ],
                         ),
                       ],
                     ),
@@ -729,7 +726,7 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   Widget _buildGradientButton({
     required VoidCallback onTap,
     required String label,
-    required List<Color> colors,
+    required List<Color> gradientColors,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -738,14 +735,14 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: colors,
+            colors: gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: colors.first.withOpacity(0.4),
+              color: gradientColors.first.withValues(alpha: 0.4),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -768,14 +765,17 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
 
 /// Custom painter for the pre-drawn circle outline
 class CircleOutlinePainter extends CustomPainter {
+  CircleOutlinePainter({required this.strokeColor});
+
+  final Color strokeColor;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF424242) // Dark gray outline
+      ..color = strokeColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
     
-    // Draw full circle in the center - larger radius for better coloring area
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width < size.height ? size.width : size.height) * 0.42;
     
@@ -783,5 +783,6 @@ class CircleOutlinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CircleOutlinePainter oldDelegate) =>
+      oldDelegate.strokeColor != strokeColor;
 }

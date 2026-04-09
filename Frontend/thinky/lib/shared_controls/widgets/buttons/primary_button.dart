@@ -25,20 +25,26 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final disabledBg = isDark
+        ? const Color(0xFF5C54B8)
+        : AppColors.primaryPurple.withValues(alpha: 0.42);
+
     return SizedBox(
       width: width ?? double.infinity,
       height: height ?? AppDimens.buttonHeight,
       child: ElevatedButton(
         onPressed: isEnabled && !isLoading ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isEnabled
-              ? AppColors.primaryPurple
-              : AppColors.primaryPurple.withOpacity(0.4),
+          backgroundColor: AppColors.primaryPurple,
+          disabledBackgroundColor: disabledBg,
+          foregroundColor: AppColors.white,
+          disabledForegroundColor: AppColors.white.withValues(alpha: 0.88),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimens.radiusRound),
           ),
           elevation: isEnabled ? 4 : 0,
-          shadowColor: AppColors.primaryPurple.withOpacity(0.4),
+          shadowColor: AppColors.primaryPurple.withValues(alpha: 0.4),
         ),
         child: isLoading
             ? const SizedBox(

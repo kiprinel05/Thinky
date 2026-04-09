@@ -58,6 +58,20 @@ class Auth {
   static String get nameRequired => TextService.getString('Auth', 'nameRequired');
   static String get nameMaxLength => TextService.getString('Auth', 'nameMaxLength');
   static String get continueAction => TextService.getString('Auth', 'continueAction');
+  static String get loginFailed => TextService.getString('Auth', 'loginFailed');
+  static String get registrationFailed =>
+      TextService.getString('Auth', 'registrationFailed');
+  static String get fillAllFields => TextService.getString('Auth', 'fillAllFields');
+}
+
+/// Localized user-facing error lines (see [UserFacingErrorMapper]).
+class UserErrors {
+  static String get wrongEmailOrPassword =>
+      TextService.getString('UserErrors', 'wrongEmailOrPassword');
+  static String get sessionExpiredMessage =>
+      TextService.getString('UserErrors', 'sessionExpiredMessage');
+  static String get somethingWentWrong =>
+      TextService.getString('UserErrors', 'somethingWentWrong');
 }
 
 /// Accessors for 'Missions' texts
@@ -100,6 +114,48 @@ class Quiz {
 class Animals {
   static String get lookAtImage => TextService.getString('Animals', 'lookAtImage');
   static String get continueAction => TextService.getString('Animals', 'continueAction');
+  static String get missionTitle => TextService.getString('Animals', 'missionTitle');
+  static String get roundShort => TextService.getString('Animals', 'roundShort');
+  static String get preparingMission => TextService.getString('Animals', 'preparingMission');
+  static String get pixyName => TextService.getString('Animals', 'pixyName');
+  static String get pixyThinkingShort => TextService.getString('Animals', 'pixyThinkingShort');
+  static String get imageLoadError => TextService.getString('Animals', 'imageLoadError');
+  static String get guessLeadIn => TextService.getString('Animals', 'guessLeadIn');
+  static String get verifyQuestion => TextService.getString('Animals', 'verifyQuestion');
+  static String get verifyYes => TextService.getString('Animals', 'verifyYes');
+  static String get verifyNo => TextService.getString('Animals', 'verifyNo');
+  static String get nextRoundExcited => TextService.getString('Animals', 'nextRoundExcited');
+  static String get teachPixy => TextService.getString('Animals', 'teachPixy');
+  static String get selectAllTarget => TextService.getString('Animals', 'selectAllTarget');
+  static String get submitTeaching => TextService.getString('Animals', 'submitTeaching');
+  static String get continueShort => TextService.getString('Animals', 'continueShort');
+  static String get nextRound => TextService.getString('Animals', 'nextRound');
+  static String get missionCompleteTitle => TextService.getString('Animals', 'missionCompleteTitle');
+  static String get missionCompleteBody => TextService.getString('Animals', 'missionCompleteBody');
+  static String get backToMissions => TextService.getString('Animals', 'backToMissions');
+  static String get oopsTitle => TextService.getString('Animals', 'oopsTitle');
+  static String get retry => TextService.getString('Animals', 'retry');
+
+  static String guessConfidencePercent(int percent) =>
+      TextService.getString('Animals', 'guessConfidence')
+          .replaceAll('{percent}', '$percent');
+
+  static String teachingScoreLine(int correct, int total) =>
+      TextService.getString('Animals', 'teachingScoreLine')
+          .replaceAll('{correct}', '$correct')
+          .replaceAll('{total}', '$total');
+
+  static String selectAllTargetFor(String animal) =>
+      TextService.getString('Animals', 'selectAllTarget')
+          .replaceAll('{animal}', animal);
+
+  static String submitTeachingCount(int n) =>
+      TextService.getString('Animals', 'submitTeachingCount')
+          .replaceAll('{count}', '$n');
+
+  static String roundCompleteTitleFor(int round) =>
+      TextService.getString('Animals', 'roundCompleteTitle')
+          .replaceAll('{round}', '$round');
 }
 
 /// Accessors for 'Drawing' texts
@@ -121,6 +177,37 @@ class Drawing {
   static String get continueAction => TextService.getString('Drawing', 'continueAction');
   static String get drawFirst => TextService.getString('Drawing', 'drawFirst');
   static String get captureError => TextService.getString('Drawing', 'captureError');
+  static String get checkDrawingSparkle =>
+      TextService.getString('Drawing', 'checkDrawingSparkle');
+  static String get missionDrawShapes =>
+      TextService.getString('Drawing', 'missionDrawShapes');
+  static String get roundCaption => TextService.getString('Drawing', 'roundCaption');
+  static String get thinkingTitle => TextService.getString('Drawing', 'thinkingTitle');
+  static String get nextRound => TextService.getString('Drawing', 'nextRound');
+  static String get missionCompleteButton =>
+      TextService.getString('Drawing', 'missionCompleteButton');
+  static String get shapeTriangle => TextService.getString('Drawing', 'shapeTriangle');
+  static String get shapeCircle => TextService.getString('Drawing', 'shapeCircle');
+  static String get shapeSquare => TextService.getString('Drawing', 'shapeSquare');
+  static String get colorNameBlue => TextService.getString('Drawing', 'colorNameBlue');
+  static String get colorNameRed => TextService.getString('Drawing', 'colorNameRed');
+  static String get colorNameGreen => TextService.getString('Drawing', 'colorNameGreen');
+  static String get drawPromptPart1 => TextService.getString('Drawing', 'drawPromptPart1');
+  static String get drawPromptPart2 => TextService.getString('Drawing', 'drawPromptPart2');
+  static String get drawPromptPart3 => TextService.getString('Drawing', 'drawPromptPart3');
+  static String get colorCircleTitle => TextService.getString('Drawing', 'colorCircleTitle');
+  static String get colorCircleInstruction =>
+      TextService.getString('Drawing', 'colorCircleInstruction');
+  static String get colorCircleThinking =>
+      TextService.getString('Drawing', 'colorCircleThinking');
+  static String get colorCircleAnalyzingSub =>
+      TextService.getString('Drawing', 'colorCircleAnalyzingSub');
+  static String get pixyCheckingTitle =>
+      TextService.getString('Drawing', 'pixyCheckingTitle');
+  static String get checkColoringSparkle =>
+      TextService.getString('Drawing', 'checkColoringSparkle');
+  static String get resultPerfect => TextService.getString('Drawing', 'resultPerfect');
+  static String get colorCircleFirst => TextService.getString('Drawing', 'colorCircleFirst');
 }
 
 /// Accessors for 'GroupingSorting' texts
@@ -129,10 +216,45 @@ class GroupingSorting {
   static String get subtitle => TextService.getString('GroupingSorting', 'subtitle');
   static String get instruction => TextService.getString('GroupingSorting', 'instruction');
   static String get submit => TextService.getString('GroupingSorting', 'submit');
+  static String get submitWithCheck =>
+      TextService.getString('GroupingSorting', 'submitWithCheck');
   static String get allSorted => TextService.getString('GroupingSorting', 'allSorted');
+  static String get tapSubmitHint =>
+      TextService.getString('GroupingSorting', 'tapSubmitHint');
   static String get missionComplete => TextService.getString('GroupingSorting', 'missionComplete');
   static String get tryAgain => TextService.getString('GroupingSorting', 'tryAgain');
   static String get continueAction => TextService.getString('GroupingSorting', 'continueAction');
+  static String get continueExcited =>
+      TextService.getString('GroupingSorting', 'continueExcited');
+  static String get tryAgainStrong =>
+      TextService.getString('GroupingSorting', 'tryAgainStrong');
+  static String get loadingItems => TextService.getString('GroupingSorting', 'loadingItems');
+  static String get dropHere => TextService.getString('GroupingSorting', 'dropHere');
+  static String get itemsToSort => TextService.getString('GroupingSorting', 'itemsToSort');
+  static String get statAccuracy => TextService.getString('GroupingSorting', 'statAccuracy');
+  static String get statTime => TextService.getString('GroupingSorting', 'statTime');
+  static String get statCorrect => TextService.getString('GroupingSorting', 'statCorrect');
+  static String get masteredMessage =>
+      TextService.getString('GroupingSorting', 'masteredMessage');
+  static String get backToMissions =>
+      TextService.getString('GroupingSorting', 'backToMissions');
+  static String get errorTitle => TextService.getString('GroupingSorting', 'errorTitle');
+  static String get unknownError => TextService.getString('GroupingSorting', 'unknownError');
+
+  static String roundOf(int current, int total) =>
+      TextService.getString('GroupingSorting', 'roundOf')
+          .replaceAll('{current}', '$current')
+          .replaceAll('{total}', '$total');
+
+  static String sortedProgress(int current, int total) =>
+      TextService.getString('GroupingSorting', 'sortedProgress')
+          .replaceAll('{current}', '$current')
+          .replaceAll('{total}', '$total');
+
+  static String motivationalLine(int index) {
+    final keys = ['moti1', 'moti2', 'moti3', 'moti4', 'moti5', 'moti6'];
+    return TextService.getString('GroupingSorting', keys[index % keys.length]);
+  }
 }
 
 /// Accessors for 'Vocabulary' texts
@@ -183,6 +305,8 @@ class Common {
   static String get connectionTimeout => TextService.getString('Common', 'connectionTimeout');
   static String get sessionExpired => TextService.getString('Common', 'sessionExpired');
   static String get serverError => TextService.getString('Common', 'serverError');
+  static String get offlineMissionBody =>
+      TextService.getString('Common', 'offlineMissionBody');
 }
 
 /// Accessors for 'Profile' texts
@@ -256,6 +380,8 @@ class WorkshopTexts {
   static String get answerHint => TextService.getString('Workshop', 'answerHint');
   static String get addAnswer => TextService.getString('Workshop', 'addAnswer');
   static String get missionPublishedMsg => TextService.getString('Workshop', 'missionPublished');
+  static String get noDownloaded => TextService.getString('Workshop', 'noDownloaded');
+  static String get browseWorkshop => TextService.getString('Workshop', 'browseWorkshop');
 }
 
 /// Accessors for 'Nav' texts (bottom navigation bar)
@@ -263,4 +389,124 @@ class Nav {
   static String get missions => TextService.getString('Nav', 'missions');
   static String get workshop => TextService.getString('Nav', 'workshop');
   static String get profile => TextService.getString('Nav', 'profile');
+  static String get missionsTab => TextService.getString('Nav', 'missionsTab');
+  static String get leaderboard => TextService.getString('Nav', 'leaderboard');
+  static String get mascotChat => TextService.getString('Nav', 'mascotChat');
+}
+
+/// Localized display titles for missions menu cards (by API `mission_path`).
+class MissionTitles {
+  static String forPath(String? path, String apiFallback) {
+    if (path == null || path.isEmpty) return apiFallback;
+    final v = TextService.getString('MissionTitles', path);
+    if (v.startsWith('MissionTitles.')) return apiFallback;
+    return v;
+  }
+}
+
+class LeaderboardTexts {
+  static String get title => TextService.getString('Leaderboard', 'title');
+  static String get subtitle => TextService.getString('Leaderboard', 'subtitle');
+  static String get includeWorkshop =>
+      TextService.getString('Leaderboard', 'includeWorkshop');
+  static String get noPlayers => TextService.getString('Leaderboard', 'noPlayers');
+  static String get noPlayersSubtitle =>
+      TextService.getString('Leaderboard', 'noPlayersSubtitle');
+  static String get couldNotLoad =>
+      TextService.getString('Leaderboard', 'couldNotLoad');
+  static String get globalStats =>
+      TextService.getString('Leaderboard', 'globalStats');
+  static String get players => TextService.getString('Leaderboard', 'players');
+  static String get avgPoints => TextService.getString('Leaderboard', 'avgPoints');
+  static String get min => TextService.getString('Leaderboard', 'min');
+  static String get avg => TextService.getString('Leaderboard', 'avg');
+  static String get max => TextService.getString('Leaderboard', 'max');
+  static String get missionsLabel =>
+      TextService.getString('Leaderboard', 'missionsLabel');
+  static String get workshopLabel =>
+      TextService.getString('Leaderboard', 'workshopLabel');
+  static String get pointsGuideTitle =>
+      TextService.getString('Leaderboard', 'pointsGuideTitle');
+  static String get pointsGuideBody =>
+      TextService.getString('Leaderboard', 'pointsGuideBody');
+  static String get ptsSuffix => TextService.getString('Leaderboard', 'ptsSuffix');
+}
+
+class AboutTexts {
+  static String get title => TextService.getString('About', 'title');
+  static String get appName => TextService.getString('About', 'appName');
+  static String get tagline => TextService.getString('About', 'tagline');
+  static String get missionTitle => TextService.getString('About', 'missionTitle');
+  static String get missionBody => TextService.getString('About', 'missionBody');
+  static String get objectivesTitle =>
+      TextService.getString('About', 'objectivesTitle');
+  static String get objective1 => TextService.getString('About', 'objective1');
+  static String get objective2 => TextService.getString('About', 'objective2');
+  static String get objective3 => TextService.getString('About', 'objective3');
+  static String get featuresTitle =>
+      TextService.getString('About', 'featuresTitle');
+  static String get feature1 => TextService.getString('About', 'feature1');
+  static String get feature2 => TextService.getString('About', 'feature2');
+  static String get feature3 => TextService.getString('About', 'feature3');
+  static String get feature4 => TextService.getString('About', 'feature4');
+  static String get madeWith => TextService.getString('About', 'madeWith');
+  static String get copyright => TextService.getString('About', 'copyright');
+}
+
+class HelpTexts {
+  static String get title => TextService.getString('Help', 'title');
+  static String get faqTitle => TextService.getString('Help', 'faqTitle');
+  static String get faqSubtitle => TextService.getString('Help', 'faqSubtitle');
+  static String faqQuestion(int i) => TextService.getString('Help', 'faq${i}Q');
+  static String faqAnswer(int i) => TextService.getString('Help', 'faq${i}A');
+}
+
+class PixyLearnsTexts {
+  static String get preparingLessons =>
+      TextService.getString('PixyLearns', 'preparingLessons');
+  static String get introTitle => TextService.getString('PixyLearns', 'introTitle');
+  static String get introBody => TextService.getString('PixyLearns', 'introBody');
+  static String get pillImages => TextService.getString('PixyLearns', 'pillImages');
+  static String get pillCategories =>
+      TextService.getString('PixyLearns', 'pillCategories');
+  static String get pillAi => TextService.getString('PixyLearns', 'pillAi');
+  static String get startTeaching =>
+      TextService.getString('PixyLearns', 'startTeaching');
+  static String get chapter1 => TextService.getString('PixyLearns', 'chapter1');
+  static String get learningProgress =>
+      TextService.getString('PixyLearns', 'learningProgress');
+  static String get teachPixyHeader =>
+      TextService.getString('PixyLearns', 'teachPixyHeader');
+  static String get teachPixyHint =>
+      TextService.getString('PixyLearns', 'teachPixyHint');
+  static String get labelApple => TextService.getString('PixyLearns', 'labelApple');
+  static String get labelCat => TextService.getString('PixyLearns', 'labelCat');
+  static String get imageUnavailable =>
+      TextService.getString('PixyLearns', 'imageUnavailable');
+  static String get teachPixyCta =>
+      TextService.getString('PixyLearns', 'teachPixyCta');
+  static String get amazingJob => TextService.getString('PixyLearns', 'amazingJob');
+  static String learnedExamples(int count) => TextService.getString(
+        'PixyLearns',
+        'learnedExamples',
+      ).replaceAll('{count}', '$count');
+  static String categoriesLine(String list) => TextService.getString(
+        'PixyLearns',
+        'categoriesLine',
+      ).replaceAll('{list}', list);
+  static String get aiExplanation =>
+      TextService.getString('PixyLearns', 'aiExplanation');
+  static String get continueMissions =>
+      TextService.getString('PixyLearns', 'continueMissions');
+}
+
+class MascotTexts {
+  static String get inputHint => TextService.getString('Mascot', 'inputHint');
+  static String get greeting => TextService.getString('Mascot', 'greeting');
+  static String get title => TextService.getString('Mascot', 'title');
+  static String get subtitle => TextService.getString('Mascot', 'subtitle');
+  static String get typing => TextService.getString('Mascot', 'typing');
+  static String get suggest1 => TextService.getString('Mascot', 'suggest1');
+  static String get suggest2 => TextService.getString('Mascot', 'suggest2');
+  static String get suggest3 => TextService.getString('Mascot', 'suggest3');
 }

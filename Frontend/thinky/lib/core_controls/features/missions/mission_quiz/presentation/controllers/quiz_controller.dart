@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import '../../data/quiz_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/data/quiz_content_localization.dart';
 import 'quiz_state.dart';
 
 // Import local storage provider for repository DI
@@ -31,7 +33,8 @@ class QuizController extends BaseAsyncController<QuizState> {
     await executeAsync<List<Question>>(
       operation: () async {
         final result = await _repository.getQuestions();
-        return result.getOrThrow();
+        final list = result.getOrThrow();
+        return QuizContentLocalization.applyLocale(list);
       },
       loadingState: () => QuizState.loading(),
       successState: (questions) => state.copyWith(
@@ -138,7 +141,7 @@ class QuizController extends BaseAsyncController<QuizState> {
       ErrorLogger().logError(e, stackTrace: stack);
       safeUpdate(state.copyWith(
         isSubmitting: false,
-        errorMessage: e.toString(),
+        errorMessage: UserFacingErrorMapper.map(e),
       ));
     }
   }

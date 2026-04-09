@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends ConsumerWidget {
   const AboutPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
     final colors = context.appColors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -37,7 +41,7 @@ class AboutPage extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
               title: Text(
-                'About Thinky',
+                AboutTexts.title,
                 style: GoogleFonts.alata(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -117,7 +121,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.lg),
             Text(
-              'Thinky',
+              AboutTexts.appName,
               style: GoogleFonts.alata(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -127,7 +131,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Learn AI with Pixy',
+              AboutTexts.tagline,
               style: GoogleFonts.alata(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -146,9 +150,8 @@ class AboutPage extends StatelessWidget {
       child: _buildSectionCard(
         context,
         icon: Icons.rocket_launch_rounded,
-        title: 'Our Mission',
-        content:
-            'Thinky este o aplicație interactivă, educativă și gamificată, destinată copiilor cu vârsta între 7 și 12 ani. Prin jocuri și interacțiuni cu mascota digitală Pixy, copiii învață conceptele de bază din inteligența artificială. Pe parcurs, mascota este „antrenată" de copil, simulând procesul real de învățare al unui model de IA.',
+        title: AboutTexts.missionTitle,
+        content: AboutTexts.missionBody,
       ),
     );
   }
@@ -160,21 +163,21 @@ class AboutPage extends StatelessWidget {
       child: _buildSectionCard(
         context,
         icon: Icons.flag_rounded,
-        title: 'Obiective principale',
+        title: AboutTexts.objectivesTitle,
         content: '',
         children: [
           _buildObjectiveItem(
-            'Introducerea notiunilor de IA într-un mod prietenos și intuitiv.',
+            AboutTexts.objective1,
             colors,
           ),
           const SizedBox(height: AppDimens.sm),
           _buildObjectiveItem(
-            'Simularea unui model simplu de IA care „învață" în timp real din interacțiunile copilului.',
+            AboutTexts.objective2,
             colors,
           ),
           const SizedBox(height: AppDimens.sm),
           _buildObjectiveItem(
-            'Utilizarea unei mascote animate care servește drept ghid, partener și model de învățare.',
+            AboutTexts.objective3,
             colors,
           ),
         ],
@@ -213,10 +216,10 @@ class AboutPage extends StatelessWidget {
   Widget _buildFeaturesSection(BuildContext context) {
     final colors = context.appColors;
     final features = [
-      ('Misiuni interactive', Icons.gamepad_rounded),
-      ('Workshop creativ', Icons.extension_rounded),
-      ('Leaderboard gamificat', Icons.leaderboard_rounded),
-      ('Chat cu Pixy', Icons.chat_bubble_rounded),
+      (AboutTexts.feature1, Icons.gamepad_rounded),
+      (AboutTexts.feature2, Icons.extension_rounded),
+      (AboutTexts.feature3, Icons.leaderboard_rounded),
+      (AboutTexts.feature4, Icons.chat_bubble_rounded),
     ];
 
     return FadeInWidget(
@@ -225,7 +228,7 @@ class AboutPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Ce oferim',
+            AboutTexts.featuresTitle,
             style: GoogleFonts.alata(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -290,7 +293,7 @@ class AboutPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Made with ❤️ for curious minds',
+              AboutTexts.madeWith,
               style: GoogleFonts.alata(
                 fontSize: 13,
                 color: colors.textHint,
@@ -298,7 +301,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Thinky © 2025',
+              AboutTexts.copyright,
               style: GoogleFonts.alata(
                 fontSize: 12,
                 color: colors.textMuted,

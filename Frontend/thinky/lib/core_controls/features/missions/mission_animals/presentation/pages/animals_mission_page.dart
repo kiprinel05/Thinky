@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import '../../data/animals_models.dart';
 import '../../data/animals_repository.dart';
 import '../controllers/animals_controller.dart';
@@ -59,23 +61,30 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
   Widget build(BuildContext context) {
     ref.watch(textRefreshProvider);
     final state = ref.watch(animalsControllerProvider);
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final gradientColors = isDark
+        ? <Color>[
+            AppColors.darkSurface,
+            Color.lerp(AppColors.darkSurface, _primaryColor, 0.38)!,
+          ]
+        : <Color>[_primaryColor, _primaryLightColor];
 
     return Scaffold(
       body: Stack(
         children: [
-          // Purple gradient background
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [_primaryColor, _primaryLightColor],
+                  colors: gradientColors,
                 ),
               ),
             ),
           ),
-          // Decorative circles
           Positioned(
             top: -80,
             left: -60,
@@ -84,7 +93,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.08),
               ),
             ),
           ),
@@ -96,7 +105,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
               height: 150,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: isDark ? 0.04 : 0.06),
               ),
             ),
           ),
@@ -104,7 +113,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             child: Column(
               children: [
                 _buildAppBar(state),
-                Expanded(child: _buildContent(state)),
+                Expanded(child: _buildContent(state, colors, isDark)),
               ],
             ),
           ),
@@ -123,7 +132,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -139,7 +148,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Teach Pixy Animals',
+                  Animals.missionTitle,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -147,10 +156,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                   ),
                 ),
                 Text(
-                  'Round ${state.currentRound}/${state.totalRounds}',
+                  '${Animals.roundShort} ${state.currentRound}/${state.totalRounds}',
                   style: GoogleFonts.alata(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -180,11 +189,11 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 ? Colors.white
                 : isCurrent
                     ? AppColors.missionYellow
-                    : Colors.white.withOpacity(0.35),
+                    : Colors.white.withValues(alpha: 0.35),
             boxShadow: isCurrent
                 ? [
                     BoxShadow(
-                      color: AppColors.missionYellow.withOpacity(0.5),
+                      color: AppColors.missionYellow.withValues(alpha: 0.5),
                       blurRadius: 8,
                       spreadRadius: 1,
                     ),
@@ -196,26 +205,30 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildContent(AnimalsMissionState state) {
+  Widget _buildContent(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+    bool isDark,
+  ) {
     switch (state.phase) {
       case AnimalsMissionPhase.loading:
         return _buildLoading();
       case AnimalsMissionPhase.showImage:
-        return _buildShowImage(state);
+        return _buildShowImage(state, colors);
       case AnimalsMissionPhase.guessResult:
-        return _buildGuessResult(state);
+        return _buildGuessResult(state, colors, isDark);
       case AnimalsMissionPhase.verifyFeedback:
-        return _buildVerifyFeedback(state);
+        return _buildVerifyFeedback(state, colors, isDark);
       case AnimalsMissionPhase.teachingPhase:
-        return _buildTeachingPhase(state);
+        return _buildTeachingPhase(state, colors);
       case AnimalsMissionPhase.teachingResult:
-        return _buildTeachingResult(state);
+        return _buildTeachingResult(state, colors);
       case AnimalsMissionPhase.roundComplete:
-        return _buildRoundComplete(state);
+        return _buildRoundComplete(state, colors);
       case AnimalsMissionPhase.missionComplete:
-        return _buildMissionComplete();
+        return _buildMissionComplete(colors);
       case AnimalsMissionPhase.error:
-        return _buildError(state);
+        return _buildError(state, colors);
     }
   }
 
@@ -229,7 +242,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const CircularProgressIndicator(
@@ -242,7 +255,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           FadeInWidget(
             delay: const Duration(milliseconds: 400),
             child: Text(
-              'Preparing mission...',
+              Animals.preparingMission,
               style: GoogleFonts.alata(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -255,7 +268,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildShowImage(AnimalsMissionState state) {
+  Widget _buildShowImage(AnimalsMissionState state, AppColorsExtension colors) {
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 20,
@@ -275,10 +288,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                       width: 1,
                     ),
                   ),
@@ -290,12 +303,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           width: 64,
                           height: 64,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
+                            color: Colors.white.withValues(alpha: 0.25),
                             shape: BoxShape.circle,
                           ),
                           child: ClipOval(
                             child: Image.asset(
-                              'assets/welcome/page2/thinking.png',
+                              AppAssets.welcomePage2Thinking,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -307,7 +320,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Pixy',
+                              Animals.pixyName,
                               style: GoogleFonts.alata(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
@@ -315,10 +328,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                               ),
                             ),
                             Text(
-                              'Hmm, let me think... 🤔',
+                              Animals.pixyThinkingShort,
                               style: GoogleFonts.alata(
                                 fontSize: 14,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
                           ],
@@ -348,7 +361,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
               textAlign: TextAlign.center,
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 height: 1.5,
               ),
             ),
@@ -358,7 +371,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           SlideUpWidget(
             delay: const Duration(milliseconds: 350),
             offset: 40,
-            child: _buildAnimalImage(state.currentImage),
+            child: _buildAnimalImage(state.currentImage, colors),
           ),
           const SizedBox(height: 24),
           // Continue button
@@ -379,7 +392,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: _primaryColor.withOpacity(0.4),
+                      color: _primaryColor.withValues(alpha: 0.4),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -423,7 +436,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildAnimalImage(AnimalImage? image) {
+  Widget _buildAnimalImage(AnimalImage? image, AppColorsExtension colors) {
     if (image == null) return const SizedBox();
 
     final imageUrl = AnimalsRepository.getImageUrl(image.url);
@@ -431,16 +444,17 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     return Container(
       constraints: const BoxConstraints(minHeight: 280, maxHeight: 400),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: _primaryColor.withOpacity(0.2),
+            color: _primaryColor.withValues(alpha: 0.2),
             blurRadius: 30,
             offset: const Offset(0, 12),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -451,9 +465,9 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Container(color: const Color(0xFFF5F6FA)),
+            Container(color: colors.surface),
             Center(
-              child: _buildImageWidget(imageUrl),
+              child: _buildImageWidget(imageUrl, colors),
             ),
           ],
         ),
@@ -461,7 +475,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildImageWidget(String imageUrl) {
+  Widget _buildImageWidget(String imageUrl, AppColorsExtension colors) {
     if (imageUrl.startsWith('assets/')) {
       return Image.asset(
         imageUrl,
@@ -491,13 +505,13 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             Icon(
               Icons.image_not_supported_rounded,
               size: 56,
-              color: AppColors.textHint,
+              color: colors.textHint,
             ),
             const SizedBox(height: 12),
             Text(
-              'Failed to load image',
+              Animals.imageLoadError,
               style: GoogleFonts.alata(
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 fontSize: 14,
               ),
             ),
@@ -507,9 +521,17 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildGuessResult(AnimalsMissionState state) {
+  Widget _buildGuessResult(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+    bool isDark,
+  ) {
     final guess = state.lastGuess;
     if (guess == null) return const SizedBox();
+
+    final cardGradient = isDark
+        ? [colors.cardColor, colors.surface]
+        : [Colors.white.withValues(alpha: 0.95), Colors.white.withValues(alpha: 0.85)];
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(
@@ -533,24 +555,21 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withOpacity(0.95),
-                        Colors.white.withOpacity(0.85),
-                      ],
+                      colors: cardGradient,
                     ),
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.6),
+                      color: isDark ? colors.border : Colors.white.withValues(alpha: 0.6),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryColor.withOpacity(0.12),
+                        color: _primaryColor.withValues(alpha: 0.12),
                         blurRadius: 32,
                         offset: const Offset(0, 12),
                       ),
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -572,7 +591,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: _primaryColor.withOpacity(0.45),
+                                color: _primaryColor.withValues(alpha: 0.45),
                                 blurRadius: 16,
                                 offset: const Offset(0, 6),
                               ),
@@ -580,7 +599,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           ),
                           child: ClipOval(
                             child: Image.asset(
-                              'assets/welcome/page2/thinking.png',
+                              AppAssets.welcomePage2Thinking,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -588,10 +607,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'I think this is a...',
+                        Animals.guessLeadIn,
                         style: GoogleFonts.alata(
                           fontSize: 15,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                           letterSpacing: 0.3,
                         ),
                       ),
@@ -609,7 +628,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: _primaryColor.withOpacity(0.35),
+                              color: _primaryColor.withValues(alpha: 0.35),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -633,15 +652,17 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           Icon(
                             Icons.auto_awesome,
                             size: 16,
-                            color: _primaryColor.withOpacity(0.8),
+                            color: _primaryColor.withValues(alpha: 0.8),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '${(guess.confidence * 100).toInt()}% confident',
+                            Animals.guessConfidencePercent(
+                              (guess.confidence * 100).toInt(),
+                            ),
                             style: GoogleFonts.alata(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: _primaryColor.withOpacity(0.9),
+                              color: _primaryColor.withValues(alpha: 0.9),
                             ),
                           ),
                         ],
@@ -664,15 +685,15 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.35),
+                      color: Colors.white.withValues(alpha: 0.35),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
+                        color: Colors.black.withValues(alpha: 0.06),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -686,7 +707,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -699,7 +720,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'Is Pixy correct?',
+                              Animals.verifyQuestion,
                               style: GoogleFonts.alata(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -716,7 +737,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           Expanded(
                             child: _buildVerifyButton(
                               icon: Icons.check_rounded,
-                              label: 'Yes, correct!',
+                              label: Animals.verifyYes,
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -734,7 +755,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           Expanded(
                             child: _buildVerifyButton(
                               icon: Icons.close_rounded,
-                              label: 'No, wrong!',
+                              label: Animals.verifyNo,
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
@@ -779,7 +800,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -809,12 +830,23 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildVerifyFeedback(AnimalsMissionState state) {
+  Widget _buildVerifyFeedback(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+    bool isDark,
+  ) {
     final response = state.verifyResponse;
     if (response == null) return const SizedBox();
 
     final wasCorrect = response.wasActuallyCorrect;
     final userWasRight = response.userWasRight;
+
+    final feedbackCardGradient = isDark
+        ? [colors.cardColor, colors.surface]
+        : [
+            Colors.white.withValues(alpha: 0.95),
+            Colors.white.withValues(alpha: 0.88),
+          ];
 
     return Center(
       child: SingleChildScrollView(
@@ -840,24 +872,21 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          Colors.white.withOpacity(0.95),
-                          Colors.white.withOpacity(0.88),
-                        ],
+                        colors: feedbackCardGradient,
                       ),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.6),
+                        color: isDark ? colors.border : Colors.white.withValues(alpha: 0.6),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.12),
+                          color: _primaryColor.withValues(alpha: 0.12),
                           blurRadius: 36,
                           offset: const Offset(0, 14),
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 20,
                           offset: const Offset(0, 6),
                         ),
@@ -889,7 +918,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                                 color: (userWasRight
                                         ? AppColors.success
                                         : _primaryColor)
-                                    .withOpacity(0.4),
+                                    .withValues(alpha: 0.4),
                                 blurRadius: 16,
                                 offset: const Offset(0, 6),
                               ),
@@ -910,7 +939,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           style: GoogleFonts.alata(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -953,7 +982,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                     boxShadow: [
                       BoxShadow(
                         color: (wasCorrect ? AppColors.success : _primaryColor)
-                            .withOpacity(0.4),
+                            .withValues(alpha: 0.4),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -963,7 +992,9 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          wasCorrect ? 'Next Round!' : 'Teach Pixy!',
+                          wasCorrect
+                              ? Animals.nextRoundExcited
+                              : Animals.teachPixy,
                           style: GoogleFonts.alata(
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
@@ -991,7 +1022,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildTeachingPhase(AnimalsMissionState state) {
+  Widget _buildTeachingPhase(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+  ) {
     final teachingData = state.teachingImages;
     if (teachingData == null) return const SizedBox();
 
@@ -1006,10 +1040,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   width: 1,
                 ),
               ),
@@ -1018,7 +1052,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
@@ -1033,7 +1067,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Teach Pixy!',
+                          Animals.teachPixy,
                           style: GoogleFonts.alata(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -1041,10 +1075,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                           ),
                         ),
                         Text(
-                          'Select all the ${teachingData.targetAnimal.toUpperCase()}s',
+                          Animals.selectAllTargetFor(
+                            teachingData.targetAnimal.toUpperCase(),
+                          ),
                           style: GoogleFonts.alata(
                             fontSize: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -1072,7 +1108,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
               return SlideUpWidget(
                 delay: Duration(milliseconds: 200 + (index * 80)),
                 offset: 30,
-                child: _buildTeachingImageCard(image, isSelected),
+                child: _buildTeachingImageCard(image, isSelected, colors),
               );
             },
           ),
@@ -1098,12 +1134,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                         colors: [_primaryColor, _primaryLightColor],
                       )
                     : null,
-                color: canSubmit ? null : const Color(0xFFE0E2EA),
+                color: canSubmit ? null : colors.border,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: canSubmit
                     ? [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.4),
+                          color: _primaryColor.withValues(alpha: 0.4),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -1115,16 +1151,16 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 children: [
                   Icon(
                     Icons.auto_awesome,
-                    color: canSubmit ? Colors.white : AppColors.textHint,
+                    color: canSubmit ? Colors.white : colors.textHint,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Submit Teaching (${state.selectedImageIds.length} selected)',
+                    Animals.submitTeachingCount(state.selectedImageIds.length),
                     style: GoogleFonts.alata(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: canSubmit ? Colors.white : AppColors.textHint,
+                      color: canSubmit ? Colors.white : colors.textHint,
                     ),
                   ),
                 ],
@@ -1136,7 +1172,11 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildTeachingImageCard(AnimalImage image, bool isSelected) {
+  Widget _buildTeachingImageCard(
+    AnimalImage image,
+    bool isSelected,
+    AppColorsExtension colors,
+  ) {
     final imageUrl = AnimalsRepository.getImageUrl(image.url);
 
     return GestureDetector(
@@ -1147,7 +1187,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? _primaryColor : Colors.transparent,
@@ -1156,8 +1196,8 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? _primaryColor.withOpacity(0.25)
-                  : Colors.black.withOpacity(0.08),
+                  ? _primaryColor.withValues(alpha: 0.25)
+                  : Colors.black.withValues(alpha: 0.08),
               blurRadius: isSelected ? 16 : 12,
               offset: const Offset(0, 4),
             ),
@@ -1168,9 +1208,9 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Container(color: const Color(0xFFF5F6FA)),
+              Container(color: colors.surface),
               Center(
-                child: _buildImageWidget(imageUrl),
+                child: _buildImageWidget(imageUrl, colors),
               ),
               if (isSelected)
                 Positioned(
@@ -1185,7 +1225,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.5),
+                          color: _primaryColor.withValues(alpha: 0.5),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -1201,7 +1241,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildTeachingResult(AnimalsMissionState state) {
+  Widget _buildTeachingResult(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+  ) {
     final result = state.teachingResult;
     if (result == null) return const SizedBox();
 
@@ -1219,11 +1262,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           child: Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: accentColor.withOpacity(0.2),
+                  color: accentColor.withValues(alpha: 0.2),
                   blurRadius: 30,
                   offset: const Offset(0, 12),
                 ),
@@ -1244,18 +1288,21 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.12),
+                    color: accentColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${result.correctCount}/${result.totalCorrect} correct',
+                    Animals.teachingScoreLine(
+                      result.correctCount,
+                      result.totalCorrect,
+                    ),
                     style: GoogleFonts.alata(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -1282,14 +1329,16 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: accentColor.withOpacity(0.35),
+                          color: accentColor.withValues(alpha: 0.35),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: Text(
-                      result.isCorrect ? 'Continue!' : 'Try Again',
+                      result.isCorrect
+                          ? Animals.continueShort
+                          : Animals.retry,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -1306,7 +1355,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildRoundComplete(AnimalsMissionState state) {
+  Widget _buildRoundComplete(
+    AnimalsMissionState state,
+    AppColorsExtension colors,
+  ) {
     return Center(
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -1319,11 +1371,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryColor.withOpacity(0.2),
+                  color: _primaryColor.withValues(alpha: 0.2),
                   blurRadius: 30,
                   offset: const Offset(0, 12),
                 ),
@@ -1335,11 +1388,11 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 const Text('🎉', style: TextStyle(fontSize: 72)),
                 const SizedBox(height: 20),
                 Text(
-                  'Round ${state.currentRound} Complete!',
+                  Animals.roundCompleteTitleFor(state.currentRound),
                   style: GoogleFonts.alata(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -1359,14 +1412,14 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.4),
+                          color: _primaryColor.withValues(alpha: 0.4),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: Text(
-                      'Next Round',
+                      Animals.nextRound,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -1383,7 +1436,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildMissionComplete() {
+  Widget _buildMissionComplete(AppColorsExtension colors) {
     return Center(
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -1396,11 +1449,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryColor.withOpacity(0.2),
+                  color: _primaryColor.withValues(alpha: 0.2),
                   blurRadius: 30,
                   offset: const Offset(0, 12),
                 ),
@@ -1412,7 +1466,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 const Text('🏆', style: TextStyle(fontSize: 88)),
                 const SizedBox(height: 20),
                 Text(
-                  'Mission Complete!',
+                  Animals.missionCompleteTitle,
                   style: GoogleFonts.alata(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -1421,10 +1475,10 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Pixy now knows animals!',
+                  Animals.missionCompleteBody,
                   style: GoogleFonts.alata(
                     fontSize: 16,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -1442,7 +1496,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.4),
+                          color: _primaryColor.withValues(alpha: 0.4),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -1454,7 +1508,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                         const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
                         const SizedBox(width: 10),
                         Text(
-                          'Back to Missions',
+                          Animals.backToMissions,
                           style: GoogleFonts.alata(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -1473,7 +1527,7 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
     );
   }
 
-  Widget _buildError(AnimalsMissionState state) {
+  Widget _buildError(AnimalsMissionState state, AppColorsExtension colors) {
     return Center(
       child: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -1486,11 +1540,12 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
           child: Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.error.withOpacity(0.15),
+                  color: AppColors.error.withValues(alpha: 0.15),
                   blurRadius: 24,
                   offset: const Offset(0, 10),
                 ),
@@ -1506,20 +1561,20 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Oops!',
+                  Animals.oopsTitle,
                   style: GoogleFonts.alata(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  state.errorMessage ?? 'Something went wrong',
+                  state.errorMessage ?? UserErrors.somethingWentWrong,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.alata(
                     fontSize: 15,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -1539,14 +1594,14 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: _primaryColor.withOpacity(0.35),
+                          color: _primaryColor.withValues(alpha: 0.35),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: Text(
-                      'Retry',
+                      Animals.retry,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,

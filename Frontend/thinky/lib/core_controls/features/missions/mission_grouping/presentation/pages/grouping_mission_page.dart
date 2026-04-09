@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import '../../data/grouping_models.dart';
 import '../../data/grouping_repository.dart';
 import '../controllers/grouping_controller.dart';
@@ -61,6 +65,8 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     final state = ref.watch(groupingControllerProvider);
 
     // Listen for motivational text changes
@@ -75,22 +81,22 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(state),
+            _buildAppBar(state, colors),
             if (state.phase == GroupingMissionPhase.playing ||
                 state.phase == GroupingMissionPhase.submitting)
-              _buildProgressIndicator(state),
-            Expanded(child: _buildContent(state)),
+              _buildProgressIndicator(state, colors),
+            Expanded(child: _buildContent(state, colors)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAppBar(GroupingMissionState state) {
+  Widget _buildAppBar(GroupingMissionState state, AppColorsExtension colors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -100,10 +106,11 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F3F7),
+                color: colors.inputFill,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.border),
               ),
-              child: const Icon(Icons.arrow_back, color: Color(0xFF222222), size: 20),
+              child: Icon(Icons.arrow_back, color: colors.textPrimary, size: 20),
             ),
           ),
           const SizedBox(width: 16),
@@ -112,19 +119,19 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Group the Images',
+                  GroupingSorting.title,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF222222),
+                    color: colors.textPrimary,
                   ),
                 ),
                 if (state.phase == GroupingMissionPhase.playing)
                   Text(
-                    'Round ${state.currentRound} of ${state.totalRounds}',
+                    GroupingSorting.roundOf(state.currentRound, state.totalRounds),
                     style: GoogleFonts.alata(
                       fontSize: 13,
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                     ),
                   ),
               ],
@@ -164,7 +171,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
-  Widget _buildProgressIndicator(GroupingMissionState state) {
+  Widget _buildProgressIndicator(GroupingMissionState state, AppColorsExtension colors) {
     final progress = state.items.isEmpty
         ? 0.0
         : state.assignments.length / state.items.length;
@@ -176,9 +183,9 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: const Color(0xFFF2F3F7),
+              backgroundColor: colors.inputFill,
               valueColor: AlwaysStoppedAnimation<Color>(
-                progress == 1.0 ? const Color(0xFF66BB6A) : const Color(0xFF8E97FD),
+                progress == 1.0 ? const Color(0xFF66BB6A) : AppColors.primaryPurple,
               ),
               minHeight: 6,
             ),
@@ -188,11 +195,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${state.assignments.length}/${state.items.length} sorted',
-                style: GoogleFonts.alata(fontSize: 11, color: const Color(0xFF8A8A8F)),
+                GroupingSorting.sortedProgress(
+                  state.assignments.length,
+                  state.items.length,
+                ),
+                style: GoogleFonts.alata(fontSize: 11, color: colors.textSecondary),
               ),
               if (state.startTime != null)
-                _TimerWidget(startTime: state.startTime!),
+                _TimerWidget(startTime: state.startTime!, colors: colors),
             ],
           ),
           const SizedBox(height: 8),
@@ -201,36 +211,62 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
-  Widget _buildContent(GroupingMissionState state) {
+  Widget _buildContent(GroupingMissionState state, AppColorsExtension colors) {
     switch (state.phase) {
       case GroupingMissionPhase.loading:
       case GroupingMissionPhase.submitting:
-        return _buildLoading();
+        return _buildLoading(colors);
       case GroupingMissionPhase.playing:
-        return _buildPlayingPhase(state);
+        return _buildPlayingPhase(state, colors);
       case GroupingMissionPhase.results:
-        return _buildResults(state);
+        return _buildResults(state, colors);
       case GroupingMissionPhase.missionComplete:
-        return _buildMissionComplete();
+        return _buildMissionComplete(colors);
       case GroupingMissionPhase.error:
-        return _buildError(state);
+        return _buildError(state, colors);
       default:
-        return _buildLoading();
+        return _buildLoading(colors);
     }
   }
 
-  Widget _buildLoading() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(color: Color(0xFF8E97FD)),
-          const SizedBox(height: 16),
-          Text(
-            'Loading items...',
-            style: GoogleFonts.alata(fontSize: 16, color: const Color(0xFF8A8A8F)),
+  Widget _buildLoading(AppColorsExtension colors) {
+    Widget skel(double h, [double? w]) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: colors.shimmer,
+            borderRadius: BorderRadius.circular(16),
           ),
-        ],
+        );
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: skel(140)),
+                const SizedBox(width: 12),
+                Expanded(child: skel(140)),
+                const SizedBox(width: 12),
+                Expanded(child: skel(140)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            skel(12, double.infinity),
+            const SizedBox(height: 8),
+            skel(12, 200),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(color: AppColors.primaryPurple),
+            const SizedBox(height: 16),
+            Text(
+              GroupingSorting.loadingItems,
+              style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -239,17 +275,17 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   // PLAYING PHASE — Drag & Drop Interface
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildPlayingPhase(GroupingMissionState state) {
+  Widget _buildPlayingPhase(GroupingMissionState state, AppColorsExtension colors) {
     return Column(
       children: [
         // Instruction text
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
           child: Text(
-            'Drag each image into the correct category',
+            GroupingSorting.instruction,
             style: GoogleFonts.alata(
               fontSize: 14,
-              color: const Color(0xFF8A8A8F),
+              color: colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -267,7 +303,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 return Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _buildCategoryDropZone(state, category),
+                    child: _buildCategoryDropZone(state, category, colors),
                   ),
                 );
               }).toList(),
@@ -283,7 +319,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           child: Container(
             height: 2,
             decoration: BoxDecoration(
-              color: const Color(0xFFF2F3F7),
+              color: colors.divider,
               borderRadius: BorderRadius.circular(1),
             ),
           ),
@@ -294,7 +330,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
         // Image tray (unassigned items) - more space
         Expanded(
           flex: 3,
-          child: _buildImageTray(state),
+          child: _buildImageTray(state, colors),
         ),
 
         // Submit button
@@ -307,8 +343,12 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
-  Widget _buildCategoryDropZone(GroupingMissionState state, String category) {
-    final color = _categoryColors[category] ?? const Color(0xFF8E97FD);
+  Widget _buildCategoryDropZone(
+    GroupingMissionState state,
+    String category,
+    AppColorsExtension colors,
+  ) {
+    final color = _categoryColors[category] ?? AppColors.primaryPurple;
     final icon = _categoryIcons[category] ?? Icons.category;
     final itemsInCat = state.itemsInCategory(category);
     final controller = ref.read(groupingControllerProvider.notifier);
@@ -323,10 +363,10 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: isHovering ? color.withOpacity(0.15) : const Color(0xFFFAFAFC),
+            color: isHovering ? color.withValues(alpha: 0.15) : colors.cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isHovering ? color : const Color(0xFFE8E8ED),
+              color: isHovering ? color : colors.border,
               width: isHovering ? 2.5 : 1.5,
             ),
             boxShadow: isHovering
@@ -367,14 +407,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 child: itemsInCat.isEmpty
                     ? Center(
                         child: Text(
-                          'Drop here',
+                          GroupingSorting.dropHere,
                           style: GoogleFonts.alata(
                             fontSize: 11,
-                            color: const Color(0xFFBBBBC3),
+                            color: colors.textHint,
                           ),
                         ),
                       )
-                    : _buildScrollableDropList(itemsInCat, color),
+                    : _buildScrollableDropList(itemsInCat, color, colors),
               ),
             ],
           ),
@@ -386,6 +426,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   Widget _buildScrollableDropList(
     List<GroupingItem> itemsInCat,
     Color color,
+    AppColorsExtension colors,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -398,7 +439,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 spacing: 4,
                 runSpacing: 4,
                 children: itemsInCat.map((item) {
-                  return _buildDroppedItemChip(item, color);
+                  return _buildDroppedItemChip(item, color, colors);
                 }).toList(),
               ),
             ),
@@ -430,7 +471,11 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
-  Widget _buildDroppedItemChip(GroupingItem item, Color categoryColor) {
+  Widget _buildDroppedItemChip(
+    GroupingItem item,
+    Color categoryColor,
+    AppColorsExtension colors,
+  ) {
     final controller = ref.read(groupingControllerProvider.notifier);
 
     return GestureDetector(
@@ -439,11 +484,15 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: categoryColor.withOpacity(0.3)),
+          border: Border.all(color: categoryColor.withValues(alpha: 0.3)),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
@@ -462,18 +511,18 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             Expanded(
               child: Text(
                 item.name,
-                style: GoogleFonts.alata(fontSize: 10, color: const Color(0xFF222222)),
+                style: GoogleFonts.alata(fontSize: 10, color: colors.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(Icons.close, size: 12, color: Colors.grey.shade400),
+            Icon(Icons.close, size: 12, color: colors.textHint),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildImageTray(GroupingMissionState state) {
+  Widget _buildImageTray(GroupingMissionState state, AppColorsExtension colors) {
     final unassigned = state.unassignedItems;
 
     if (unassigned.isEmpty) {
@@ -484,13 +533,13 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             const Icon(Icons.check_circle_outline, size: 40, color: Color(0xFF66BB6A)),
             const SizedBox(height: 8),
             Text(
-              'All items sorted!',
+              GroupingSorting.allSorted,
               style: GoogleFonts.alata(fontSize: 16, color: const Color(0xFF66BB6A)),
             ),
             const SizedBox(height: 4),
             Text(
-              'Tap Submit to check your answers',
-              style: GoogleFonts.alata(fontSize: 12, color: const Color(0xFF8A8A8F)),
+              GroupingSorting.tapSubmitHint,
+              style: GoogleFonts.alata(fontSize: 12, color: colors.textSecondary),
             ),
           ],
         ),
@@ -505,11 +554,11 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 4),
             child: Text(
-              'Items to sort:',
+              GroupingSorting.itemsToSort,
               style: GoogleFonts.alata(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF8A8A8F),
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -544,14 +593,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.white.withOpacity(0.9),
+                              colors.background.withValues(alpha: 0.94),
                             ],
                           ),
                         ),
                         child: Center(
                           child: Icon(
                             Icons.keyboard_arrow_down,
-                            color: const Color(0xFF8E97FD).withOpacity(0.6),
+                            color: AppColors.primaryPurple.withValues(alpha: 0.6),
                             size: 24,
                           ),
                         ),
@@ -576,9 +625,9 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           width: 90,
           height: 90,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.appColors.cardColor,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF8E97FD), width: 2),
+            border: Border.all(color: AppColors.primaryPurple, width: 2),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -586,7 +635,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               item: item,
               width: 90,
               height: 90,
-              categoryColor: const Color(0xFF8E97FD),
+              categoryColor: AppColors.primaryPurple,
             ),
           ),
         ),
@@ -601,14 +650,15 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
 
   /// Item card in tray - no label (label shown only when dropped in table)
   Widget _buildItemCard(GroupingItem item, {required bool showLabel}) {
+    final colors = context.appColors;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE8E8ED), width: 1.5),
+        border: Border.all(color: colors.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -620,7 +670,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           item: item,
           width: double.infinity,
           height: double.infinity,
-          categoryColor: const Color(0xFF8A8A8F),
+          categoryColor: colors.textSecondary,
         ),
       ),
     );
@@ -635,13 +685,13 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           ref.read(groupingControllerProvider.notifier).submitGrouping();
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8E97FD),
+          backgroundColor: AppColors.primaryPurple,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 4,
         ),
         child: Text(
-          'Submit Sorting ✅',
+          GroupingSorting.submitWithCheck,
           style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -652,9 +702,9 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   // RESULTS PHASE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildResults(GroupingMissionState state) {
+  Widget _buildResults(GroupingMissionState state, AppColorsExtension colors) {
     final result = state.lastResult;
-    if (result == null) return _buildLoading();
+    if (result == null) return _buildLoading(colors);
 
     final isAllCorrect = result.isCorrect;
     final accentColor = isAllCorrect ? const Color(0xFF66BB6A) : const Color(0xFFFF8A65);
@@ -686,7 +736,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             style: GoogleFonts.alata(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF222222),
+              color: colors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -696,15 +746,15 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatBox('Accuracy', '${(result.accuracy * 100).toInt()}%', accentColor),
-              _buildStatBox('Time', '${result.timeSpent.toStringAsFixed(1)}s', const Color(0xFF8E97FD)),
-              _buildStatBox('Correct', '${result.correctCount}/${result.totalCount}', const Color(0xFF66BB6A)),
+              _buildStatBox(GroupingSorting.statAccuracy, '${(result.accuracy * 100).toInt()}%', accentColor, colors),
+              _buildStatBox(GroupingSorting.statTime, '${result.timeSpent.toStringAsFixed(1)}s', AppColors.primaryPurple, colors),
+              _buildStatBox(GroupingSorting.statCorrect, '${result.correctCount}/${result.totalCount}', const Color(0xFF66BB6A), colors),
             ],
           ),
           const SizedBox(height: 24),
 
           // Per-item results
-          ...result.details.map((detail) => _buildItemResultRow(detail)),
+          ...result.details.map((detail) => _buildItemResultRow(detail, colors)),
           const SizedBox(height: 24),
 
           // Continue button
@@ -722,7 +772,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 elevation: 4,
               ),
               child: Text(
-                isAllCorrect ? 'Continue 🚀' : 'Try Again 💪',
+                isAllCorrect ? GroupingSorting.continueExcited : GroupingSorting.tryAgainStrong,
                 style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
@@ -732,13 +782,18 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
     );
   }
 
-  Widget _buildStatBox(String label, String value, Color color) {
+  Widget _buildStatBox(
+    String label,
+    String value,
+    Color color,
+    AppColorsExtension colors,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -753,14 +808,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
           const SizedBox(height: 2),
           Text(
             label,
-            style: GoogleFonts.alata(fontSize: 11, color: const Color(0xFF8A8A8F)),
+            style: GoogleFonts.alata(fontSize: 11, color: colors.textSecondary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildItemResultRow(GroupingItemResult detail) {
+  Widget _buildItemResultRow(GroupingItemResult detail, AppColorsExtension colors) {
     final isCorrect = detail.isCorrect;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -788,15 +843,15 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             Expanded(
               child: Text(
                 detail.itemName,
-                style: GoogleFonts.alata(fontSize: 14, color: const Color(0xFF222222)),
+                style: GoogleFonts.alata(fontSize: 14, color: colors.textPrimary),
               ),
             ),
             if (!isCorrect)
               Text(
-                '${detail.correctCategory}',
+                detail.correctCategory,
                 style: GoogleFonts.alata(
                   fontSize: 12,
-                  color: const Color(0xFF8A8A8F),
+                  color: colors.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -810,7 +865,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   // MISSION COMPLETE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildMissionComplete() {
+  Widget _buildMissionComplete(AppColorsExtension colors) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -821,7 +876,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFF66BB6A).withOpacity(0.12),
+                color: const Color(0xFF66BB6A).withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -830,19 +885,19 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             ),
             const SizedBox(height: 24),
             Text(
-              'Mission Complete!',
+              GroupingSorting.missionComplete,
               style: GoogleFonts.alata(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF222222),
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              'You mastered the grouping challenge!\nPixy is impressed! 🌟',
+              GroupingSorting.masteredMessage,
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: const Color(0xFF8A8A8F),
+                color: colors.textSecondary,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -854,13 +909,13 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8E97FD),
+                  backgroundColor: AppColors.primaryPurple,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 4,
                 ),
                 child: Text(
-                  'Back to Missions',
+                  GroupingSorting.backToMissions,
                   style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -875,7 +930,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
   // ERROR
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildError(GroupingMissionState state) {
+  Widget _buildError(GroupingMissionState state, AppColorsExtension colors) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -885,17 +940,17 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
             const Icon(Icons.error_outline, size: 60, color: Color(0xFFFF5252)),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              GroupingSorting.errorTitle,
               style: GoogleFonts.alata(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF222222),
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              state.errorMessage ?? 'Unknown error',
-              style: GoogleFonts.alata(fontSize: 14, color: const Color(0xFF8A8A8F)),
+              state.errorMessage ?? GroupingSorting.unknownError,
+              style: GoogleFonts.alata(fontSize: 14, color: colors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -904,12 +959,12 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                 ref.read(groupingControllerProvider.notifier).startMission();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8E97FD),
+                backgroundColor: AppColors.primaryPurple,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: Text(
-                'Try Again',
+                GroupingSorting.tryAgain,
                 style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
@@ -981,7 +1036,8 @@ class _GroupingImage extends StatelessWidget {
 
 class _TimerWidget extends StatefulWidget {
   final DateTime startTime;
-  const _TimerWidget({required this.startTime});
+  final AppColorsExtension colors;
+  const _TimerWidget({required this.startTime, required this.colors});
 
   @override
   State<_TimerWidget> createState() => _TimerWidgetState();
@@ -1010,11 +1066,11 @@ class _TimerWidgetState extends State<_TimerWidget> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.timer_outlined, size: 14, color: Color(0xFF8A8A8F)),
+            Icon(Icons.timer_outlined, size: 14, color: widget.colors.textSecondary),
             const SizedBox(width: 3),
             Text(
               '${min.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}',
-              style: GoogleFonts.alata(fontSize: 11, color: const Color(0xFF8A8A8F)),
+              style: GoogleFonts.alata(fontSize: 11, color: widget.colors.textSecondary),
             ),
           ],
         );

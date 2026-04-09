@@ -152,7 +152,22 @@ abstract class BaseRepository {
         );
       }
     } else if (response.statusCode == 401) {
-      return const Result.failure(UnauthorizedException());
+      String? detail;
+      try {
+        final errorData = jsonDecode(response.body);
+        final d = errorData['detail'];
+        if (d != null) detail = d.toString();
+      } catch (e) {
+        ErrorLogger().logDebug('Could not parse 401 body: $e');
+      }
+      if (token == null) {
+        return Result.failure(
+          AuthException(detail ?? 'Invalid credentials', 401),
+        );
+      }
+      return Result.failure(
+        UnauthorizedException(detail ?? 'Unauthorized'),
+      );
     } else {
       String message = 'Request failed';
       try {

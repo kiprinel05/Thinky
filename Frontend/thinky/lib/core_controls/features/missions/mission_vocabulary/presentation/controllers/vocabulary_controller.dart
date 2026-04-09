@@ -1,5 +1,6 @@
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/vocabulary_models.dart';
 import '../../data/vocabulary_repository.dart';
@@ -104,7 +105,7 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: VocabMissionPhase.error,
-        errorMessage: 'Failed to start mission: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -139,7 +140,7 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: VocabMissionPhase.error,
-        errorMessage: 'Failed to submit answer: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }

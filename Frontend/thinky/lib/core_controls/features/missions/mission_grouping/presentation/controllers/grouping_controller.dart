@@ -1,5 +1,7 @@
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/grouping_models.dart';
 import '../../data/grouping_repository.dart';
@@ -92,16 +94,6 @@ class GroupingMissionState {
 class GroupingController extends StateNotifier<GroupingMissionState> {
   GroupingController() : super(const GroupingMissionState());
 
-  // Motivational microcopy messages
-  static const _motivationalMessages = [
-    "Nice sorting! 🎯",
-    "Great choice! ⭐",
-    "You're a pro! 💪",
-    "Keep going! 🚀",
-    "Smart move! 🧠",
-    "Awesome! 🌟",
-  ];
-
   int _messageIndex = 0;
 
   /// Start the mission
@@ -114,7 +106,7 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: GroupingMissionPhase.error,
-        errorMessage: 'Failed to start mission: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -146,7 +138,7 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
       } else {
         state = state.copyWith(
           phase: GroupingMissionPhase.error,
-          errorMessage: 'Failed to load round: $e',
+          errorMessage: UserFacingErrorMapper.map(e),
           isLoading: false,
         );
       }
@@ -158,8 +150,7 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
     final newAssignments = Map<String, String>.from(state.assignments);
     newAssignments[itemId] = category;
 
-    // Cycle through motivational messages
-    final message = _motivationalMessages[_messageIndex % _motivationalMessages.length];
+    final message = GroupingSorting.motivationalLine(_messageIndex);
     _messageIndex++;
 
     state = state.copyWith(
@@ -204,7 +195,7 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: GroupingMissionPhase.error,
-        errorMessage: 'Failed to submit: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -242,7 +233,7 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: GroupingMissionPhase.error,
-        errorMessage: 'Failed to retry: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }

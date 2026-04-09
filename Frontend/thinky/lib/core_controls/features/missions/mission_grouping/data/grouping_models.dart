@@ -1,6 +1,7 @@
 /// Models for Grouping Mission
 /// 
 /// Represents data structures for the "Group Images" mission
+library;
 
 class GroupingItem {
   final String id;

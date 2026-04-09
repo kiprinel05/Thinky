@@ -7,6 +7,7 @@ import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 class IntroPage extends ConsumerWidget {
   const IntroPage({super.key});
@@ -15,6 +16,7 @@ class IntroPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(textRefreshProvider);
     final colors = context.appColors;
+    final themeBrightness = Theme.of(context).brightness;
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -22,7 +24,11 @@ class IntroPage extends ConsumerWidget {
         children: [
           Positioned(
             top: 0, left: 0, right: 0,
-            child: Image.asset('assets/backgrounds/background.png', fit: BoxFit.cover),
+            child: Image.asset(
+              AppAssets.onboardingBackgroundFor(themeBrightness),
+              key: ValueKey(themeBrightness),
+              fit: BoxFit.cover,
+            ),
           ),
           SafeArea(
             child: Center(
@@ -36,7 +42,11 @@ class IntroPage extends ConsumerWidget {
                       children: [
                         SizedBox(
                           height: 70,
-                          child: Image.asset('assets/logos/logo.png', fit: BoxFit.contain),
+                          child: Image.asset(
+                            AppAssets.logoFor(themeBrightness),
+                            key: ValueKey('intro_logo_$themeBrightness'),
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         AspectRatio(
@@ -44,7 +54,7 @@ class IntroPage extends ConsumerWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.asset(
-                              'assets/illustrations/first_page_image.png',
+                              AppAssets.onboardingIllustration,
                               fit: BoxFit.cover,
                             ),
                           ),

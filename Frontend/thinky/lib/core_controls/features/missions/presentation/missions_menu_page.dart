@@ -11,11 +11,14 @@ import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/core_controls/network/mission_network_guard.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 class MissionsMenuPage extends ConsumerStatefulWidget {
   const MissionsMenuPage({super.key});
@@ -31,7 +34,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
   bool _isLoading = true;
   bool _isGuest = true;
   int _selectedTab = 0; // 0 = Default, 1 = Workshop
-  Set<int> _unlockedMissions = {};
+  final Set<int> _unlockedMissions = {};
   late AnimationController _unlockAnimationController;
 
   @override
@@ -92,7 +95,10 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
         _isLoading = false;
       });
       if (mounted) {
-        ErrorHandlerUI.showError(context, '${Missions.errorLoading} $e');
+        ErrorHandlerUI.showError(
+          context,
+          '${Missions.errorLoading}${UserFacingErrorMapper.map(e)}',
+        );
       }
     }
   }
@@ -101,6 +107,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
   Widget build(BuildContext context) {
     ref.watch(textRefreshProvider);
     final colors = context.appColors;
+    final themeBrightness = Theme.of(context).brightness;
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -127,9 +134,11 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
               left: 0,
               right: 0,
               child: Image.asset(
-                'assets/missions/missions/presentation/Union.png',
+                AppAssets.missionsMenuUnion(themeBrightness),
+                key: ValueKey(themeBrightness),
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
             ),
             SingleChildScrollView(
@@ -168,9 +177,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                   const SizedBox(height: 24),
                   _selectedTab == 0
                       ? (_isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
+                          ? _buildMissionsGridSkeleton(context)
                           : _buildMissionsGrid(context))
                       : _buildWorkshopGrid(),
                   const SizedBox(height: 24),
@@ -179,6 +186,44 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMissionsGridSkeleton(BuildContext context) {
+    final colors = context.appColors;
+    Widget skel(double h) => Container(
+          height: h,
+          decoration: BoxDecoration(
+            color: colors.shimmer,
+            borderRadius: BorderRadius.circular(20),
+          ),
+        );
+    return SizedBox(
+      height: 420,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                skel(200),
+                const SizedBox(height: 16),
+                skel(180),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              children: [
+                skel(220),
+                const SizedBox(height: 16),
+                skel(160),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -232,36 +277,39 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
               isNewlyUnlocked: isNewlyUnlocked,
               onTap: mission.isLocked
                   ? null
-                  : () {
+                  : () async {
+                      final ok = await MissionNetworkGuard.ensureOnlineForMission(
+                        context,
+                        mission.missionPath,
+                      );
+                      if (!ok || !context.mounted) return;
+
                       if (mission.missionPath == 'quiz') {
                         context.push(RouteNames.quiz);
                       } else if (mission.missionPath == 'pixy_learns') {
                         context.push(RouteNames.pixyLearns);
-                      } else if (mission.missionPath == 'draw_shapes') {
+                      } else if (mission.missionPath == 'draw_shapes' ||
+                          mission.missionPath == 'draw_triangle') {
                         context.push(RouteNames.drawShapes);
                       } else if (mission.missionPath == 'color_circle') {
                         context.push(RouteNames.colorCircle);
                       } else if (mission.missionPath == 'animals') {
-                        // Navigate to Animals mission
                         context.push(RouteNames.animalsMission);
                       } else if (mission.missionPath == 'group_sorting') {
-                        // Navigate to Grouping mission
                         context.push(RouteNames.groupingMission);
                       } else if (mission.missionPath == 'vocabulary') {
-                        // Navigate to Vocabulary mission
                         context.push(RouteNames.vocabularyMission);
                       } else if (mission.missionPath == 'describe_image') {
-                        // Navigate to Describe mission
                         context.push(RouteNames.describeMission);
                       } else if (mission.missionPath == 'pattern') {
-                        // Navigate to Pattern mission
                         context.push(RouteNames.patternMission);
                       } else if (mission.missionPath == 'numbers') {
-                        // Navigate to Numbers mission
                         context.push(RouteNames.numbersMission);
                       } else {
-                        // Default: show message for unhandled missions
-                        ErrorHandlerUI.showInfo(context, 'Mission "${mission.missionPath}" coming soon!');
+                        ErrorHandlerUI.showInfo(
+                          context,
+                          '${Common.comingSoon} (${mission.missionPath})',
+                        );
                       }
                     },
             ),
@@ -280,6 +328,8 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
   }) {
     final backgroundColor = mission.backgroundColorAsColor;
     final missionPath = mission.missionPath;
+    final assetPath =
+        missionPath == 'draw_triangle' ? 'draw_shapes' : missionPath;
     
     Widget cardWidget = ScaleInWidget(
       delay: Duration(milliseconds: 400 + (mission.orderIndex * 100)),
@@ -306,8 +356,9 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
-                    'assets/missions/$missionPath/background.png',
+                    AppAssets.missionBackground(assetPath),
                     fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -318,9 +369,10 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                 child: Opacity(
                   opacity: 0.3,
                   child: Image.asset(
-                    'assets/missions/$missionPath/vector1.png',
+                    AppAssets.missionVector1(assetPath),
                     width: 60,
                     height: 60,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -330,9 +382,10 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                 child: Opacity(
                   opacity: 0.3,
                   child: Image.asset(
-                    'assets/missions/$missionPath/vector2.png',
+                    AppAssets.missionVector2(assetPath),
                     width: 50,
                     height: 50,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -343,9 +396,14 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                     padding: const EdgeInsets.all(16.0),
                     child: Image.asset(
                       missionPath == 'quiz'
-                          ? 'assets/missions/quiz/quiz.png'
-                          : 'assets/missions/$missionPath/card_drawing.png',
+                          ? AppAssets.missionQuizCard
+                          : AppAssets.missionCardDrawing(assetPath),
                       fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.extension_rounded,
+                        size: 48,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
                     ),
                   ),
                 ),
@@ -368,7 +426,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                     ),
                   ),
                   child: Text(
-                    mission.title,
+                    MissionTitles.forPath(mission.missionPath, mission.title),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 14,
@@ -523,8 +581,8 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
         padding: const EdgeInsets.all(4),
         child: Row(
           children: [
-            _buildToggleOption('Default', 0, Icons.grid_view_rounded, colors),
-            _buildToggleOption('Workshop', 1, Icons.extension_rounded, colors),
+            _buildToggleOption(Nav.missionsTab, 0, Icons.grid_view_rounded, colors),
+            _buildToggleOption(Nav.workshop, 1, Icons.extension_rounded, colors),
           ],
         ),
       ),
@@ -592,7 +650,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
               Icon(Icons.extension_off_rounded, size: 48, color: context.appColors.textHint),
               const SizedBox(height: 12),
               Text(
-                'No downloaded missions',
+                WorkshopTexts.noDownloaded,
                 style: GoogleFonts.alata(
                   fontSize: 16,
                   color: context.appColors.textSecondary,
@@ -600,7 +658,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
               ),
               const SizedBox(height: 4),
               Text(
-                'Browse the Workshop to find missions!',
+                WorkshopTexts.browseWorkshop,
                 style: GoogleFonts.alata(
                   fontSize: 13,
                   color: context.appColors.textHint,
@@ -676,7 +734,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    'by ${mission.authorName} · ${mission.questions.length} questions',
+                    '${WorkshopTexts.byAuthor} ${mission.authorName} · ${mission.questions.length} ${WorkshopTexts.questionsCount}',
                     style: GoogleFonts.alata(
                       fontSize: 12,
                       color: context.appColors.textSecondary,

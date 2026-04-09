@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:thinky/core_controls/storage/local_storage.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 import '../../data/auth_repository.dart';
 import 'auth_state.dart';
 
@@ -188,7 +188,7 @@ class LoginFormController extends BaseFormController<LoginFormState> {
   @override
   Future<bool> submit() async {
     if (!validate()) {
-      state = state.copyWith(errorMessage: 'Please fill in all fields');
+      state = state.copyWith(errorMessage: Auth.fillAllFields);
       return false;
     }
 
@@ -200,7 +200,7 @@ class LoginFormController extends BaseFormController<LoginFormState> {
     );
 
     if (!success) {
-      final error = _authController.state.errorMessage ?? 'Login failed';
+      final error = _authController.state.errorMessage ?? Auth.loginFailed;
       state = state.copyWith(isSubmitting: false, errorMessage: error);
     } else {
       state = state.copyWith(isSubmitting: false);
@@ -260,9 +260,9 @@ class RegisterFormController extends BaseFormController<RegisterFormState> {
   Future<bool> submit() async {
     if (!state.isValid) {
       if (state.password != state.confirmPassword) {
-        state = state.copyWith(errorMessage: 'Passwords do not match');
+        state = state.copyWith(errorMessage: Auth.passwordsMismatch);
       } else {
-        state = state.copyWith(errorMessage: 'Please fill in all fields');
+        state = state.copyWith(errorMessage: Auth.fillAllFields);
       }
       return false;
     }
@@ -277,7 +277,8 @@ class RegisterFormController extends BaseFormController<RegisterFormState> {
     );
 
     if (!success) {
-      final error = _authController.state.errorMessage ?? 'Registration failed';
+      final error =
+          _authController.state.errorMessage ?? Auth.registrationFailed;
       state = state.copyWith(isSubmitting: false, errorMessage: error);
     } else {
       state = state.copyWith(isSubmitting: false);

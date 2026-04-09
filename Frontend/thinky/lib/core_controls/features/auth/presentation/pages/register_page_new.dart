@@ -12,6 +12,7 @@ import 'package:thinky/shared_controls/widgets/inputs/app_text_field.dart';
 import 'package:thinky/shared_controls/widgets/social_button.dart';
 import 'package:thinky/shared_controls/widgets/or_divider.dart';
 import 'package:thinky/shared_controls/widgets/error_message_banner.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import '../controllers/auth_controller.dart';
 
 /// RegisterPage - Refactored to use Riverpod for state management
@@ -40,7 +41,7 @@ class RegisterPage extends ConsumerWidget {
             left: 0,
             right: 0,
             child: Image.asset(
-              'assets/auth/register/background.png',
+              AppAssets.authRegisterBackground,
               fit: BoxFit.cover,
             ),
           ),
@@ -55,14 +56,14 @@ class RegisterPage extends ConsumerWidget {
                   // Title
                   Text(
                     'Create your account',
-                    style: AppTypography.h1,
+                    style: AppTypography.h1.copyWith(color: colors.textPrimary),
                   ),
                   
                   const SizedBox(height: AppDimens.lg + 2),
                   
                   // Social signup buttons
                   SocialButton(
-                    icon: 'assets/auth/icons/facebook.png',
+                    icon: AppAssets.authFacebookIcon,
                     label: 'CONTINUE WITH FACEBOOK',
                     filled: true,
                     onPressed: () {},
@@ -71,7 +72,7 @@ class RegisterPage extends ConsumerWidget {
                   const SizedBox(height: AppDimens.md),
                   
                   SocialButton(
-                    icon: 'assets/auth/icons/google.png',
+                    icon: AppAssets.authGoogleIcon,
                     label: 'CONTINUE WITH GOOGLE',
                     onPressed: () {},
                   ),
@@ -153,7 +154,10 @@ class RegisterPage extends ConsumerWidget {
                         child: Text(
                           'LOG IN',
                           style: AppTypography.buttonSecondary.copyWith(
-                            color: AppColors.primaryPurple,
+                            color: Theme.of(context).brightness ==
+                                    Brightness.dark
+                                ? AppColors.primaryPurpleLight
+                                : AppColors.primaryPurple,
                           ),
                         ),
                       ),

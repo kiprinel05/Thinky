@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'domain/quiz_models.dart';
 
@@ -15,16 +17,20 @@ class QuizAnswersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.surface,
         elevation: 0.5,
-        iconTheme: const IconThemeData(color: Color(0xFF222222)),
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
+        iconTheme: IconThemeData(color: colors.textPrimary),
         title: Text(
           'Quiz answers',
           style: GoogleFonts.alata(
-            color: const Color(0xFF222222),
+            color: colors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -55,8 +61,6 @@ class QuizAnswersPage extends StatelessWidget {
                     : const Color(0xFFFF7043);
                 final String statusText = isCorrect ? 'Correct' : 'Incorrect';
 
-                // Re-order options when the answer is wrong:
-                // show chosen wrong answer first, then correct answer, then the rest.
                 List<AnswerOption> orderedOptions;
                 if (!isCorrect && userOption != null) {
                   final others = question.options.where((o) =>
@@ -79,11 +83,12 @@ class QuizAnswersPage extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colors.cardColor,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: colors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.04),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -100,7 +105,7 @@ class QuizAnswersPage extends StatelessWidget {
                                 style: GoogleFonts.alata(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF8E97FD),
+                                  color: AppColors.primaryPurple,
                                 ),
                               ),
                               Container(
@@ -109,7 +114,7 @@ class QuizAnswersPage extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: statusColor.withOpacity(0.08),
+                                  color: statusColor.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -141,78 +146,88 @@ class QuizAnswersPage extends StatelessWidget {
                             style: GoogleFonts.alata(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF222222),
+                              color: colors.textPrimary,
                               height: 1.3,
                             ),
                           ),
-                            const SizedBox(height: 12),
-                            ...orderedOptions.map((option) {
-                              final bool isUser =
-                                  userAnswerId != null &&
-                                  option.id == userAnswerId;
-                              final bool isCorrectOption =
-                                  option.id == correctOption.id;
+                          const SizedBox(height: 12),
+                          ...orderedOptions.map((option) {
+                            final bool isUser =
+                                userAnswerId != null &&
+                                option.id == userAnswerId;
+                            final bool isCorrectOption =
+                                option.id == correctOption.id;
 
-                              Color bgColor;
-                              Color textColor;
-                              IconData? icon;
+                            late Color bgColor;
+                            late Color textColor;
+                            IconData? icon;
 
-                              if (isCorrectOption) {
+                            if (isCorrectOption) {
+                              if (isDark) {
+                                bgColor = const Color(0xFF1B3D24);
+                                textColor = const Color(0xFFA5D6A7);
+                              } else {
                                 bgColor = const Color(0xFFE8F5E9);
                                 textColor = const Color(0xFF2E7D32);
-                                icon = Icons.check_circle_rounded;
-                              } else if (isUser && !isCorrectOption) {
+                              }
+                              icon = Icons.check_circle_rounded;
+                            } else if (isUser && !isCorrectOption) {
+                              if (isDark) {
+                                bgColor = const Color(0xFF3D1F1F);
+                                textColor = const Color(0xFFEF9A9A);
+                              } else {
                                 bgColor = const Color(0xFFFFEBEE);
                                 textColor = const Color(0xFFC62828);
-                                icon = Icons.cancel_rounded;
-                              } else {
-                                bgColor = const Color(0xFFF2F3F7);
-                                textColor = const Color(0xFF444444);
                               }
+                              icon = Icons.cancel_rounded;
+                            } else {
+                              bgColor = colors.inputFill;
+                              textColor = colors.textSecondary;
+                            }
 
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: bgColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      if (icon != null) ...[
-                                        Icon(
-                                          icon,
-                                          size: 18,
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: bgColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (icon != null) ...[
+                                      Icon(
+                                        icon,
+                                        size: 18,
+                                        color: textColor,
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Expanded(
+                                      child: Text(
+                                        option.text,
+                                        style: GoogleFonts.alata(
+                                          fontSize: 13,
                                           color: textColor,
                                         ),
-                                        const SizedBox(width: 8),
-                                      ],
-                                      Expanded(
-                                        child: Text(
-                                          option.text,
-                                          style: GoogleFonts.alata(
-                                            fontSize: 13,
-                                            color: textColor,
-                                          ),
-                                        ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                            );
+                          }),
                         ],
                       ),
                     ),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
@@ -220,4 +235,3 @@ class QuizAnswersPage extends StatelessWidget {
     );
   }
 }
-

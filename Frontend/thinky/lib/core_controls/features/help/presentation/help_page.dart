@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
 class _FaqItem {
   final String question;
@@ -13,61 +16,29 @@ class _FaqItem {
   const _FaqItem({required this.question, required this.answer});
 }
 
-class HelpPage extends StatefulWidget {
+class HelpPage extends ConsumerStatefulWidget {
   const HelpPage({super.key});
 
   @override
-  State<HelpPage> createState() => _HelpPageState();
+  ConsumerState<HelpPage> createState() => _HelpPageState();
 }
 
-class _HelpPageState extends State<HelpPage> {
+class _HelpPageState extends ConsumerState<HelpPage> {
   int? _expandedIndex;
 
-  static const _faqs = [
-    _FaqItem(
-      question: 'Ce este Thinky și pentru cine este?',
-      answer:
-          'Thinky este o aplicație educativă pentru copiii cu vârsta între 7 și 12 ani. Te ajută să înțelegi conceptele de bază din inteligența artificială prin jocuri interactive și prin antrenarea mascotei Pixy.',
-    ),
-    _FaqItem(
-      question: 'Cum funcționează mascota Pixy?',
-      answer:
-          'Pixy este mascota ta digitală care „învață" din interacțiunile tale. Pe măsură ce completezi misiuni și îi dai feedback, Pixy simulează cum un model de IA se îmbunătățește din exemple. Poți și să vorbești cu Pixy în secțiunea de chat!',
-    ),
-    _FaqItem(
-      question: 'Ce sunt misiunile și cum câștig puncte?',
-      answer:
-          'Misiunile sunt jocuri educative care te învață despre IA: recunoașterea imaginilor, culori, forme, animale, vocabular și multe altele. Fiecare misiune completată îți aduce puncte. Poți descărca și misiuni din Workshop pentru puncte bonus!',
-    ),
-    _FaqItem(
-      question: 'Ce este Workshop-ul?',
-      answer:
-          'Workshop-ul este locul unde poți explora misiuni create de alți utilizatori sau crea propriile misiuni. Descarcă misiuni noi pentru a învăța și a câștiga puncte suplimentare în leaderboard.',
-    ),
-    _FaqItem(
-      question: 'Cum funcționează leaderboard-ul?',
-      answer:
-          'Leaderboard-ul afișează top 20 jucători după puncte. Punctele provin din misiunile completate și din misiunile Workshop descărcate. Statisticile (număr total jucători, medie puncte) sunt calculate pentru toată comunitatea.',
-    ),
-    _FaqItem(
-      question: 'Pot folosi aplicația fără cont?',
-      answer:
-          'Da! Poți juca ca invitat (Guest) introducând doar un nume. Progresul tău va fi salvat local. Pentru a sincroniza pe mai multe dispozitive și a participa la leaderboard, creează un cont.',
-    ),
-    _FaqItem(
-      question: 'Cum schimb limba aplicației?',
-      answer:
-          'Mergi la Profil → Settings → Language și alege între English și Română. Setarea se aplică imediat în întreaga aplicație.',
-    ),
-    _FaqItem(
-      question: 'Aplicația nu se încarcă corect. Ce fac?',
-      answer:
-          'Verifică conexiunea la internet. Asigură-te că backend-ul rulează dacă folosești versiunea de dezvoltare. Încearcă să închizi și redeschizi aplicația sau să ștergi cache-ul.',
-    ),
-  ];
+  static const int _faqCount = 8;
+
+  List<_FaqItem> get _faqItems => List.generate(_faqCount, (i) {
+        final n = i + 1;
+        return _FaqItem(
+          question: HelpTexts.faqQuestion(n),
+          answer: HelpTexts.faqAnswer(n),
+        );
+      });
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final colors = context.appColors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -94,7 +65,7 @@ class _HelpPageState extends State<HelpPage> {
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
               title: Text(
-                'Help & FAQ',
+                HelpTexts.title,
                 style: GoogleFonts.alata(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -165,7 +136,7 @@ class _HelpPageState extends State<HelpPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Întrebări frecvente',
+                    HelpTexts.faqTitle,
                     style: GoogleFonts.alata(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -174,7 +145,7 @@ class _HelpPageState extends State<HelpPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Găsește răspunsuri la cele mai comune întrebări despre Thinky.',
+                    HelpTexts.faqSubtitle,
                     style: GoogleFonts.alata(
                       fontSize: 13,
                       color: colors.textSecondary,
@@ -195,7 +166,7 @@ class _HelpPageState extends State<HelpPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'FAQ',
+          HelpTexts.faqTitle,
           style: GoogleFonts.alata(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -203,7 +174,7 @@ class _HelpPageState extends State<HelpPage> {
           ),
         ),
         const SizedBox(height: AppDimens.lg),
-        ...List.generate(_faqs.length, (index) {
+        ...List.generate(_faqItems.length, (index) {
           return FadeInWidget(
             delay: Duration(milliseconds: 50 * index),
             child: Padding(
@@ -218,7 +189,7 @@ class _HelpPageState extends State<HelpPage> {
 
   Widget _buildFaqTile(int index) {
     final colors = context.appColors;
-    final faq = _faqs[index];
+    final faq = _faqItems[index];
     final isExpanded = _expandedIndex == index;
 
     return Material(

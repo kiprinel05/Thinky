@@ -1,4 +1,5 @@
 /// Domain models for Pixy Learns mission
+library;
 
 /// Represents an image to be labeled
 class LearningImage {

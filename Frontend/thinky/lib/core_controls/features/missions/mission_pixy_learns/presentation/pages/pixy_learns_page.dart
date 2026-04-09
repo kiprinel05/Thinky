@@ -4,6 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/base_controls/base_state.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import '../controllers/pixy_learns_controller.dart';
 import '../controllers/pixy_learns_state.dart';
 import '../../domain/pixy_learns_models.dart';
@@ -53,6 +57,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final state = ref.watch(pixyLearnsStateProvider);
 
     if (state.status == StateStatus.loading) {
@@ -106,7 +111,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                       ),
                       const SizedBox(height: 32),
                       Text(
-                        'Preparing lessons...',
+                        PixyLearnsTexts.preparingLessons,
                         style: GoogleFonts.alata(
                           color: Colors.white,
                           fontSize: 18,
@@ -132,7 +137,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     final controller = ref.read(pixyLearnsStateProvider.notifier);
     
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.appColors.background,
       body: Stack(
         children: [
           // Purple gradient header
@@ -178,7 +183,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             child: ScaleTransition(
                               scale: _pixyScaleAnimation,
                               child: Image.asset(
-                                'assets/welcome/page2/thinking.png',
+                                AppAssets.welcomePage2Thinking,
                                 height: 140,
                                 fit: BoxFit.contain,
                               ),
@@ -223,21 +228,21 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                 ),
                                 const SizedBox(height: 20),
                                 Text(
-                                  "How Does Pixy Learn?",
+                                  PixyLearnsTexts.introTitle,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.alata(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF222222),
+                                    color: context.appColors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  "Help Pixy understand the world by teaching it to recognize different things. Label the images and watch Pixy learn!",
+                                  PixyLearnsTexts.introBody,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.alata(
                                     fontSize: 15,
-                                    color: const Color(0xFF8A8A8F),
+                                    color: context.appColors.textSecondary,
                                     height: 1.6,
                                   ),
                                 ),
@@ -256,9 +261,9 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             runSpacing: 12,
                             alignment: WrapAlignment.center,
                             children: [
-                              _buildFeaturePill(Icons.image_rounded, "${state.images.length} Images"),
-                              _buildFeaturePill(Icons.category_rounded, "2 Categories"),
-                              _buildFeaturePill(Icons.auto_awesome, "AI Learning"),
+                              _buildFeaturePill(Icons.image_rounded, "${state.images.length} ${PixyLearnsTexts.pillImages}"),
+                              _buildFeaturePill(Icons.category_rounded, "2 ${PixyLearnsTexts.pillCategories}"),
+                              _buildFeaturePill(Icons.auto_awesome, PixyLearnsTexts.pillAi),
                             ],
                           ),
                         ),
@@ -297,7 +302,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'START TEACHING',
+                                    PixyLearnsTexts.startTeaching,
                                     style: GoogleFonts.alata(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -374,7 +379,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     final controller = ref.read(pixyLearnsStateProvider.notifier);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: context.appColors.background,
       body: Stack(
         children: [
           // Gradient header
@@ -452,7 +457,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                 const Icon(Icons.school_rounded, color: Colors.white, size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'Chapter 1',
+                  PixyLearnsTexts.chapter1,
                   style: GoogleFonts.alata(
                     color: Colors.white,
                     fontSize: 13,
@@ -489,7 +494,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                   Icon(Icons.auto_graph_rounded, color: Colors.white.withOpacity(0.9), size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    'Learning Progress',
+                    PixyLearnsTexts.learningProgress,
                     style: GoogleFonts.alata(
                       color: Colors.white,
                       fontSize: 14,
@@ -593,7 +598,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Teach Pixy!',
+                    PixyLearnsTexts.teachPixyHeader,
                     style: GoogleFonts.alata(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -602,7 +607,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Tap each image and select the correct label',
+                    PixyLearnsTexts.teachPixyHint,
                     style: GoogleFonts.alata(
                       fontSize: 13,
                       color: const Color(0xFF8A8A8F),
@@ -710,7 +715,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                 children: [
                   Expanded(
                     child: _buildLabelButton(
-                      '🍎 Apple',
+                      PixyLearnsTexts.labelApple,
                       'apple',
                       selectedLabel == 'apple',
                       () => controller.selectLabel(image.id, 'apple'),
@@ -719,7 +724,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildLabelButton(
-                      '🐱 Cat',
+                      PixyLearnsTexts.labelCat,
                       'cat',
                       selectedLabel == 'cat',
                       () => controller.selectLabel(image.id, 'cat'),
@@ -788,7 +793,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'Image unavailable',
+                PixyLearnsTexts.imageUnavailable,
                 style: GoogleFonts.alata(
                   fontSize: 11,
                   color: const Color(0xFFB7BAC3),
@@ -888,7 +893,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'TEACH PIXY',
+                      PixyLearnsTexts.teachPixyCta,
                       style: GoogleFonts.alata(
                         color: allLabeled ? Colors.white : const Color(0xFFA3A6AD),
                         fontWeight: FontWeight.w700,
@@ -935,7 +940,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                       ScaleInWidget(
                         delay: const Duration(milliseconds: 200),
                         child: Image.asset(
-                          'assets/welcome/page1/hello.png',
+                          AppAssets.welcomePage1Hello,
                           height: 160,
                           fit: BoxFit.contain,
                         ),
@@ -951,7 +956,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             const Text('🎉', style: TextStyle(fontSize: 36)),
                             const SizedBox(width: 12),
                             Text(
-                              'Amazing Job!',
+                              PixyLearnsTexts.amazingJob,
                               style: GoogleFonts.alata(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w700,
@@ -1008,7 +1013,9 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                'Pixy learned ${result?.learnedExamples ?? state.images.length} examples!',
+                                PixyLearnsTexts.learnedExamples(
+                                  result?.learnedExamples ?? state.images.length,
+                                ),
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.alata(
                                   fontSize: 22,
@@ -1032,7 +1039,9 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                     const Icon(Icons.category_rounded, color: _primaryColor, size: 20),
                                     const SizedBox(width: 10),
                                     Text(
-                                      'Categories: ${result?.categories.join(", ") ?? "apple, cat"}',
+                                      PixyLearnsTexts.categoriesLine(
+                                        result?.categories.join(', ') ?? 'apple, cat',
+                                      ),
                                       style: GoogleFonts.alata(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -1075,7 +1084,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Text(
-                                  'This is how AI learns! By seeing many examples, Pixy can now tell the difference between apples and cats.',
+                                  PixyLearnsTexts.aiExplanation,
                                   style: GoogleFonts.alata(
                                     fontSize: 14,
                                     color: const Color(0xFF60646D),
@@ -1122,7 +1131,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'CONTINUE TO MISSIONS',
+                                  PixyLearnsTexts.continueMissions,
                                   style: GoogleFonts.alata(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:thinky/core/errors/exceptions.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/network/api_exceptions.dart' as api;
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
+import 'package:thinky/core_controls/services/text_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 
@@ -49,11 +53,11 @@ class ErrorHandlerUI {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_getTitle(exception)),
-        content: Text(exception.message),
+        content: Text(UserFacingErrorMapper.map(exception)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(Common.close),
           ),
           if (onRetry != null)
             ElevatedButton(
@@ -61,7 +65,7 @@ class ErrorHandlerUI {
                 Navigator.of(context).pop();
                 onRetry();
               },
-              child: const Text('Retry'),
+              child: Text(Common.retry),
             ),
         ],
       ),
@@ -69,10 +73,23 @@ class ErrorHandlerUI {
   }
 
   static String _getTitle(AppException exception) {
-    if (exception is NetworkException) return 'Network Error';
-    if (exception is TimeoutException) return 'Connection Timeout';
-    if (exception is UnauthorizedException) return 'Session Expired';
-    if (exception is ServerException) return 'Server Error';
-    return 'Error';
+    if (exception is api.AuthException) return Common.error;
+    if (exception is api.NetworkException) return Common.networkError;
+    if (exception is api.TimeoutException) return Common.connectionTimeout;
+    if (exception is api.UnauthorizedException) return Common.sessionExpired;
+    if (exception is api.ServerException) return Common.serverError;
+    if (exception is NetworkException) {
+      return TextService.getString('Common', 'networkError');
+    }
+    if (exception is TimeoutException) {
+      return TextService.getString('Common', 'connectionTimeout');
+    }
+    if (exception is UnauthorizedException) {
+      return TextService.getString('Common', 'sessionExpired');
+    }
+    if (exception is ServerException) {
+      return TextService.getString('Common', 'serverError');
+    }
+    return Common.error;
   }
 }

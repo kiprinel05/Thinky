@@ -12,6 +12,7 @@ import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 class GuestNamePage extends BasePage {
   const GuestNamePage({super.key});
@@ -29,7 +30,7 @@ class GuestNamePage extends BasePage {
   );
 
   @override
-  Color get backgroundColor => AppColors.backgroundWhite;
+  Color? get backgroundColor => null;
 }
 
 class _GuestNameForm extends ConsumerStatefulWidget {
@@ -115,7 +116,7 @@ class _GuestNameFormState extends ConsumerState<_GuestNameForm> {
           left: 0,
           right: 0,
           child: Image.asset(
-            'assets/auth/guest/background.png',
+            AppAssets.authGuestBackground,
             fit: BoxFit.cover,
           ),
         ),

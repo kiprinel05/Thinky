@@ -1,10 +1,7 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:thinky/core_controls/config/app_config.dart';
-import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/features/missions/mission_pattern/data/pattern_models.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import '../controllers/pattern_controller.dart';

@@ -1,5 +1,6 @@
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/animals_models.dart';
 import '../../data/animals_repository.dart';
@@ -86,7 +87,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: AnimalsMissionPhase.error,
-        errorMessage: 'Failed to start mission: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -119,7 +120,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
       } else {
         state = state.copyWith(
           phase: AnimalsMissionPhase.error,
-          errorMessage: 'Failed to load round: $e',
+          errorMessage: UserFacingErrorMapper.map(e),
           isLoading: false,
         );
       }
@@ -143,7 +144,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: AnimalsMissionPhase.error,
-        errorMessage: 'Pixy failed to guess: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -170,7 +171,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: AnimalsMissionPhase.error,
-        errorMessage: 'Failed to verify guess: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -211,7 +212,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: AnimalsMissionPhase.error,
-        errorMessage: 'Failed to load teaching images: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }
@@ -248,7 +249,7 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: AnimalsMissionPhase.error,
-        errorMessage: 'Failed to validate teaching: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
         isLoading: false,
       );
     }

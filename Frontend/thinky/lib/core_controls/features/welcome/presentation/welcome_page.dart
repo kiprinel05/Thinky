@@ -9,6 +9,7 @@ import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -104,7 +105,7 @@ class WelcomePage1 extends ConsumerWidget {
           left: 0,
           right: 0,
           child: Image.asset(
-            'assets/welcome/page1/background_welcome.png',
+            AppAssets.welcomePage1Background,
             fit: BoxFit.fitWidth,
             alignment: Alignment.bottomCenter,
             width: double.infinity,
@@ -170,7 +171,7 @@ class WelcomePage1 extends ConsumerWidget {
             ScaleInWidget(
               delay: const Duration(milliseconds: 600),
               child: Image.asset(
-                'assets/welcome/page1/hello.png',
+                AppAssets.welcomePage1Hello,
                 height: MediaQuery.of(context).size.height * 0.55,
                 fit: BoxFit.contain,
               ),
@@ -235,7 +236,7 @@ class WelcomePage2 extends ConsumerWidget {
           left: 0,
           right: 0,
           child: Image.asset(
-            'assets/welcome/page2/background_welcome.png',
+            AppAssets.welcomePage2Background,
             fit: BoxFit.fitWidth,
             alignment: Alignment.bottomCenter,
             width: double.infinity,
@@ -292,7 +293,7 @@ class WelcomePage2 extends ConsumerWidget {
             ScaleInWidget(
               delay: const Duration(milliseconds: 600),
               child: Image.asset(
-                'assets/welcome/page2/thinking.png',
+                AppAssets.welcomePage2Thinking,
                 height: MediaQuery.of(context).size.height * 0.55,
                 fit: BoxFit.contain,
               ),

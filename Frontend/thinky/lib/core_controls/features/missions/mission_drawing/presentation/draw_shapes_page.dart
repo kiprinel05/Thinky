@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'controllers/drawing_controller.dart';
 
 /// Draw Shapes Mission Page
@@ -23,7 +27,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     with TickerProviderStateMixin {
   final GlobalKey _canvasKey = GlobalKey();
   final GlobalKey<DrawingCanvasState> _canvasStateKey = GlobalKey<DrawingCanvasState>();
-  bool _isEraserSelected = false;
+  final bool _isEraserSelected = false;
   
   late AnimationController _pixyBounceController;
   late AnimationController _resultSlideController;
@@ -83,14 +87,14 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
   Future<void> _onCheckDrawing() async {
     final canvasState = _canvasStateKey.currentState;
     if (canvasState == null || !canvasState.hasDrawing) {
-      ErrorHandlerUI.showWarning(context, 'Draw something first!');
+      ErrorHandlerUI.showWarning(context, Drawing.drawFirst);
       return;
     }
     
     // Export canvas to PNG
     final imageBytes = await canvasState.exportToPng();
     if (imageBytes == null) {
-      ErrorHandlerUI.showError(context, 'Could not capture drawing. Try again!');
+      ErrorHandlerUI.showError(context, Drawing.captureError);
       return;
     }
     
@@ -127,30 +131,28 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(drawingControllerProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Stack(
           children: [
-            // Background decorations
-            _buildBackground(),
+            _buildBackground(isDark),
             
-            // Main content
             Column(
               children: [
-                // App bar
-                _buildAppBar(state),
+                _buildAppBar(state, colors),
                 
-                // Pixy mascot with emotion
-                _buildPixySection(state),
+                _buildPixySection(state, colors),
                 
-                // Drawing canvas
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildCanvasSection(state),
+                    child: _buildCanvasSection(state, colors),
                   ),
                 ),
                 
@@ -174,26 +176,24 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                     24,
                     MediaQuery.of(context).padding.bottom + 80,
                   ),
-                  child: _buildActionButtons(state),
+                  child: _buildActionButtons(state, colors),
                 ),
               ],
             ),
             
-            // Thinking overlay
-            if (state.isAnalyzing) _buildThinkingOverlay(),
-            
-            // Result overlay
-            if (state.showResult) _buildResultOverlay(state),
+            if (state.isAnalyzing) _buildThinkingOverlay(colors),
+            if (state.showResult) _buildResultOverlay(state, colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBackground() {
+  Widget _buildBackground(bool isDark) {
+    final topA = isDark ? 0.18 : 0.3;
+    final botA = isDark ? 0.12 : 0.2;
     return Stack(
       children: [
-        // Top gradient blob
         Positioned(
           top: -100,
           right: -50,
@@ -204,14 +204,13 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFF8E97FD).withOpacity(0.3),
-                  const Color(0xFF8E97FD).withOpacity(0.0),
+                  AppColors.primaryPurple.withValues(alpha: topA),
+                  AppColors.primaryPurple.withValues(alpha: 0.0),
                 ],
               ),
             ),
           ),
         ),
-        // Bottom gradient blob
         Positioned(
           bottom: -50,
           left: -80,
@@ -222,8 +221,8 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFFFFB347).withOpacity(0.2),
-                  const Color(0xFFFFB347).withOpacity(0.0),
+                  AppColors.missionYellow.withValues(alpha: botA),
+                  AppColors.missionYellow.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -233,10 +232,10 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     );
   }
 
-  Widget _buildAppBar(DrawingState state) {
+  Widget _buildAppBar(DrawingState state, AppColorsExtension colors) {
     final config = state.currentRoundConfig;
     final roundTitle =
-        'Draw a ${config.color[0].toUpperCase()}${config.color.substring(1)} ${config.shape[0].toUpperCase()}${config.shape.substring(1)}';
+        '${Drawing.drawPromptPart1}${_shapeLabel(config.shape)}${Drawing.drawPromptPart2}${_colorLabel(config.color)}${Drawing.drawPromptPart3}';
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -246,19 +245,20 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 10,
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios_new,
                 size: 20,
-                color: Color(0xFF3F414E),
+                color: colors.textPrimary,
               ),
             ),
           ),
@@ -268,10 +268,10 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Draw Shapes • Round ${state.currentRound}/${state.totalRounds}',
+                  '${Drawing.missionDrawShapes} • ${Drawing.roundCaption} ${state.currentRound}/${state.totalRounds}',
                   style: GoogleFonts.alata(
                     fontSize: 12,
-                    color: const Color(0xFF8E97FD),
+                    color: AppColors.primaryPurple,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -280,7 +280,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF3F414E),
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -291,7 +291,33 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     );
   }
 
-  Widget _buildPixySection(DrawingState state) {
+  String _shapeLabel(String shape) {
+    switch (shape) {
+      case 'triangle':
+        return Drawing.shapeTriangle;
+      case 'circle':
+        return Drawing.shapeCircle;
+      case 'square':
+        return Drawing.shapeSquare;
+      default:
+        return shape;
+    }
+  }
+
+  String _colorLabel(String color) {
+    switch (color) {
+      case 'blue':
+        return Drawing.colorNameBlue;
+      case 'red':
+        return Drawing.colorNameRed;
+      case 'green':
+        return Drawing.colorNameGreen;
+      default:
+        return color;
+    }
+  }
+
+  Widget _buildPixySection(DrawingState state, AppColorsExtension colors) {
     String pixyAsset = _getPixyAsset(state.pixyEmotion);
     String message = _getPixyMessage(state);
     
@@ -315,11 +341,12 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 shape: BoxShape.circle,
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF8E97FD).withOpacity(0.3),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.28),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -329,10 +356,10 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                 child: Image.asset(
                   pixyAsset,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.smart_toy,
                     size: 40,
-                    color: Color(0xFF8E97FD),
+                    color: AppColors.primaryPurple,
                   ),
                 ),
               ),
@@ -346,11 +373,12 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 10,
                   ),
                 ],
@@ -359,7 +387,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                 message,
                 style: GoogleFonts.alata(
                   fontSize: 14,
-                  color: const Color(0xFF3F414E),
+                  color: colors.textPrimary,
                   height: 1.4,
                 ),
               ),
@@ -373,35 +401,36 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
   String _getPixyAsset(String emotion) {
     switch (emotion) {
       case 'thinking':
-        return 'assets/welcome/page2/thinking.png';
+        return AppAssets.welcomePage2Thinking;
       case 'happy':
       case 'encouraging':
-        return 'assets/welcome/page1/hello.png';
+        return AppAssets.welcomePage1Hello;
       case 'hint_color':
-        return 'assets/welcome/page1/hello.png';
+        return AppAssets.welcomePage1Hello;
       default:
-        return 'assets/welcome/page1/hello.png';
+        return AppAssets.welcomePage1Hello;
     }
   }
 
   String _getPixyMessage(DrawingState state) {
     if (state.isAnalyzing) {
-      return 'Hmm, let me look at your drawing... 🤔';
+      return Drawing.thinking;
     }
     if (state.showResult && state.analysisResult != null) {
       return state.analysisResult!.message;
     }
     final config = state.currentRoundConfig;
-    return 'Draw a ${config.shape} using ${config.color} color! Tap the canvas to start. 🎨';
+    return '${Drawing.drawPromptPart1}${_shapeLabel(config.shape)}${Drawing.drawPromptPart2}${_colorLabel(config.color)}${Drawing.drawPromptPart3}';
   }
 
-  Widget _buildCanvasSection(DrawingState state) {
+  Widget _buildCanvasSection(DrawingState state, AppColorsExtension colors) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -414,7 +443,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
           repaintKey: _canvasKey,
           selectedColor: state.selectedColor,
           strokeWidth: 12.0,
-          backgroundColor: Colors.white,
+          backgroundColor: colors.surface,
           isEraserMode: _isEraserSelected,
           onDrawingChanged: () {
             ref.read(drawingControllerProvider.notifier).setHasDrawing(true);
@@ -424,10 +453,9 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     );
   }
 
-  Widget _buildActionButtons(DrawingState state) {
+  Widget _buildActionButtons(DrawingState state, AppColorsExtension colors) {
     return Row(
       children: [
-        // Clear button
         Expanded(
           flex: 1,
           child: GestureDetector(
@@ -435,10 +463,10 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
             child: Container(
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFE0E0E0),
+                  color: colors.border,
                   width: 1.5,
                 ),
               ),
@@ -446,18 +474,18 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.refresh,
-                      color: Color(0xFF8A8A8F),
+                      color: colors.iconColor,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Clear',
+                      Drawing.clear,
                       style: GoogleFonts.alata(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF8A8A8F),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -469,7 +497,6 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
         
         const SizedBox(width: 16),
         
-        // Check drawing button
         Expanded(
           flex: 2,
           child: GestureDetector(
@@ -478,14 +505,14 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               height: 56,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF8E97FD), Color(0xFFA5B4FC)],
+                  colors: [AppColors.primaryPurple, AppColors.primaryPurpleLight],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF8E97FD).withOpacity(0.4),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.4),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -493,7 +520,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               ),
               child: Center(
                 child: Text(
-                  'Check Drawing ✨',
+                  Drawing.checkDrawingSparkle,
                   style: GoogleFonts.alata(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -508,20 +535,21 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     );
   }
 
-  Widget _buildThinkingOverlay() {
+  Widget _buildThinkingOverlay(AppColorsExtension colors) {
     return Container(
-      color: Colors.black.withOpacity(0.3),
+      color: Colors.black.withValues(alpha: 0.32),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 30,
                 ),
               ],
@@ -529,7 +557,6 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Thinking Pixy
                 AnimatedBuilder(
                   animation: _thinkingRotation,
                   builder: (context, child) {
@@ -542,17 +569,17 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F9FE),
+                      color: colors.inputFill,
                       shape: BoxShape.circle,
                     ),
                     child: ClipOval(
                       child: Image.asset(
-                        'assets/welcome/page2/thinking.png',
+                        AppAssets.welcomePage2Thinking,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, __, ___) => Icon(
                           Icons.smart_toy,
                           size: 50,
-                          color: Color(0xFF8E97FD),
+                          color: AppColors.primaryPurple,
                         ),
                       ),
                     ),
@@ -562,31 +589,31 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                 const SizedBox(height: 20),
                 
                 Text(
-                  'Pixy is thinking...',
+                  Drawing.thinkingTitle,
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF3F414E),
+                    color: colors.textPrimary,
                   ),
                 ),
                 
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Analyzing your masterpiece! 🎨',
+                  Drawing.analyzingMessage,
                   style: GoogleFonts.alata(
                     fontSize: 14,
-                    color: const Color(0xFF8A8A8F),
+                    color: colors.textSecondary,
                   ),
                 ),
                 
                 const SizedBox(height: 20),
                 
-                const SizedBox(
+                SizedBox(
                   width: 40,
                   height: 40,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8E97FD)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryPurple),
                     strokeWidth: 3,
                   ),
                 ),
@@ -598,16 +625,17 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     );
   }
 
-  Widget _buildResultOverlay(DrawingState state) {
+  Widget _buildResultOverlay(DrawingState state, AppColorsExtension colors) {
     final result = state.analysisResult;
     if (result == null) return const SizedBox.shrink();
     
     final isCorrect = result.isCorrect;
+    final accent = isCorrect ? AppColors.success : AppColors.warning;
     
     return SlideTransition(
       position: _resultSlide,
       child: Container(
-        color: Colors.black.withOpacity(0.4),
+        color: Colors.black.withValues(alpha: 0.42),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Center(
@@ -615,12 +643,12 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               margin: const EdgeInsets.all(32),
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: colors.border),
                 boxShadow: [
                   BoxShadow(
-                    color: (isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF9800))
-                        .withOpacity(0.3),
+                    color: accent.withValues(alpha: 0.28),
                     blurRadius: 30,
                     spreadRadius: 5,
                   ),
@@ -629,23 +657,21 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Result icon
                   Container(
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isCorrect
-                            ? [const Color(0xFF4CAF50), const Color(0xFF81C784)]
-                            : [const Color(0xFFFF9800), const Color(0xFFFFB74D)],
+                            ? [AppColors.success, AppColors.correctGreen]
+                            : [AppColors.warning, AppColors.orangeAccent],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: (isCorrect ? const Color(0xFF4CAF50) : const Color(0xFFFF9800))
-                              .withOpacity(0.4),
+                          color: accent.withValues(alpha: 0.4),
                           blurRadius: 20,
                           spreadRadius: 2,
                         ),
@@ -660,49 +686,52 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                   
                   const SizedBox(height: 24),
                   
-                  // Title
                   Text(
-                    isCorrect ? 'Amazing! 🎉' : 'Almost there!',
+                    isCorrect
+                        ? '${Drawing.successTitle} ${Drawing.successEmoji}'
+                        : Drawing.almostTitle,
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF3F414E),
+                      color: colors.textPrimary,
                     ),
                   ),
                   
                   const SizedBox(height: 12),
                   
-                  // Message
                   Text(
                     result.message,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.alata(
                       fontSize: 16,
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                       height: 1.5,
                     ),
                   ),
                   
                   const SizedBox(height: 32),
                   
-                  // Action buttons
                   if (isCorrect)
                     _buildGradientButton(
                       onTap: state.currentRound < state.totalRounds
                           ? _onNextRound
                           : _onComplete,
                       label: state.currentRound < state.totalRounds
-                          ? 'Next Round'
-                          : 'Mission Complete',
-                      colors: [const Color(0xFF4CAF50), const Color(0xFF81C784)],
+                          ? Drawing.nextRound
+                          : Drawing.missionCompleteButton,
+                      gradientColors: [AppColors.success, AppColors.correctGreen],
                     )
                   else
                     Column(
                       children: [
                         _buildGradientButton(
                           onTap: _onTryAgain,
-                          label: 'Try Again',
-                          colors: [const Color(0xFF8E97FD), const Color(0xFFA5B4FC)],
+                          label: Drawing.tryAgain,
+                          gradientColors: [
+                            AppColors.primaryPurple,
+                            AppColors.primaryPurpleLight,
+                          ],
                         ),
                       ],
                     ),
@@ -718,7 +747,7 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
   Widget _buildGradientButton({
     required VoidCallback onTap,
     required String label,
-    required List<Color> colors,
+    required List<Color> gradientColors,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -727,14 +756,14 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: colors,
+            colors: gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: colors.first.withOpacity(0.4),
+              color: gradientColors.first.withValues(alpha: 0.4),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),

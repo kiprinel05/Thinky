@@ -53,12 +53,12 @@ class AppTextField extends StatelessWidget {
       maxLines: maxLines,
       textInputAction: textInputAction,
       focusNode: focusNode,
-      style: AppTypography.inputText,
+      style: AppTypography.inputText.copyWith(color: colors.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
         labelText: labelText,
         errorText: errorText,
-        hintStyle: AppTypography.inputHint,
+        hintStyle: AppTypography.inputHint.copyWith(color: colors.textHint),
         filled: true,
         fillColor: colors.inputFill,
         contentPadding: const EdgeInsets.symmetric(
@@ -67,11 +67,14 @@ class AppTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimens.inputRadius),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: colors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimens.inputRadius),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(
+            color: AppColors.primaryPurple,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimens.inputRadius),

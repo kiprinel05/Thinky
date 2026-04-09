@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart'; // For @visibleForTesting
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 
 /// Service responsible for loading and providing translated texts from JSON
 class TextService {
   static Map<String, dynamic> _texts = {};
   static bool _initialized = false;
+
+  /// BCP 47 language code of the loaded bundle (e.g. `en`, `ro`).
+  static String get currentLanguageCode => _currentLanguage;
 
   /// Private constructor
   TextService._();
@@ -23,10 +27,10 @@ class TextService {
   /// Load texts for a specific language
   static Future<void> loadLanguage(String languageCode) async {
     try {
-      String jsonPath = 'assets/i18n/texts.json'; // Default english
-      
+      String jsonPath = AppAssets.i18nTexts;
+
       if (languageCode == 'ro') {
-        jsonPath = 'assets/i18n/texts_ro.json';
+        jsonPath = AppAssets.i18nTextsRo;
       }
       
       final String jsonString = await rootBundle.loadString(jsonPath);

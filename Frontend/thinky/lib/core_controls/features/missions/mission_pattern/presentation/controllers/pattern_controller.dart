@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import '../../data/pattern_models.dart';
 import '../../data/pattern_repository.dart';
 
@@ -58,7 +59,7 @@ class PatternController extends StateNotifier<PatternState> {
     } catch (e) {
       state = state.copyWith(
         phase: PatternPhase.error,
-        errorMessage: 'Failed to start mission: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -86,7 +87,7 @@ class PatternController extends StateNotifier<PatternState> {
     } catch (e) {
       state = state.copyWith(
         phase: PatternPhase.error,
-        errorMessage: 'Failed to submit answer: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -111,7 +112,7 @@ class PatternController extends StateNotifier<PatternState> {
     } catch (e) {
       state = state.copyWith(
         phase: PatternPhase.error,
-        errorMessage: 'Failed to load next round: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }

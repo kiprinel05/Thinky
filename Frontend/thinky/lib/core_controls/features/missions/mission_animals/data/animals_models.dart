@@ -1,6 +1,7 @@
 /// Models for Animals Mission
 /// 
 /// Represents data structures for the "Teach Pixy Animals" mission
+library;
 
 class AnimalImage {
   final String id;

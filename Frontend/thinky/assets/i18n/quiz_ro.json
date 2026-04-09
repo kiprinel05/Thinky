@@ -1,0 +1,52 @@
+{
+  "1": {
+    "question": "Ce este, de fapt, inteligența artificială?",
+    "options": {
+      "1": "Un robot invizibil care trăiește în telefonul tău.",
+      "2": "Un fel de magie care ghicește ce gândești.",
+      "3": "Un program de computer inteligent care poate învăța lucruri noi.",
+      "4": "O baterie foarte puternică."
+    },
+    "explanation": "Exact! IA este ca un elev foarte rapid. Este un set de instrucțiuni (cod) scrise de oameni, care poate învăța din exemple."
+  },
+  "2": {
+    "question": "Cum învață inteligența artificială să recunoască o pisică într-o poză?",
+    "options": {
+      "1": "Se uită la mii de poze cu pisici până înțelege cum arată o pisică.",
+      "2": "Întreabă o altă pisică.",
+      "3": "Pur și simplu ghicește și are noroc de fiecare dată.",
+      "4": "Are ochi adevărați și vede exact ca noi."
+    },
+    "explanation": "Corect! Asta se numește „antrenare”. Cu cât vede mai multe exemple (date), cu atât devine mai deșteaptă."
+  },
+  "3": {
+    "question": "Unde ai întâlnit deja inteligența artificială, poate fără să știi?",
+    "options": {
+      "1": "Când îți legi șireturile.",
+      "2": "Când mănânci cereale dimineața.",
+      "3": "Când YouTube sau TikTok îți recomandă un clip care îți place.",
+      "4": "Când scrii cu stiloul pe hârtie."
+    },
+    "explanation": "Bingo! Algoritmii de recomandare sunt IA. „Învață” ce îți place și încearcă să îți arate lucruri asemănătoare."
+  },
+  "4": {
+    "question": "Ce NU poate face (încă) inteligența artificială?",
+    "options": {
+      "1": "Să joace șah mai bine decât un om.",
+      "2": "Să scrie o poezie sau o povestioară.",
+      "3": "Să deseneze o imagine colorată.",
+      "4": "Să aibă sentimente adevărate (să fie fericită sau tristă)."
+    },
+    "explanation": "Foarte bine! IA poate imita emoții, dar nu simte nimic. Nu are inimă sau conștiință; este doar matematică și cod."
+  },
+  "5": {
+    "question": "Care este cel mai bun mod de a folosi inteligența artificială?",
+    "options": {
+      "1": "Să ne facă toate temele ca să nu mai învățăm nimic.",
+      "2": "Să ne fie teamă de ea și să o oprească.",
+      "3": "Să o folosim ca pe un asistent (copilot) ca să fim mai creativi și mai rapizi.",
+      "4": "Să lăsăm lumea să fie condusă de ea singură."
+    },
+    "explanation": "Super atitudine! IA este unealta. Cele mai bune rezultate apar când oamenii și IA lucrează împreună ca o echipă."
+  }
+}

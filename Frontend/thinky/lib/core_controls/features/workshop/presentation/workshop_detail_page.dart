@@ -9,6 +9,7 @@ import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 
@@ -51,7 +52,7 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
     } catch (e, stack) {
       ErrorLogger().logError(e, stackTrace: stack);
       setState(() {
-        _error = e.toString();
+        _error = UserFacingErrorMapper.map(e);
         _isLoading = false;
       });
     }
@@ -77,7 +78,10 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
       ErrorLogger().logError(e, stackTrace: stack);
       setState(() => _isDownloading = false);
       if (mounted) {
-        ErrorHandlerUI.showError(context, '${WorkshopTexts.downloadFailed}: $e');
+        ErrorHandlerUI.showError(
+          context,
+          '${WorkshopTexts.downloadFailed} ${UserFacingErrorMapper.map(e)}',
+        );
       }
     }
   }

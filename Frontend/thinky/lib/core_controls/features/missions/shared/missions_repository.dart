@@ -1,9 +1,8 @@
-import 'package:http/http.dart' as http;
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/core_controls/network/base_repository.dart';
-import 'package:thinky/core_controls/storage/local_storage.dart';
 import 'package:thinky/shared/models/result.dart';
+import 'package:thinky/shared_controls/assets/app_assets.dart';
 import '../presentation/controllers/missions_state.dart';
 
 /// Missions Repository - handles all mission-related API calls
@@ -78,7 +77,7 @@ class MissionsRepository extends BaseRepository {
       const Mission(
         id: 1,
         name: 'Pixy Learns',
-        imageUrl: 'assets/missions/pixy_learns.png',
+        imageUrl: AppAssets.missionCatalogPixyLearns,
         color: '#8E97FD',
         isLocked: false,
         order: 1,
@@ -87,7 +86,7 @@ class MissionsRepository extends BaseRepository {
       const Mission(
         id: 2,
         name: 'Colors',
-        imageUrl: 'assets/missions/colors.png',
+        imageUrl: AppAssets.missionCatalogColors,
         color: '#FFB59E',
         isLocked: false, // UNLOCKED FOR TESTING
         order: 2,
@@ -96,7 +95,7 @@ class MissionsRepository extends BaseRepository {
       const Mission(
         id: 3,
         name: 'Draw Shapes',
-        imageUrl: 'assets/missions/shapes.png',
+        imageUrl: AppAssets.missionCatalogShapes,
         color: '#8E97FD',
         isLocked: false, // UNLOCKED FOR TESTING
         order: 3,
@@ -106,7 +105,7 @@ class MissionsRepository extends BaseRepository {
       const Mission(
         id: 4,
         name: 'Numbers',
-        imageUrl: 'assets/missions/numbers.png',
+        imageUrl: AppAssets.missionCatalogNumbers,
         color: '#6CB28E',
         isLocked: false, // UNLOCKED FOR TESTING
         order: 4,

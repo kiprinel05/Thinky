@@ -1,4 +1,5 @@
 /// Domain models for the Numbers Mission ("Învățăm numerele cu Pixy")
+library;
 
 /// Pixy's AI model level
 enum PixyModelLevel {

@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
+import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
 import '../../data/describe_models.dart';
 import '../../data/describe_repository.dart';
@@ -103,7 +103,7 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
-        errorMessage: 'Failed to start mission: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -139,7 +139,7 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
-        errorMessage: 'Failed to start recording: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -178,7 +178,7 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
-        errorMessage: 'Failed to process audio: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
@@ -212,7 +212,7 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
     } catch (e) {
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
-        errorMessage: 'Failed to load next round: $e',
+        errorMessage: UserFacingErrorMapper.map(e),
       );
     }
   }
