@@ -50,6 +50,9 @@ class WorkshopMission {
   final List<String> tags;
   final int downloadCount;
   final DateTime createdAt;
+  /// Curator-approved as appropriate for children (server flag).
+  final bool isVerified;
+  final DateTime? verifiedAt;
 
   WorkshopMission({
     required this.id,
@@ -61,6 +64,8 @@ class WorkshopMission {
     required this.tags,
     required this.downloadCount,
     required this.createdAt,
+    this.isVerified = false,
+    this.verifiedAt,
   });
 
   factory WorkshopMission.fromJson(Map<String, dynamic> json) {
@@ -74,6 +79,10 @@ class WorkshopMission {
       tags: List<String>.from(json['tags'] ?? []),
       downloadCount: json['download_count'],
       createdAt: DateTime.parse(json['created_at']),
+      isVerified: json['is_verified'] as bool? ?? false,
+      verifiedAt: json['verified_at'] != null
+          ? DateTime.parse(json['verified_at'] as String)
+          : null,
     );
   }
 }
@@ -91,6 +100,8 @@ class WorkshopMissionDetail extends WorkshopMission {
     required super.tags,
     required super.downloadCount,
     required super.createdAt,
+    super.isVerified,
+    super.verifiedAt,
     required this.questions,
   });
 
@@ -105,6 +116,10 @@ class WorkshopMissionDetail extends WorkshopMission {
       tags: List<String>.from(json['tags'] ?? []),
       downloadCount: json['download_count'],
       createdAt: DateTime.parse(json['created_at']),
+      isVerified: json['is_verified'] as bool? ?? false,
+      verifiedAt: json['verified_at'] != null
+          ? DateTime.parse(json['verified_at'] as String)
+          : null,
       questions: (json['questions'] as List)
           .map((q) => WorkshopQuestion.fromJson(q))
           .toList(),
@@ -121,6 +136,8 @@ class WorkshopMissionDetail extends WorkshopMission {
         'tags': tags,
         'download_count': downloadCount,
         'created_at': createdAt.toIso8601String(),
+        'is_verified': isVerified,
+        'verified_at': verifiedAt?.toIso8601String(),
         'questions': questions.map((q) => q.toJson()).toList(),
       };
 }

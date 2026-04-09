@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
@@ -9,15 +10,16 @@ import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/services/workshop_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
-class MyMissionsPage extends StatefulWidget {
+class MyMissionsPage extends ConsumerStatefulWidget {
   const MyMissionsPage({super.key});
 
   @override
-  State<MyMissionsPage> createState() => _MyMissionsPageState();
+  ConsumerState<MyMissionsPage> createState() => _MyMissionsPageState();
 }
 
-class _MyMissionsPageState extends State<MyMissionsPage> {
+class _MyMissionsPageState extends ConsumerState<MyMissionsPage> {
   List<WorkshopMission> _missions = [];
   bool _isLoading = true;
   String? _error;
@@ -51,6 +53,7 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final colors = context.appColors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -195,15 +198,32 @@ class _MyMissionsPageState extends State<MyMissionsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    mission.title,
-                    style: GoogleFonts.alata(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          mission.title,
+                          style: GoogleFonts.alata(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (mission.isVerified) ...[
+                        const SizedBox(width: 6),
+                        Tooltip(
+                          message: WorkshopTexts.verifiedHint,
+                          child: Icon(
+                            Icons.verified_rounded,
+                            size: 20,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Row(

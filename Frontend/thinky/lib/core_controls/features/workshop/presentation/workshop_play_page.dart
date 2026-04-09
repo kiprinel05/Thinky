@@ -113,13 +113,32 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
           icon: Icon(Icons.close_rounded, color: colors.textPrimary),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          _mission!.title,
-          style: GoogleFonts.alata(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: colors.textPrimary,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                _mission!.title,
+                style: GoogleFonts.alata(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: colors.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (_mission!.isVerified) ...[
+              const SizedBox(width: 6),
+              Tooltip(
+                message: WorkshopTexts.verifiedHint,
+                child: const Icon(
+                  Icons.verified_rounded,
+                  color: AppColors.success,
+                  size: 22,
+                ),
+              ),
+            ],
+          ],
         ),
         centerTitle: true,
       ),

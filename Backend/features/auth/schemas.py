@@ -56,6 +56,7 @@ class TokenResponse(BaseModel):
     email: Optional[str] = None
     is_guest: bool
     guest_name: Optional[str] = None
+    is_admin: bool = False
 
 class UserResponse(BaseModel):
     id: int
@@ -63,6 +64,7 @@ class UserResponse(BaseModel):
     email: Optional[str] = None
     is_guest: bool
     guest_name: Optional[str] = None
+    is_admin: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

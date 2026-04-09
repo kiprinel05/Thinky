@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
@@ -11,16 +12,17 @@ import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 
-class WorkshopBrowsePage extends StatefulWidget {
+class WorkshopBrowsePage extends ConsumerStatefulWidget {
   const WorkshopBrowsePage({super.key});
 
   @override
-  State<WorkshopBrowsePage> createState() => _WorkshopBrowsePageState();
+  ConsumerState<WorkshopBrowsePage> createState() => _WorkshopBrowsePageState();
 }
 
-class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
+class _WorkshopBrowsePageState extends ConsumerState<WorkshopBrowsePage> {
   final _searchController = TextEditingController();
   final List<WorkshopMission> _missions = [];
   bool _isLoading = true;
@@ -93,6 +95,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final colors = context.appColors;
     if (_isGuest) return _buildLockedState();
 
@@ -491,15 +494,32 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    mission.title,
-                    style: GoogleFonts.alata(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          mission.title,
+                          style: GoogleFonts.alata(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (mission.isVerified) ...[
+                        const SizedBox(width: 6),
+                        Tooltip(
+                          message: WorkshopTexts.verifiedHint,
+                          child: Icon(
+                            Icons.verified_rounded,
+                            size: 20,
+                            color: AppColors.success,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(

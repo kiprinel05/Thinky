@@ -38,6 +38,7 @@ void main() {
         email: 'user42@example.com',
         isGuest: true,
         guestName: 'Local Guest',
+        isAdmin: true,
       );
 
       await AuthService.saveAuthData(response);
@@ -49,6 +50,7 @@ void main() {
       expect(prefs.getString('email'), 'user42@example.com');
       expect(prefs.getBool('is_guest'), true);
       expect(prefs.getString('guest_name'), 'Local Guest');
+      expect(prefs.getBool('is_admin'), true);
     });
 
     test('getToken returns stored token', () async {
@@ -83,6 +85,7 @@ void main() {
       expect(user['email'], 'test@example.com');
       expect(user['isGuest'], false);
       expect(user['guestName'], isNull);
+      expect(user['isAdmin'], false);
     });
 
     test('getCurrentUser returns null when no token', () async {

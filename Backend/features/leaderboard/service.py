@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -8,9 +8,13 @@ from features.mission.models import Mission, MissionProgress
 from features.workshop.models import WorkshopDownload
 from features.leaderboard.schemas import (
     LeaderboardEntry,
+    LeaderboardMissionPoints,
     LeaderboardResponse,
     LeaderboardStats,
 )
+
+# Aggregated workshop bonus uses this slug; app i18n can add MissionTitles.workshop later.
+_WORKSHOP_SLUG = "workshop"
 
 
 class LeaderboardService:
@@ -36,6 +40,10 @@ class LeaderboardService:
     ) -> LeaderboardResponse:
         mission_points_map = self._get_mission_points()
 
+        # id -> mission_path (slug aligned with app MissionTitles keys, e.g. quiz, pixy_learns)
+        mission_rows = self.db.query(Mission.id, Mission.mission_path).all()
+        mission_id_to_path: Dict[int, str] = {m.id: m.mission_path for m in mission_rows}
+
         # Aggregate mission progress (completed missions only)
         mission_progress_rows: List[MissionProgress] = (
             self.db.query(MissionProgress)
@@ -46,11 +54,19 @@ class LeaderboardService:
         user_points: Dict[int, float] = defaultdict(float)
         user_missions_completed: Dict[int, int] = defaultdict(int)
         user_workshop_completed: Dict[int, int] = defaultdict(int)
+        # user_id -> mission_path -> points earned for that built-in mission
+        user_slug_points: Dict[int, Dict[str, float]] = defaultdict(
+            lambda: defaultdict(float)
+        )
 
         for p in mission_progress_rows:
             pts = mission_points_map.get(p.mission_id, 1.0)
             user_points[p.user_id] += pts
             user_missions_completed[p.user_id] += 1
+            slug = mission_id_to_path.get(p.mission_id)
+            if not slug:
+                slug = f"mission_{p.mission_id}"
+            user_slug_points[p.user_id][slug] += pts
 
         # Each distinct downloaded workshop mission counts as 1 point
         if include_workshop:
@@ -89,6 +105,21 @@ class LeaderboardService:
             for u in users
         }
 
+        def build_mission_points_breakdown(uid: int) -> Optional[List[LeaderboardMissionPoints]]:
+            combined: Dict[str, float] = dict(user_slug_points.get(uid, {}))
+            if include_workshop:
+                wcount = user_workshop_completed.get(uid, 0)
+                if wcount > 0:
+                    combined[_WORKSHOP_SLUG] = (
+                        combined.get(_WORKSHOP_SLUG, 0.0) + float(wcount)
+                    )
+            if not combined:
+                return None
+            return [
+                LeaderboardMissionPoints(mission_id=s, points=p)
+                for s, p in sorted(combined.items(), key=lambda x: (-x[1], x[0]))
+            ]
+
         entries: List[LeaderboardEntry] = []
         for user_id, points in user_points.items():
             entries.append(
@@ -98,6 +129,7 @@ class LeaderboardService:
                     points=points,
                     missions_completed=user_missions_completed[user_id],
                     workshop_missions_completed=user_workshop_completed[user_id],
+                    mission_points=build_mission_points_breakdown(user_id),
                 )
             )
 

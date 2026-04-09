@@ -6,6 +6,7 @@ class AuthResponse {
   final String? email;
   final bool isGuest;
   final String? guestName;
+  final bool isAdmin;
 
   AuthResponse({
     required this.accessToken,
@@ -15,6 +16,7 @@ class AuthResponse {
     this.email,
     required this.isGuest,
     this.guestName,
+    this.isAdmin = false,
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class AuthResponse {
       email: json['email'] as String?,
       isGuest: json['is_guest'] as bool? ?? false,
       guestName: json['guest_name'] as String?,
+      isAdmin: json['is_admin'] as bool? ?? false,
     );
   }
 }

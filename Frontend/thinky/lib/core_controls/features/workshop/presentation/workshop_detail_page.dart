@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
@@ -12,21 +13,24 @@ import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 
-class WorkshopDetailPage extends StatefulWidget {
+class WorkshopDetailPage extends ConsumerStatefulWidget {
   final int missionId;
 
   const WorkshopDetailPage({super.key, required this.missionId});
 
   @override
-  State<WorkshopDetailPage> createState() => _WorkshopDetailPageState();
+  ConsumerState<WorkshopDetailPage> createState() => _WorkshopDetailPageState();
 }
 
-class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
+class _WorkshopDetailPageState extends ConsumerState<WorkshopDetailPage> {
   WorkshopMissionDetail? _mission;
   bool _isLoading = true;
   bool _isDownloading = false;
   bool _isDownloaded = false;
+  bool _savingVerification = false;
   String? _error;
 
   @override
@@ -91,8 +95,37 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
     context.push('/workshop-play/${_mission!.id}');
   }
 
+  Future<void> _applyVerification(bool value) async {
+    setState(() => _savingVerification = true);
+    try {
+      await WorkshopService.setMissionVerification(
+        missionId: widget.missionId,
+        isVerified: value,
+      );
+      await _loadMission();
+      final downloaded = await WorkshopStorage.isDownloaded(widget.missionId);
+      if (downloaded && _mission != null) {
+        await WorkshopStorage.saveDownloadedMission(_mission!);
+      }
+      if (mounted) {
+        ErrorHandlerUI.showSuccess(context, WorkshopTexts.verificationUpdated);
+      }
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
+      if (mounted) {
+        ErrorHandlerUI.showError(
+          context,
+          UserFacingErrorMapper.map(e),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _savingVerification = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final colors = context.appColors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -139,6 +172,7 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
   Widget _buildContent() {
     final colors = context.appColors;
     final mission = _mission!;
+    final isAdmin = ref.watch(authStateProvider).user?.isAdmin ?? false;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -168,13 +202,55 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
 
           FadeInWidget(
             delay: const Duration(milliseconds: 100),
-            child: Text(
-              mission.title,
-              style: GoogleFonts.alata(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: colors.textPrimary,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    mission.title,
+                    style: GoogleFonts.alata(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
+                if (mission.isVerified) ...[
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: WorkshopTexts.verifiedHint,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                        border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 18,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            WorkshopTexts.verifiedBadge,
+                            style: GoogleFonts.alata(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.success,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           const SizedBox(height: 6),
@@ -268,6 +344,62 @@ class _WorkshopDetailPageState extends State<WorkshopDetailPage> {
               ),
             ),
           ),
+          if (isAdmin) ...[
+            const SizedBox(height: AppDimens.md),
+            FadeInWidget(
+              delay: const Duration(milliseconds: 320),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.md,
+                  vertical: AppDimens.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.cardColor,
+                  borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                  border: Border.all(color: colors.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            WorkshopTexts.adminMarkVerified,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            WorkshopTexts.verifiedHint,
+                            style: GoogleFonts.alata(
+                              fontSize: 11,
+                              color: colors.textSecondary,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_savingVerification)
+                      const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      Switch(
+                        value: mission.isVerified,
+                        onChanged: _savingVerification ? null : _applyVerification,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: AppDimens.xl),
 
           FadeInWidget(

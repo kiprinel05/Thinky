@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
@@ -193,6 +194,26 @@ class WorkshopService:
         return self._to_response(mission)
 
     # ──────────────────────────────────────────────────────────────────────
+    # ADMIN VERIFICATION
+    # ──────────────────────────────────────────────────────────────────────
+
+    def set_mission_verified(
+        self, mission_id: int, is_verified: bool
+    ) -> Optional[WorkshopMissionResponse]:
+        mission = (
+            self.db.query(WorkshopMission)
+            .filter(WorkshopMission.id == mission_id)
+            .first()
+        )
+        if not mission:
+            return None
+        mission.is_verified = is_verified
+        mission.verified_at = datetime.now(timezone.utc) if is_verified else None
+        self.db.commit()
+        self.db.refresh(mission)
+        return self._to_response(mission)
+
+    # ──────────────────────────────────────────────────────────────────────
     # HELPERS
     # ──────────────────────────────────────────────────────────────────────
 
@@ -235,6 +256,8 @@ class WorkshopService:
             tags=self._parse_tags(mission.tags),
             download_count=mission.download_count,
             created_at=mission.created_at,
+            is_verified=bool(getattr(mission, "is_verified", False)),
+            verified_at=getattr(mission, "verified_at", None),
         )
 
     def _to_detail_response(self, mission: WorkshopMission) -> WorkshopMissionDetailResponse:
@@ -248,5 +271,7 @@ class WorkshopService:
             tags=self._parse_tags(mission.tags),
             download_count=mission.download_count,
             created_at=mission.created_at,
+            is_verified=bool(getattr(mission, "is_verified", False)),
+            verified_at=getattr(mission, "verified_at", None),
             questions=self._parse_questions(mission.quiz_data),
         )

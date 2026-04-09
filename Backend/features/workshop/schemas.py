@@ -67,6 +67,12 @@ class WorkshopMissionUpdate(BaseModel):
     questions: Optional[List[WorkshopQuestionCreate]] = None
 
 
+class WorkshopVerificationUpdate(BaseModel):
+    """Admin-only: mark mission as reviewed OK for children."""
+
+    is_verified: bool
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # OUTPUT SCHEMAS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -81,6 +87,8 @@ class WorkshopMissionResponse(BaseModel):
     tags: List[str]
     download_count: int
     created_at: datetime
+    is_verified: bool = False
+    verified_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

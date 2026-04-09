@@ -389,7 +389,11 @@
         "createFirstMission": "Creează prima ta misiune",
         "questionTextEmpty": "textul este gol",
         "questionNeedsAnswers": "necesită minim 2 răspunsuri",
-        "questionSelectCorrect": "selectează un răspuns corect valid"
+        "questionSelectCorrect": "selectează un răspuns corect valid",
+        "verifiedBadge": "Verificată",
+        "verifiedHint": "Verificată de echipa Thinky ca fiind potrivită pentru copii",
+        "adminMarkVerified": "Marchează ca verificată (OK pentru copii)",
+        "verificationUpdated": "Verificare actualizată"
     },
     "Leaderboard": {
         "title": "Clasament",
@@ -421,7 +425,8 @@
         "vocabulary": "Potrivire cuvinte",
         "describe_image": "Descrie imaginea",
         "pattern": "Completează modelul",
-        "numbers": "Învățăm numerele cu Pixy"
+        "numbers": "Învățăm numerele cu Pixy",
+        "workshop": "Misiuni din atelier"
     },
     "PixyLearns": {
         "preparingLessons": "Pregătim lecțiile...",

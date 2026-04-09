@@ -62,6 +62,14 @@ class FakeLocalStorage extends LocalStorage {
   }
 
   @override
+  bool get isAdmin => _store['is_admin'] as bool? ?? false;
+
+  @override
+  Future<void> setIsAdmin(bool value) async {
+    _store['is_admin'] = value;
+  }
+
+  @override
   bool get hasSeenWelcome => _store['has_seen_welcome'] as bool? ?? false;
 
   @override
@@ -85,6 +93,7 @@ class FakeLocalStorage extends LocalStorage {
     _store.remove('email');
     _store.remove('is_guest');
     _store.remove('guest_name');
+    _store.remove('is_admin');
   }
 
   @override

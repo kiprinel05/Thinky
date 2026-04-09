@@ -9,6 +9,7 @@ class AuthUser {
   final String? email;
   final bool isGuest;
   final String? guestName;
+  final bool isAdmin;
 
   const AuthUser({
     required this.id,
@@ -16,6 +17,7 @@ class AuthUser {
     this.email,
     required this.isGuest,
     this.guestName,
+    this.isAdmin = false,
   });
 
   String get displayName => username ?? guestName ?? 'User';
@@ -26,6 +28,7 @@ class AuthUser {
     String? email,
     bool? isGuest,
     String? guestName,
+    bool? isAdmin,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -33,6 +36,7 @@ class AuthUser {
       email: email ?? this.email,
       isGuest: isGuest ?? this.isGuest,
       guestName: guestName ?? this.guestName,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 }

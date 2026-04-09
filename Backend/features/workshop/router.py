@@ -2,15 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-# Support both old (api/) and new (features/) architecture
-try:
-    from api.dependencies import get_current_user
-    from database import get_db
-    from models.user_model import User
-except ImportError:
-    from core.database import get_db
-    from features.auth.dependencies import get_current_user
-    from features.auth.models import User
+from core.database import get_db
+from features.auth.dependencies import get_current_admin_user, get_current_user
+from features.auth.models import User
 from features.workshop.service import WorkshopService
 from features.workshop.schemas import (
     WorkshopMissionCreate,
@@ -18,6 +12,7 @@ from features.workshop.schemas import (
     WorkshopMissionResponse,
     WorkshopMissionDetailResponse,
     WorkshopMissionListResponse,
+    WorkshopVerificationUpdate,
 )
 
 router = APIRouter(prefix="/workshop", tags=["Workshop"])
@@ -146,5 +141,30 @@ async def update_mission(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Mission not found or you are not the author",
+        )
+    return result
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ADMIN — verification (child-safety curator mark)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+@router.patch(
+    "/missions/{mission_id}/verification",
+    response_model=WorkshopMissionResponse,
+)
+async def set_mission_verification(
+    mission_id: int,
+    body: WorkshopVerificationUpdate,
+    _admin: User = Depends(get_current_admin_user),
+    service: WorkshopService = Depends(get_workshop_service),
+):
+    """Mark a workshop mission as verified (or unverify). Admin only."""
+    result = service.set_mission_verified(mission_id, body.is_verified)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Mission not found",
         )
     return result

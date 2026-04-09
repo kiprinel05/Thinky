@@ -37,6 +37,7 @@ class LocalStorage {
   static const String _keyEmail = 'email';
   static const String _keyIsGuest = 'is_guest';
   static const String _keyGuestName = 'guest_name';
+  static const String _keyIsAdmin = 'is_admin';
   static const String _keyHasSeenWelcome = 'has_seen_welcome';
   static const String _keyLastRoute = 'last_route';
 
@@ -80,6 +81,12 @@ class LocalStorage {
 
   String? get guestName => _prefs.getString(_keyGuestName);
 
+  Future<void> setIsAdmin(bool value) async {
+    await _prefs.setBool(_keyIsAdmin, value);
+  }
+
+  bool get isAdmin => _prefs.getBool(_keyIsAdmin) ?? false;
+
   // ══════════════════════════════════════════════════════════════════════════
   // APP STATE
   // ══════════════════════════════════════════════════════════════════════════
@@ -108,6 +115,7 @@ class LocalStorage {
     await _prefs.remove(_keyEmail);
     await _prefs.remove(_keyIsGuest);
     await _prefs.remove(_keyGuestName);
+    await _prefs.remove(_keyIsAdmin);
   }
 
   /// Clear app state (for logout)

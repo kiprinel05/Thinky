@@ -96,6 +96,27 @@ class WorkshopService {
     }
   }
 
+  /// Admin: mark mission as verified (child-appropriate) or revoke.
+  static Future<WorkshopMission> setMissionVerification({
+    required int missionId,
+    required bool isVerified,
+  }) async {
+    try {
+      final response = await ApiClient.patch(
+        '/workshop/missions/$missionId/verification',
+        {'is_verified': isVerified},
+      );
+      if (response.statusCode == 200) {
+        return WorkshopMission.fromJson(jsonDecode(response.body));
+      }
+      final err = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+      throw Exception(err['detail']?.toString() ?? 'Verification update failed');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
+      rethrow;
+    }
+  }
+
   /// Get missions created by the current user.
   static Future<WorkshopMissionList> getMyMissions() async {
     try {

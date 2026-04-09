@@ -21,6 +21,9 @@ class WorkshopMission(Base):
     tags = Column(Text, nullable=True)  # JSON array stored as string, e.g. '["geography","science"]'
     download_count = Column(Integer, default=0, nullable=False)
     is_published = Column(Boolean, default=True, nullable=False)
+    # Curator / admin: mission reviewed as child-appropriate for the catalog
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
     quiz_data = Column(Text, nullable=False)  # JSON string with questions/answers
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

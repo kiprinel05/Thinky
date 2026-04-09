@@ -11,6 +11,7 @@ class AuthService {
   static const String _emailKey = 'email';
   static const String _isGuestKey = 'is_guest';
   static const String _guestNameKey = 'guest_name';
+  static const String _isAdminKey = 'is_admin';
 
   static Future<void> saveAuthData(AuthResponse response) async {
     final prefs = await SharedPreferences.getInstance();
@@ -26,6 +27,7 @@ class AuthService {
     if (response.guestName != null) {
       await prefs.setString(_guestNameKey, response.guestName!);
     }
+    await prefs.setBool(_isAdminKey, response.isAdmin);
   }
 
   static Future<String?> getToken() async {
@@ -49,6 +51,7 @@ class AuthService {
       'email': prefs.getString(_emailKey),
       'isGuest': prefs.getBool(_isGuestKey) ?? false,
       'guestName': prefs.getString(_guestNameKey),
+      'isAdmin': prefs.getBool(_isAdminKey) ?? false,
     };
   }
 
@@ -60,6 +63,7 @@ class AuthService {
     await prefs.remove(_emailKey);
     await prefs.remove(_isGuestKey);
     await prefs.remove(_guestNameKey);
+    await prefs.remove(_isAdminKey);
   }
 
   static Future<AuthResponse> register({
@@ -167,6 +171,7 @@ class AuthService {
       email: null,
       isGuest: true,
       guestName: name,
+      isAdmin: false,
     );
 
     await saveAuthData(authResponse);

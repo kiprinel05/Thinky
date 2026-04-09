@@ -491,6 +491,12 @@ class WorkshopTexts {
   static String get missionPublishedMsg => TextService.getString('Workshop', 'missionPublished');
   static String get noDownloaded => TextService.getString('Workshop', 'noDownloaded');
   static String get browseWorkshop => TextService.getString('Workshop', 'browseWorkshop');
+  static String get verifiedBadge => TextService.getString('Workshop', 'verifiedBadge');
+  static String get verifiedHint => TextService.getString('Workshop', 'verifiedHint');
+  static String get adminMarkVerified =>
+      TextService.getString('Workshop', 'adminMarkVerified');
+  static String get verificationUpdated =>
+      TextService.getString('Workshop', 'verificationUpdated');
 }
 
 /// Accessors for 'Nav' texts (bottom navigation bar)

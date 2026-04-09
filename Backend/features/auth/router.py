@@ -9,6 +9,8 @@ from features.auth.schemas import (
 )
 from features.auth.service import AuthService
 from features.auth.repository import AuthRepository
+from features.auth.dependencies import get_current_user
+from features.auth.models import User as UserModel
 from core.config import settings
 from core.security import create_access_token
 
@@ -36,7 +38,8 @@ async def register(user_data: UserRegister, service: AuthService = Depends(get_a
             user_id=user.id,
             username=user.username,
             email=user.email,
-            is_guest=False
+            is_guest=False,
+            is_admin=bool(getattr(user, "is_admin", False)),
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -54,6 +57,19 @@ async def login(credentials: UserLogin, service: AuthService = Depends(get_auth_
 @router.post("/guest", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register_guest(guest_data: GuestRegister, service: AuthService = Depends(get_auth_service)):
     return service.register_guest(guest_data)
+
+
+@router.get("/me", response_model=UserResponse)
+async def read_me(current_user: UserModel = Depends(get_current_user)):
+    """Current user profile (includes is_admin for workshop moderation UI)."""
+    return UserResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        is_guest=current_user.is_guest,
+        guest_name=current_user.guest_name,
+        is_admin=bool(getattr(current_user, "is_admin", False)),
+    )
 
 @router.post("/forgot-password/request")
 async def request_password_reset(request: PasswordResetRequest, service: AuthService = Depends(get_auth_service)):

@@ -57,7 +57,8 @@ class AuthService(BaseService[User, UserRegister, UserLogin]):
             user_id=user.id,
             username=user.username,
             email=user.email,
-            is_guest=False
+            is_guest=False,
+            is_admin=bool(getattr(user, "is_admin", False)),
         )
 
     def register_guest(self, guest_data: GuestRegister) -> TokenResponse:
@@ -87,7 +88,8 @@ class AuthService(BaseService[User, UserRegister, UserLogin]):
             access_token=access_token,
             user_id=new_guest.id,
             guest_name=new_guest.guest_name,
-            is_guest=True
+            is_guest=True,
+            is_admin=False,
         )
 
     def request_password_reset(self, email: str) -> str:

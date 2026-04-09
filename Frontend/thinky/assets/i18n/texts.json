@@ -389,7 +389,11 @@
         "createFirstMission": "Create your first mission",
         "questionTextEmpty": "text is empty",
         "questionNeedsAnswers": "needs at least 2 answers",
-        "questionSelectCorrect": "select a valid correct answer"
+        "questionSelectCorrect": "select a valid correct answer",
+        "verifiedBadge": "Verified",
+        "verifiedHint": "Reviewed by the Thinky team as OK for kids",
+        "adminMarkVerified": "Mark as verified (kids OK)",
+        "verificationUpdated": "Verification updated"
     },
     "Leaderboard": {
         "title": "Leaderboard",
@@ -421,7 +425,8 @@
         "vocabulary": "Word Match",
         "describe_image": "Describe It",
         "pattern": "Complete the Pattern",
-        "numbers": "Learn Numbers with Pixy"
+        "numbers": "Learn Numbers with Pixy",
+        "workshop": "Workshop missions"
     },
     "PixyLearns": {
         "preparingLessons": "Preparing lessons...",
