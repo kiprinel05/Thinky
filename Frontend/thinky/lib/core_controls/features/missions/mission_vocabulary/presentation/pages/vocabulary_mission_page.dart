@@ -2,6 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import '../../data/vocabulary_models.dart';
 import '../../data/vocabulary_repository.dart';
 import '../controllers/vocabulary_controller.dart';
@@ -86,6 +90,8 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     final state = ref.watch(vocabularyControllerProvider);
 
     // Listen for phase changes to trigger animations
@@ -106,16 +112,16 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
-            _buildAppBar(state),
+            _buildAppBar(state, colors),
             if (state.phase == VocabMissionPhase.question ||
                 state.phase == VocabMissionPhase.feedback ||
                 state.phase == VocabMissionPhase.submitting)
-              _buildProgressDots(state),
-            Expanded(child: _buildContent(state)),
+              _buildProgressDots(state, colors),
+            Expanded(child: _buildContent(state, colors)),
           ],
         ),
       ),
@@ -126,7 +132,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // APP BAR
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildAppBar(VocabMissionState state) {
+  Widget _buildAppBar(VocabMissionState state, AppColorsExtension colors) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -136,11 +142,11 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F3F7),
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.border),
               ),
-              child: const Icon(Icons.arrow_back,
-                  color: Color(0xFF222222), size: 20),
+              child: Icon(Icons.arrow_back, color: colors.textPrimary, size: 20),
             ),
           ),
           const SizedBox(width: 16),
@@ -149,38 +155,38 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Word Match',
+                  Vocabulary.title,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF222222),
+                    color: colors.textPrimary,
                   ),
                 ),
                 Text(
-                  'Select the image that matches the word',
+                  Vocabulary.subtitle,
                   style: GoogleFonts.alata(
                     fontSize: 12,
-                    color: const Color(0xFF8A8A8F),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          // Score badge
           if (state.answeredCount > 0)
             Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF8E97FD).withAlpha(25),
+                color: AppColors.primaryPurple.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.25)),
               ),
               child: Text(
                 '${state.correctCount}/${state.answeredCount}',
                 style: GoogleFonts.alata(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF8E97FD),
+                  color: AppColors.primaryPurple,
                 ),
               ),
             ),
@@ -193,7 +199,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // PROGRESS DOTS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildProgressDots(VocabMissionState state) {
+  Widget _buildProgressDots(VocabMissionState state, AppColorsExtension colors) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       child: Row(
@@ -202,13 +208,13 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           Color dotColor;
           double size;
           if (index < state.answeredCount) {
-            dotColor = const Color(0xFF66BB6A); // Completed
+            dotColor = AppColors.correctGreen;
             size = 8;
           } else if (index == state.currentIndex) {
-            dotColor = const Color(0xFF8E97FD); // Current
+            dotColor = AppColors.primaryPurple;
             size = 12;
           } else {
-            dotColor = const Color(0xFFE0E0E0); // Future
+            dotColor = colors.border;
             size = 8;
           }
           return AnimatedContainer(
@@ -230,33 +236,33 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // CONTENT ROUTER
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildContent(VocabMissionState state) {
+  Widget _buildContent(VocabMissionState state, AppColorsExtension colors) {
     switch (state.phase) {
       case VocabMissionPhase.loading:
+        return _buildLoading(colors, Vocabulary.loadingWords);
       case VocabMissionPhase.submitting:
-        return _buildLoading();
+        return _buildLoading(colors, Vocabulary.submittingShort);
       case VocabMissionPhase.question:
-        return _buildQuestionPhase(state);
+        return _buildQuestionPhase(state, colors);
       case VocabMissionPhase.feedback:
-        return _buildFeedbackPhase(state);
+        return _buildFeedbackPhase(state, colors);
       case VocabMissionPhase.missionComplete:
-        return _buildMissionComplete(state);
+        return _buildMissionComplete(state, colors);
       case VocabMissionPhase.error:
-        return _buildError(state);
+        return _buildError(state, colors);
     }
   }
 
-  Widget _buildLoading() {
+  Widget _buildLoading(AppColorsExtension colors, String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: Color(0xFF8E97FD)),
+          CircularProgressIndicator(color: AppColors.primaryPurple),
           const SizedBox(height: 16),
           Text(
-            'Loading words...',
-            style: GoogleFonts.alata(
-                fontSize: 16, color: const Color(0xFF8A8A8F)),
+            message,
+            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
           ),
         ],
       ),
@@ -267,9 +273,9 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // QUESTION PHASE — Word Card + Image Grid
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildQuestionPhase(VocabMissionState state) {
+  Widget _buildQuestionPhase(VocabMissionState state, AppColorsExtension colors) {
     final question = state.currentQuestion;
-    if (question == null) return _buildLoading();
+    if (question == null) return _buildLoading(colors, Vocabulary.loadingWords);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -293,7 +299,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
 
           // Image grid
           Expanded(
-            child: _buildImageGrid(question, state.selectedImageId),
+            child: _buildImageGrid(question, state.selectedImageId, colors),
           ),
 
           // Submit button
@@ -344,10 +350,10 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           ),
           const SizedBox(height: 4),
           Text(
-            'Find the matching image',
+            Vocabulary.findMatchingImage,
             style: GoogleFonts.alata(
               fontSize: 13,
-              color: Colors.white70,
+              color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
         ],
@@ -355,7 +361,11 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     );
   }
 
-  Widget _buildImageGrid(VocabQuestion question, int? selectedId) {
+  Widget _buildImageGrid(
+    VocabQuestion question,
+    int? selectedId,
+    AppColorsExtension colors,
+  ) {
     final images = question.images;
     // Use 2 columns
     return GridView.builder(
@@ -368,14 +378,18 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       ),
       itemCount: images.length,
       itemBuilder: (context, index) {
-        return _buildImageOption(images[index], selectedId);
+        return _buildImageOption(images[index], selectedId, colors);
       },
     );
   }
 
-  Widget _buildImageOption(VocabImage image, int? selectedId) {
+  Widget _buildImageOption(
+    VocabImage image,
+    int? selectedId,
+    AppColorsExtension colors,
+  ) {
     final isSelected = selectedId == image.id;
-    final imageUrl = VocabularyRepository.getImageUrl(image.url);
+    final resolvedUrl = VocabularyRepository.getImageUrl(image.url);
     final controller = ref.read(vocabularyControllerProvider.notifier);
 
     return GestureDetector(
@@ -383,25 +397,23 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardColor,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF8E97FD)
-                : const Color(0xFFE8E8ED),
+            color: isSelected ? AppColors.primaryPurple : colors.border,
             width: isSelected ? 3.0 : 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF8E97FD).withAlpha(51),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.22),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   )
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withAlpha(13),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   )
@@ -409,30 +421,14 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
         ),
         child: Stack(
           children: [
-            // Image
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (_, __, ___) => Container(
-                  color: const Color(0xFFF2F3F7),
-                  child: Center(
-                    child: Text(
-                      image.label,
-                      style: GoogleFonts.alata(
-                        fontSize: 14,
-                        color: const Color(0xFF8A8A8F),
-                      ),
-                    ),
-                  ),
-                ),
+              child: _buildVocabImage(
+                resolvedUrl: resolvedUrl,
+                label: image.label,
+                colors: colors,
               ),
             ),
-
-            // Selection checkmark
             if (isSelected)
               Positioned(
                 top: 8,
@@ -441,21 +437,19 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                   width: 28,
                   height: 28,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF8E97FD),
+                    color: AppColors.primaryPurple,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check, color: Colors.white, size: 18),
                 ),
               ),
-
-            // Hover effect border overlay
             if (isSelected)
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF8E97FD).withAlpha(51),
+                      color: AppColors.primaryPurple.withValues(alpha: 0.35),
                       width: 2,
                     ),
                   ),
@@ -464,6 +458,65 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVocabImage({
+    required String resolvedUrl,
+    required String label,
+    required AppColorsExtension colors,
+  }) {
+    Widget fallback() => Container(
+          color: colors.surface,
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              label.isNotEmpty ? label : Vocabulary.imageError,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.alata(
+                fontSize: 14,
+                color: colors.textSecondary,
+              ),
+            ),
+          ),
+        );
+
+    if (resolvedUrl.startsWith('assets/')) {
+      return Image.asset(
+        resolvedUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, __, ___) => fallback(),
+      );
+    }
+
+    return Image.network(
+      resolvedUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          color: colors.surface,
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: AppColors.primaryPurple,
+              value: progress.expectedTotalBytes != null
+                  ? progress.cumulativeBytesLoaded /
+                      progress.expectedTotalBytes!
+                  : null,
+            ),
+          ),
+        );
+      },
+      errorBuilder: (_, __, ___) => fallback(),
     );
   }
 
@@ -483,7 +536,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           elevation: 4,
         ),
         child: Text(
-          'Submit Answer',
+          Vocabulary.submitAnswer,
           style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -494,13 +547,13 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // FEEDBACK PHASE — Correct / Incorrect with animations
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildFeedbackPhase(VocabMissionState state) {
+  Widget _buildFeedbackPhase(VocabMissionState state, AppColorsExtension colors) {
     final answer = state.lastAnswer;
-    if (answer == null) return _buildLoading();
+    if (answer == null) return _buildLoading(colors, Vocabulary.loadingWords);
 
     final isCorrect = answer.correct;
     final accentColor =
-        isCorrect ? const Color(0xFF66BB6A) : const Color(0xFFFF8A65);
+        isCorrect ? AppColors.correctGreen : AppColors.missionPeach;
     final question = state.currentQuestion;
 
     return Stack(
@@ -544,7 +597,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF222222),
+                    color: colors.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -553,14 +606,14 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                 // Show correct answer image if incorrect
                 if (!isCorrect && question != null) ...[
                   Text(
-                    'The correct image:',
+                    Vocabulary.correctImageCaption,
                     style: GoogleFonts.alata(
                       fontSize: 14,
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildCorrectAnswerCard(question, answer.correctImageId),
+                  _buildCorrectAnswerCard(question, answer.correctImageId, colors),
                   const SizedBox(height: 20),
                 ],
 
@@ -582,10 +635,10 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8E97FD).withAlpha(25),
+                        color: AppColors.primaryPurple.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: const Color(0xFF8E97FD).withAlpha(51),
+                          color: AppColors.primaryPurple.withValues(alpha: 0.28),
                         ),
                       ),
                       child: Row(
@@ -598,7 +651,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                               state.encouragement!,
                               style: GoogleFonts.alata(
                                 fontSize: 14,
-                                color: const Color(0xFF666666),
+                                color: colors.textSecondary,
                               ),
                             ),
                           ),
@@ -628,8 +681,8 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                     ),
                     child: Text(
                       state.currentIndex + 1 >= state.totalQuestions
-                          ? 'See Results 🏆'
-                          : 'Next Word →',
+                          ? Vocabulary.seeResultsWithTrophy
+                          : Vocabulary.nextWordArrow,
                       style: GoogleFonts.alata(
                           fontSize: 16, fontWeight: FontWeight.w600),
                     ),
@@ -662,7 +715,11 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     );
   }
 
-  Widget _buildCorrectAnswerCard(VocabQuestion question, int correctId) {
+  Widget _buildCorrectAnswerCard(
+    VocabQuestion question,
+    int correctId,
+    AppColorsExtension colors,
+  ) {
     final correctImage =
         question.images.where((img) => img.id == correctId).firstOrNull;
     if (correctImage == null) return const SizedBox.shrink();
@@ -673,12 +730,12 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       width: 120,
       height: 120,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF66BB6A), width: 2),
+        border: Border.all(color: AppColors.correctGreen, width: 2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF66BB6A).withAlpha(51),
+            color: AppColors.correctGreen.withValues(alpha: 0.25),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -686,16 +743,10 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Center(
-            child: Text(
-              correctImage.label,
-              style: GoogleFonts.alata(
-                  fontSize: 14, color: const Color(0xFF8A8A8F)),
-            ),
-          ),
+        child: _buildVocabImage(
+          resolvedUrl: imageUrl,
+          label: correctImage.label,
+          colors: colors,
         ),
       ),
     );
@@ -705,7 +756,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // MISSION COMPLETE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildMissionComplete(VocabMissionState state) {
+  Widget _buildMissionComplete(VocabMissionState state, AppColorsExtension colors) {
     final accuracy = state.totalQuestions > 0
         ? (state.correctCount / state.totalQuestions * 100).toInt()
         : 0;
@@ -729,11 +780,11 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
             ),
             const SizedBox(height: 24),
             Text(
-              'Mission Complete!',
+              Vocabulary.missionComplete,
               style: GoogleFonts.alata(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF222222),
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -742,23 +793,23 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatBox('Accuracy', '$accuracy%',
-                    accuracy >= 80 ? const Color(0xFF66BB6A) : const Color(0xFFFF8A65)),
-                _buildStatBox('Correct', '${state.correctCount}/${state.totalQuestions}',
-                    const Color(0xFF8E97FD)),
+                _buildStatBox(Vocabulary.statAccuracy, '$accuracy%',
+                    accuracy >= 80 ? AppColors.correctGreen : AppColors.missionPeach, colors),
+                _buildStatBox(Vocabulary.statCorrect, '${state.correctCount}/${state.totalQuestions}',
+                    AppColors.primaryPurple, colors),
               ],
             ),
             const SizedBox(height: 20),
 
             Text(
               accuracy >= 90
-                  ? 'Amazing vocabulary skills! 🌟'
+                  ? Vocabulary.completeLineHigh
                   : accuracy >= 70
-                      ? 'Great work! Keep practicing! 💪'
-                      : 'Good effort! Try again to improve! 📚',
+                      ? Vocabulary.completeLineMid
+                      : Vocabulary.completeLineLow,
               style: GoogleFonts.alata(
                 fontSize: 16,
-                color: const Color(0xFF8A8A8F),
+                color: colors.textSecondary,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -778,7 +829,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                   elevation: 4,
                 ),
                 child: Text(
-                  'Back to Missions',
+                  Common.backToMissions,
                   style: GoogleFonts.alata(
                       fontSize: 16, fontWeight: FontWeight.w600),
                 ),
@@ -790,13 +841,18 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     );
   }
 
-  Widget _buildStatBox(String label, String value, Color color) {
+  Widget _buildStatBox(
+    String label,
+    String value,
+    Color color,
+    AppColorsExtension colors,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: color.withAlpha(20),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withAlpha(51)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Column(
         children: [
@@ -812,7 +868,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           Text(
             label,
             style: GoogleFonts.alata(
-                fontSize: 12, color: const Color(0xFF8A8A8F)),
+                fontSize: 12, color: colors.textSecondary),
           ),
         ],
       ),
@@ -823,29 +879,28 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   // ERROR
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildError(VocabMissionState state) {
+  Widget _buildError(VocabMissionState state, AppColorsExtension colors) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline,
-                size: 60, color: Color(0xFFFF5252)),
+            Icon(Icons.error_outline, size: 60, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              Common.error,
               style: GoogleFonts.alata(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF222222),
+                color: colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              state.errorMessage ?? 'Unknown error',
+              state.errorMessage ?? UserErrors.somethingWentWrong,
               style: GoogleFonts.alata(
-                  fontSize: 14, color: const Color(0xFF8A8A8F)),
+                  fontSize: 14, color: colors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -856,13 +911,13 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                     .startMission();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8E97FD),
+                backgroundColor: AppColors.primaryPurple,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
               ),
               child: Text(
-                'Try Again',
+                Vocabulary.tryAgain,
                 style: GoogleFonts.alata(
                     fontSize: 16, fontWeight: FontWeight.w600),
               ),

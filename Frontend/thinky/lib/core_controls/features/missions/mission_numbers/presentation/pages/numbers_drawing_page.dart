@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import '../../domain/numbers_models.dart';
 import '../controllers/numbers_controller.dart';
@@ -31,8 +35,6 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   static const Color _primaryDark = Color(0xFFE87B3A);
   static const Color _successColor = Color(0xFF4CAF50);
   static const Color _errorColor = Color(0xFFFF6B6B);
-  static const Color _canvasBg = Color(0xFFFFFDF8);
-
   bool _hasDrawing = false;
 
   @override
@@ -78,6 +80,8 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     final state = ref.watch(numbersStateProvider);
 
     // Trigger overlays
@@ -91,7 +95,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F2),
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Stack(
           children: [
@@ -134,13 +138,15 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildHeader(NumbersState state) {
+    final colors = context.appColors;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardColor,
+        border: Border(bottom: BorderSide(color: colors.border)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -155,7 +161,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _primaryColor.withOpacity(0.1),
+                    color: _primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.arrow_back_ios_new_rounded,
@@ -168,16 +174,19 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Partea 2: Desenăm cifre',
+                      NumbersMission.part2Title,
                       style: GoogleFonts.alata(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF222222),
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Nivelul: ${state.modelLevel.displayName} ${state.modelLevel.emoji}',
+                      NumbersMission.levelLine(
+                        NumbersMission.modelLevelName(state.modelLevel),
+                        state.modelLevel.emoji,
+                      ),
                       style: GoogleFonts.alata(fontSize: 12, color: _primaryDark),
                     ),
                   ],
@@ -190,7 +199,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: state.upgradeProgress.clamp(0.0, 1.0),
-              backgroundColor: _primaryColor.withOpacity(0.12),
+              backgroundColor: _primaryColor.withValues(alpha: 0.12),
               valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
               minHeight: 8,
             ),
@@ -200,8 +209,8 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${state.correctCount}/3 corecte → upgrade',
-                style: GoogleFonts.alata(fontSize: 10, color: const Color(0xFF8A8A8F)),
+                NumbersMission.progressUpgrade(state.correctCount),
+                style: GoogleFonts.alata(fontSize: 10, color: colors.textSecondary),
               ),
               Row(
                 children: List.generate(3, (i) {
@@ -215,8 +224,8 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                       color: isActive
                           ? _primaryColor
                           : isPast
-                              ? _successColor.withOpacity(0.15)
-                              : Colors.grey.withOpacity(0.08),
+                              ? _successColor.withValues(alpha: 0.15)
+                              : Colors.grey.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(level.emoji, style: const TextStyle(fontSize: 12)),
@@ -235,6 +244,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildPrompt(NumbersState state) {
+    final colors = context.appColors;
     final target = state.round?.targetNumber ?? 1;
 
     return Container(
@@ -242,10 +252,10 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_primaryColor.withOpacity(0.1), _primaryLight.withOpacity(0.06)],
+          colors: [_primaryColor.withValues(alpha: 0.1), _primaryLight.withValues(alpha: 0.06)],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _primaryColor.withOpacity(0.2)),
+        border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -256,7 +266,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryColor.withOpacity(0.3),
+                  color: _primaryColor.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -277,19 +287,19 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Desenează cifra $target!',
+                  NumbersMission.drawTheDigit(target),
                   style: GoogleFonts.alata(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF222222),
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Pixy va încerca să recunoască ce ai desenat.',
+                  NumbersMission.drawDigitHint,
                   style: GoogleFonts.alata(
                     fontSize: 12,
-                    color: const Color(0xFF888888),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -305,12 +315,14 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildCanvasSection(NumbersState state) {
+    final colors = context.appColors;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: _primaryColor.withOpacity(0.1),
+            color: _primaryColor.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -325,9 +337,9 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
               DrawingCanvas(
                 key: _canvasKey,
                 repaintKey: _repaintKey,
-                selectedColor: Colors.black,
+                selectedColor: colors.textPrimary,
                 strokeWidth: 10.0,
-                backgroundColor: _canvasBg,
+                backgroundColor: colors.surface,
                 onDrawingChanged: () {
                   setState(() {
                     _hasDrawing = _canvasKey.currentState?.hasDrawing ?? false;
@@ -344,7 +356,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                         style: GoogleFonts.alata(
                           fontSize: 140,
                           fontWeight: FontWeight.w700,
-                          color: Colors.grey.withOpacity(0.08),
+                          color: colors.textHint.withValues(alpha: 0.2),
                         ),
                       ),
                     ),
@@ -362,6 +374,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildPixySection(NumbersState state) {
+    final colors = context.appColors;
     String pixyText;
     String pixyEmoji;
 
@@ -369,7 +382,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
       pixyText = state.drawingResult!.pixyMessage;
       pixyEmoji = _emotionToEmoji(state.drawingResult!.pixyEmotion);
     } else {
-      pixyText = 'Desenează cifra și arată-mi! Voi încerca să ghicesc! 🤖';
+      pixyText = NumbersMission.pixyDrawPrompt;
       pixyEmoji = '🤖';
     }
 
@@ -383,21 +396,22 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_primaryColor.withOpacity(0.1), _primaryLight.withOpacity(0.06)],
+                colors: [_primaryColor.withValues(alpha: 0.1), _primaryLight.withValues(alpha: 0.06)],
               ),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _primaryColor.withOpacity(0.15)),
+              border: Border.all(color: _primaryColor.withValues(alpha: 0.15)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.cardColor,
                     shape: BoxShape.circle,
+                    border: Border.all(color: colors.border),
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryColor.withOpacity(0.1),
+                        color: _primaryColor.withValues(alpha: 0.1),
                         blurRadius: 6,
                       ),
                     ],
@@ -410,7 +424,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        state.modelLevel.displayName,
+                        NumbersMission.modelLevelName(state.modelLevel),
                         style: GoogleFonts.alata(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -422,7 +436,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                         pixyText,
                         style: GoogleFonts.alata(
                           fontSize: 13,
-                          color: const Color(0xFF444444),
+                          color: colors.textPrimary,
                           height: 1.4,
                         ),
                       ),
@@ -442,6 +456,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildDrawingActions(NumbersState state) {
+    final colors = context.appColors;
     final controller = ref.read(numbersStateProvider.notifier);
 
     return Row(
@@ -456,9 +471,9 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _primaryColor.withOpacity(0.3)),
+                border: Border.all(color: _primaryColor.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -466,7 +481,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                   Icon(Icons.delete_outline_rounded, color: _primaryDark, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    'ȘTERGE',
+                    NumbersMission.clear,
                     style: GoogleFonts.alata(
                       color: _primaryDark,
                       fontWeight: FontWeight.w700,
@@ -497,12 +512,12 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
               decoration: BoxDecoration(
                 color: _hasDrawing && !state.isSubmitting
                     ? _primaryColor
-                    : _primaryColor.withOpacity(0.3),
+                    : _primaryColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   if (_hasDrawing && !state.isSubmitting)
                     BoxShadow(
-                      color: _primaryColor.withOpacity(0.3),
+                      color: _primaryColor.withValues(alpha: 0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -522,7 +537,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'ANALIZEZ...',
+                      NumbersMission.analyzing,
                       style: GoogleFonts.alata(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -533,7 +548,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     const Icon(Icons.send_rounded, color: Colors.white, size: 18),
                     const SizedBox(width: 8),
                     Text(
-                      'TRIMITE LA PIXY',
+                      NumbersMission.sendToPixy,
                       style: GoogleFonts.alata(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -556,6 +571,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildResultSection(NumbersState state) {
+    final colors = context.appColors;
     final result = state.drawingResult;
     if (result == null) return const SizedBox.shrink();
     final controller = ref.read(numbersStateProvider.notifier);
@@ -567,13 +583,13 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: result.isCorrect
-                ? _successColor.withOpacity(0.08)
-                : _errorColor.withOpacity(0.08),
+                ? _successColor.withValues(alpha: 0.08)
+                : _errorColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: result.isCorrect
-                  ? _successColor.withOpacity(0.3)
-                  : _errorColor.withOpacity(0.3),
+                  ? _successColor.withValues(alpha: 0.3)
+                  : _errorColor.withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -587,14 +603,19 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     size: 28,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    result.isCorrect
-                        ? 'Pixy a recunoscut corect! 🎉'
-                        : 'Pixy a ghicit: ${result.guessedDigit ?? "?"}',
-                    style: GoogleFonts.alata(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: result.isCorrect ? _successColor : _errorColor,
+                  Flexible(
+                    child: Text(
+                      result.isCorrect
+                          ? NumbersMission.drawingRecognized
+                          : NumbersMission.drawingGuessed(
+                              '${result.guessedDigit ?? "?"}',
+                            ),
+                      style: GoogleFonts.alata(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: result.isCorrect ? _successColor : _errorColor,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
@@ -602,10 +623,12 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
               const SizedBox(height: 8),
               if (result.confidence > 0)
                 Text(
-                  'Încredere: ${(result.confidence * 100).toInt()}%',
+                  NumbersMission.confidencePercent(
+                    (result.confidence * 100).toInt(),
+                  ),
                   style: GoogleFonts.alata(
                     fontSize: 12,
-                    color: const Color(0xFF888888),
+                    color: colors.textSecondary,
                   ),
                 ),
               const SizedBox(height: 8),
@@ -614,7 +637,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 textAlign: TextAlign.center,
                 style: GoogleFonts.alata(
                   fontSize: 13,
-                  color: const Color(0xFF666666),
+                  color: colors.textSecondary,
                   height: 1.5,
                 ),
               ),
@@ -637,7 +660,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: _primaryColor.withOpacity(0.3),
+                    color: _primaryColor.withValues(alpha: 0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -649,7 +672,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                   const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    'URMĂTOAREA CIFRĂ',
+                    NumbersMission.nextDigit,
                     style: GoogleFonts.alata(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -671,12 +694,13 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildProfessorOverlay(NumbersState state) {
+    final colors = context.appColors;
     final controller = ref.read(numbersStateProvider.notifier);
     final message = state.drawingResult?.professorMessage ?? '';
     final hint = state.drawingResult?.professorHint;
 
     return Container(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withValues(alpha: 0.45),
       child: Center(
         child: SlideTransition(
           position: _professorSlideAnim,
@@ -684,11 +708,12 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             margin: const EdgeInsets.symmetric(horizontal: 28),
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -700,18 +725,18 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF5C6BC0).withOpacity(0.1),
+                    color: AppColors.numbersPrimary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Text('👨‍🏫', style: TextStyle(fontSize: 48)),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Profesorul spune:',
+                  NumbersMission.professorSays,
                   style: GoogleFonts.alata(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF5C6BC0),
+                    color: AppColors.numbersPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -721,7 +746,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                   style: GoogleFonts.alata(
                     fontSize: 14,
                     height: 1.6,
-                    color: const Color(0xFF444444),
+                    color: colors.textPrimary,
                   ),
                 ),
                 if (hint != null) ...[
@@ -730,7 +755,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _primaryColor.withOpacity(0.08),
+                      color: _primaryColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -761,7 +786,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                       controller.dismissProfessor();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5C6BC0),
+                      backgroundColor: AppColors.numbersPrimary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -770,7 +795,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                       elevation: 0,
                     ),
                     child: Text(
-                      'AM ÎNȚELES!',
+                      NumbersMission.professorUnderstood,
                       style: GoogleFonts.alata(fontWeight: FontWeight.w700, letterSpacing: 1),
                     ),
                   ),
@@ -788,10 +813,11 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildUpgradeOverlay(NumbersState state) {
+    final colors = context.appColors;
     final controller = ref.read(numbersStateProvider.notifier);
 
     return Container(
-      color: Colors.black.withOpacity(0.4),
+      color: Colors.black.withValues(alpha: 0.45),
       child: Center(
         child: ScaleTransition(
           scale: _upgradeScaleAnim,
@@ -799,11 +825,12 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
             margin: const EdgeInsets.symmetric(horizontal: 28),
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryColor.withOpacity(0.3),
+                  color: _primaryColor.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -815,7 +842,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 const Text('🎉', style: TextStyle(fontSize: 56)),
                 const SizedBox(height: 16),
                 Text(
-                  'Pixy a avansat!',
+                  NumbersMission.upgradeTitle,
                   style: GoogleFonts.alata(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -830,7 +857,10 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${state.modelLevel.emoji} ${state.modelLevel.displayName}',
+                    NumbersMission.upgradeLevelLine(
+                      state.modelLevel.emoji,
+                      NumbersMission.modelLevelName(state.modelLevel),
+                    ),
                     style: GoogleFonts.alata(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -840,12 +870,12 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Pixy recunoaște cifrele\ntot mai bine datorită ție! 🌟',
+                  NumbersMission.upgradeDrawingSubtitle,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.alata(
                     fontSize: 13,
                     height: 1.6,
-                    color: const Color(0xFF666666),
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -867,7 +897,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                       elevation: 0,
                     ),
                     child: Text(
-                      'CONTINUĂ',
+                      NumbersMission.continueCaps,
                       style: GoogleFonts.alata(fontWeight: FontWeight.w700, letterSpacing: 1),
                     ),
                   ),

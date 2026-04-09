@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/features/missions/mission_pattern/data/pattern_models.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/shared_controls/theme/app_colors.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import '../controllers/pattern_controller.dart';
 
 class PatternMissionPage extends ConsumerWidget {
@@ -11,97 +15,146 @@ class PatternMissionPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(textRefreshProvider);
+    final colors = context.appColors;
     final state = ref.watch(patternControllerProvider);
     final controller = ref.read(patternControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
-          'Complete the Pattern',
-          style: GoogleFonts.fredoka(color: Colors.white, fontSize: 24),
+          PatternMission.title,
+          style: GoogleFonts.alata(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
         ),
-        backgroundColor: const Color(0xFF9C27B0), // Purple
+        backgroundColor: AppColors.patternPurple,
+        foregroundColor: Colors.white,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
       ),
-      body: _buildBody(context, state, controller),
+      body: _buildBody(context, colors, state, controller),
     );
   }
 
   Widget _buildBody(
-      BuildContext context, PatternState state, PatternController controller) {
+    BuildContext context,
+    AppColorsExtension colors,
+    PatternState state,
+    PatternController controller,
+  ) {
     if (state.phase == PatternPhase.loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.phase == PatternPhase.error) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-             const SizedBox(height: 16),
-             Text(
-              'Something went wrong',
-              style: GoogleFonts.fredoka(fontSize: 20, fontWeight: FontWeight.bold),
+            const CircularProgressIndicator(color: AppColors.patternPurple),
+            const SizedBox(height: 16),
+            Text(
+              PatternMission.loadingPattern,
+              style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
             ),
-             Padding(
-               padding: const EdgeInsets.all(16.0),
-               child: Text(state.errorMessage ?? 'Unknown error', textAlign: TextAlign.center),
-             ),
-             ElevatedButton(
-               onPressed: controller.startMission,
-               child: const Text('Try Again'),
-             )
           ],
+        ),
+      );
+    }
+
+    if (state.phase == PatternPhase.error) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: AppColors.error),
+              const SizedBox(height: 16),
+              Text(
+                UserErrors.somethingWentWrong,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.alata(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.errorMessage ?? UserErrors.somethingWentWrong,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.alata(fontSize: 15, color: colors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: controller.startMission,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.patternPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                ),
+                child: Text(PatternMission.tryAgain, style: GoogleFonts.alata(fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (state.phase == PatternPhase.missionComplete) {
        return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.stars_rounded, size: 80, color: Colors.amber),
-            const SizedBox(height: 20),
-            Text(
-              'Mission Complete!',
-              style: GoogleFonts.fredoka(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => context.pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF9C27B0),
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.stars_rounded, size: 80, color: AppColors.goldAccent),
+              const SizedBox(height: 20),
+              Text(
+                PatternMission.missionCompleteTitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.alata(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
               ),
-              child: Text(
-                'Back to Menu',
-                style: GoogleFonts.fredoka(fontSize: 20, color: Colors.white),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: () => context.pop(),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.patternPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: Text(
+                  PatternMission.backToMenu,
+                  style: GoogleFonts.alata(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
 
     final round = state.currentRound!;
     final isFeedback = state.phase == PatternPhase.feedback;
+    final optionsBg = Color.lerp(colors.surface, AppColors.patternPurple, 0.06)!;
 
     return Column(
       children: [
-        // 1. Instruction
         Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
           child: Text(
             round.instruction,
-            style: GoogleFonts.fredoka(fontSize: 24, color: Colors.grey[800]),
+            style: GoogleFonts.alata(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
+              height: 1.25,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -123,7 +176,11 @@ class PatternMissionPage extends ConsumerWidget {
                   // The "Mystery" Box
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: _MysteryBox(isRevealed: isFeedback, result: state.lastResult),
+                    child: _MysteryBox(
+                      isRevealed: isFeedback,
+                      result: state.lastResult,
+                      cardColor: colors.cardColor,
+                    ),
                   ),
                 ],
               ),
@@ -137,14 +194,19 @@ class PatternMissionPage extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.purple[50], // Lighter purple bg for options area
+              color: optionsBg,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+              border: Border(top: BorderSide(color: colors.border)),
             ),
             child: Column(
               children: [
                 Text(
-                  'Choose next:',
-                  style: GoogleFonts.fredoka(fontSize: 18, color: Colors.purple[800]),
+                  PatternMission.chooseNext,
+                  style: GoogleFonts.alata(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.patternPurple,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Wrap(
@@ -159,20 +221,20 @@ class PatternMissionPage extends ConsumerWidget {
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colors.cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected 
-                                ? const Color(0xFF9C27B0) 
-                                : Colors.grey[300]!,
-                            width: isSelected ? 4 : 2,
+                            color: isSelected
+                                ? AppColors.patternPurple
+                                : colors.border,
+                            width: isSelected ? 3 : 1.5,
                           ),
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: const Color(0xFF9C27B0).withOpacity(0.3),
-                                    blurRadius: 10,
-                                    spreadRadius: 2,
+                                    color: AppColors.patternPurple.withValues(alpha: 0.25),
+                                    blurRadius: 12,
+                                    spreadRadius: 1,
                                   )
                                 ]
                               : [],
@@ -200,8 +262,8 @@ class PatternMissionPage extends ConsumerWidget {
                     : (state.phase == PatternPhase.submitting ? null : controller.submitAnswer),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isFeedback
-                      ? (state.isCorrect ? Colors.green : Colors.orange)
-                      : const Color(0xFF9C27B0),
+                      ? (state.isCorrect ? AppColors.success : AppColors.warning)
+                      : AppColors.patternPurple,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -211,11 +273,13 @@ class PatternMissionPage extends ConsumerWidget {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         isFeedback
-                            ? (state.isCorrect ? 'Next Pattern' : 'Try Again') 
-                            : 'Check Answer',
-                        style: GoogleFonts.fredoka(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                            ? (state.isCorrect
+                                ? PatternMission.nextPattern
+                                : PatternMission.tryAgain)
+                            : PatternMission.checkAnswer,
+                        style: GoogleFonts.alata(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       ),
@@ -226,19 +290,27 @@ class PatternMissionPage extends ConsumerWidget {
         // Feedback Message Toast
         if (isFeedback)
            Container(
-             padding: const EdgeInsets.all(12),
+             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
              decoration: BoxDecoration(
-               color: state.isCorrect ? Colors.green[100] : Colors.orange[100],
-               borderRadius: BorderRadius.circular(8),
+               color: state.isCorrect
+                   ? AppColors.success.withValues(alpha: 0.14)
+                   : AppColors.warning.withValues(alpha: 0.14),
+               borderRadius: BorderRadius.circular(12),
+               border: Border.all(
+                 color: state.isCorrect
+                     ? AppColors.success.withValues(alpha: 0.35)
+                     : AppColors.warning.withValues(alpha: 0.35),
+               ),
              ),
              width: double.infinity,
              child: Text(
                state.lastResult?.message ?? '',
                textAlign: TextAlign.center,
-               style: GoogleFonts.fredoka(
-                 color: state.isCorrect ? Colors.green[800] : Colors.orange[800],
-                 fontWeight: FontWeight.bold,
-                 fontSize: 18
+               style: GoogleFonts.alata(
+                 color: state.isCorrect ? AppColors.success : AppColors.warning,
+                 fontWeight: FontWeight.w700,
+                 fontSize: 16,
+                 height: 1.35,
                ),
              ),
            ),
@@ -346,8 +418,13 @@ class ShapePainter extends CustomPainter {
 class _MysteryBox extends StatefulWidget {
   final bool isRevealed;
   final PatternResultResponse? result;
+  final Color cardColor;
 
-  const _MysteryBox({required this.isRevealed, this.result});
+  const _MysteryBox({
+    required this.isRevealed,
+    this.result,
+    required this.cardColor,
+  });
 
   @override
   State<_MysteryBox> createState() => _MysteryBoxState();
@@ -376,13 +453,13 @@ class _MysteryBoxState extends State<_MysteryBox> with SingleTickerProviderState
        return Container(
           width: 60, height: 60,
           decoration: BoxDecoration(
-             color: Colors.white,
-             border: Border.all(color: Colors.green, width: 3),
+             color: widget.cardColor,
+             border: Border.all(color: AppColors.success, width: 3),
              borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
              Icons.check,
-             color: Colors.green,
+             color: AppColors.success,
              size: 40,
           ),
        );
@@ -392,13 +469,13 @@ class _MysteryBoxState extends State<_MysteryBox> with SingleTickerProviderState
        return Container(
           width: 60, height: 60,
           decoration: BoxDecoration(
-             color: Colors.white,
-             border: Border.all(color: Colors.red, width: 3),
+             color: widget.cardColor,
+             border: Border.all(color: AppColors.error, width: 3),
              borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
              Icons.close,
-             color: Colors.red,
+             color: AppColors.error,
              size: 40,
           ),
        );
@@ -410,15 +487,17 @@ class _MysteryBoxState extends State<_MysteryBox> with SingleTickerProviderState
          return Container(
             width: 60, height: 60,
             decoration: BoxDecoration(
-               color: Colors.grey[200],
+               color: widget.cardColor,
                borderRadius: BorderRadius.circular(10),
                border: Border.all(
-                  color: const Color(0xFF9C27B0).withOpacity(0.5 + 0.5 * _controller.value),
+                  color: AppColors.patternPurple
+                      .withValues(alpha: 0.45 + 0.45 * _controller.value),
                   width: 3,
                ),
                boxShadow: [
                   BoxShadow(
-                     color: const Color(0xFF9C27B0).withOpacity(0.3 * _controller.value),
+                     color: AppColors.patternPurple
+                         .withValues(alpha: 0.22 * _controller.value),
                      blurRadius: 10,
                      spreadRadius: 2 * _controller.value,
                   )
@@ -427,10 +506,10 @@ class _MysteryBoxState extends State<_MysteryBox> with SingleTickerProviderState
             child: Center(
                child: Text(
                   '?',
-                  style: GoogleFonts.fredoka(
-                     fontSize: 32, 
-                     fontWeight: FontWeight.bold,
-                     color: const Color(0xFF9C27B0),
+                  style: GoogleFonts.alata(
+                     fontSize: 32,
+                     fontWeight: FontWeight.w800,
+                     color: AppColors.patternPurple,
                   ),
                ),
             ),

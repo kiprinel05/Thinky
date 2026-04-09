@@ -1,3 +1,4 @@
+import 'package:thinky/core_controls/features/missions/mission_numbers/domain/numbers_models.dart';
 import 'package:thinky/core_controls/services/text_service.dart';
 
 /// Accessors for 'Misc' texts
@@ -266,6 +267,18 @@ class Vocabulary {
   static String get missionComplete => TextService.getString('Vocabulary', 'missionComplete');
   static String get tryAgain => TextService.getString('Vocabulary', 'tryAgain');
   static String get seeResults => TextService.getString('Vocabulary', 'seeResults');
+  static String get loadingWords => TextService.getString('Vocabulary', 'loadingWords');
+  static String get submittingShort => TextService.getString('Vocabulary', 'submittingShort');
+  static String get findMatchingImage => TextService.getString('Vocabulary', 'findMatchingImage');
+  static String get correctImageCaption => TextService.getString('Vocabulary', 'correctImageCaption');
+  static String get statAccuracy => TextService.getString('Vocabulary', 'statAccuracy');
+  static String get statCorrect => TextService.getString('Vocabulary', 'statCorrect');
+  static String get completeLineHigh => TextService.getString('Vocabulary', 'completeLineHigh');
+  static String get completeLineMid => TextService.getString('Vocabulary', 'completeLineMid');
+  static String get completeLineLow => TextService.getString('Vocabulary', 'completeLineLow');
+  static String get seeResultsWithTrophy => TextService.getString('Vocabulary', 'seeResultsWithTrophy');
+  static String get nextWordArrow => TextService.getString('Vocabulary', 'nextWordArrow');
+  static String get imageError => TextService.getString('Vocabulary', 'imageError');
 }
 
 /// Accessors for 'DescribeImage' texts
@@ -286,6 +299,102 @@ class PatternMission {
   static String get checkAnswer => TextService.getString('PatternMission', 'checkAnswer');
   static String get nextPattern => TextService.getString('PatternMission', 'nextPattern');
   static String get tryAgain => TextService.getString('PatternMission', 'tryAgain');
+  static String get loadingPattern => TextService.getString('PatternMission', 'loadingPattern');
+  static String get missionCompleteTitle =>
+      TextService.getString('PatternMission', 'missionCompleteTitle');
+  static String get backToMenu => TextService.getString('PatternMission', 'backToMenu');
+}
+
+/// Accessors for 'NumbersMission' texts
+class NumbersMission {
+  static String get loadingPreparing =>
+      TextService.getString('NumbersMission', 'loadingPreparing');
+  static String get introTitle => TextService.getString('NumbersMission', 'introTitle');
+  static String get introBody => TextService.getString('NumbersMission', 'introBody');
+  static String get featureNumbers => TextService.getString('NumbersMission', 'featureNumbers');
+  static String get featureDraw => TextService.getString('NumbersMission', 'featureDraw');
+  static String get featureLevels => TextService.getString('NumbersMission', 'featureLevels');
+  static String get startAdventure => TextService.getString('NumbersMission', 'startAdventure');
+  static String get appBarTitle => TextService.getString('NumbersMission', 'appBarTitle');
+  static String get completionCongrats =>
+      TextService.getString('NumbersMission', 'completionCongrats');
+  static String get completionTitle => TextService.getString('NumbersMission', 'completionTitle');
+  static String get completionBody => TextService.getString('NumbersMission', 'completionBody');
+  static String get badgeJunior => TextService.getString('NumbersMission', 'badgeJunior');
+  static String get badgeStudent => TextService.getString('NumbersMission', 'badgeStudent');
+  static String get badgeExpert => TextService.getString('NumbersMission', 'badgeExpert');
+  static String get backToMissionsCaps =>
+      TextService.getString('NumbersMission', 'backToMissionsCaps');
+  static String get part1Title => TextService.getString('NumbersMission', 'part1Title');
+  static String get part2Title => TextService.getString('NumbersMission', 'part2Title');
+  static String get howManyObjects => TextService.getString('NumbersMission', 'howManyObjects');
+  static String get chooseCorrectNumber =>
+      TextService.getString('NumbersMission', 'chooseCorrectNumber');
+  static String get confirmPixy => TextService.getString('NumbersMission', 'confirmPixy');
+  static String get send => TextService.getString('NumbersMission', 'send');
+  static String get resultCorrect => TextService.getString('NumbersMission', 'resultCorrect');
+  static String get nextRound => TextService.getString('NumbersMission', 'nextRound');
+  static String get transitionTitle => TextService.getString('NumbersMission', 'transitionTitle');
+  static String get transitionSubtitle =>
+      TextService.getString('NumbersMission', 'transitionSubtitle');
+  static String get goToDrawing => TextService.getString('NumbersMission', 'goToDrawing');
+  static String get professorSays => TextService.getString('NumbersMission', 'professorSays');
+  static String get professorUnderstood =>
+      TextService.getString('NumbersMission', 'professorUnderstood');
+  static String get upgradeTitle => TextService.getString('NumbersMission', 'upgradeTitle');
+  static String get upgradeSubtitle => TextService.getString('NumbersMission', 'upgradeSubtitle');
+  static String get continueCaps => TextService.getString('NumbersMission', 'continueCaps');
+  static String get drawDigitHint => TextService.getString('NumbersMission', 'drawDigitHint');
+  static String get pixyDrawPrompt => TextService.getString('NumbersMission', 'pixyDrawPrompt');
+  static String get clear => TextService.getString('NumbersMission', 'clear');
+  static String get analyzing => TextService.getString('NumbersMission', 'analyzing');
+  static String get sendToPixy => TextService.getString('NumbersMission', 'sendToPixy');
+  static String get drawingRecognized =>
+      TextService.getString('NumbersMission', 'drawingRecognized');
+  static String get nextDigit => TextService.getString('NumbersMission', 'nextDigit');
+  static String get upgradeDrawingSubtitle =>
+      TextService.getString('NumbersMission', 'upgradeDrawingSubtitle');
+  static String get levelJunior => TextService.getString('NumbersMission', 'levelJunior');
+  static String get levelStudent => TextService.getString('NumbersMission', 'levelStudent');
+  static String get levelExpert => TextService.getString('NumbersMission', 'levelExpert');
+
+  static String levelLine(String levelName, String emoji) =>
+      TextService.getString('NumbersMission', 'levelLine')
+          .replaceAll('{level}', levelName)
+          .replaceAll('{emoji}', emoji);
+
+  static String progressUpgrade(int correct) =>
+      TextService.getString('NumbersMission', 'progressUpgrade')
+          .replaceAll('{correct}', '$correct');
+
+  static String resultWrongAnswer(String answer) =>
+      TextService.getString('NumbersMission', 'resultWrong').replaceAll('{answer}', answer);
+
+  static String drawTheDigit(int n) =>
+      TextService.getString('NumbersMission', 'drawTheDigit').replaceAll('{n}', '$n');
+
+  static String drawingGuessed(String digit) =>
+      TextService.getString('NumbersMission', 'drawingGuessed').replaceAll('{digit}', digit);
+
+  static String confidencePercent(int percent) =>
+      TextService.getString('NumbersMission', 'confidencePercent')
+          .replaceAll('{percent}', '$percent');
+
+  static String upgradeLevelLine(String emoji, String level) =>
+      TextService.getString('NumbersMission', 'upgradeLevel')
+          .replaceAll('{emoji}', emoji)
+          .replaceAll('{level}', level);
+
+  static String modelLevelName(PixyModelLevel level) {
+    switch (level) {
+      case PixyModelLevel.junior:
+        return levelJunior;
+      case PixyModelLevel.student:
+        return levelStudent;
+      case PixyModelLevel.expert:
+        return levelExpert;
+    }
+  }
 }
 
 /// Accessors for 'Common' texts (shared across features)

@@ -87,4 +87,7 @@ abstract final class AppAssets {
   /// `category` e.g. fruits, vegetables, toys; `filename` e.g. apple.png
   static String groupSortingImage(String category, String filename) =>
       '$_missions/group_sorting/images/$category/$filename';
+
+  /// Word Match / vocabulary mission images (`assets/missions/vocabulary/`).
+  static String vocabularyImage(String filename) => '$_missions/vocabulary/$filename';
 }

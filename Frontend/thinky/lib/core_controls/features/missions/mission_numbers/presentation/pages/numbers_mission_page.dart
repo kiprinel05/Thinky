@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/language_service.dart';
+import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import '../controllers/numbers_controller.dart';
 import '../controllers/numbers_state.dart';
@@ -50,6 +53,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(textRefreshProvider);
     final state = ref.watch(numbersStateProvider);
 
     if (state.status == StateStatus.loading) {
@@ -90,19 +94,19 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
             colors: [_primaryColor, _primaryLight],
           ),
         ),
-        child: const SafeArea(
+        child: SafeArea(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(
+                const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   strokeWidth: 3,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Text(
-                  'Pregătim lecția...',
-                  style: TextStyle(
+                  NumbersMission.loadingPreparing,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
@@ -122,9 +126,10 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
 
   Widget _buildIntroScreen() {
     final controller = ref.read(numbersStateProvider.notifier);
+    final colors = context.appColors;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           // Orange gradient header
@@ -165,7 +170,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                             ),
                             child: ScaleTransition(
                               scale: _pixyScaleAnimation,
@@ -186,11 +191,12 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colors.cardColor,
                               borderRadius: BorderRadius.circular(28),
+                              border: Border.all(color: colors.border),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _primaryColor.withOpacity(0.15),
+                                  color: _primaryColor.withValues(alpha: 0.12),
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
                                 ),
@@ -214,22 +220,21 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                                 ),
                                 const SizedBox(height: 20),
                                 Text(
-                                  'Învățăm numerele\ncu Pixy!',
+                                  NumbersMission.introTitle,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.alata(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF222222),
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Ajută-l pe Pixy să recunoască numerele de la 1 la 5! '
-                                  'Mai întâi numără obiectele, apoi desenează cifrele.',
+                                  NumbersMission.introBody,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.alata(
                                     fontSize: 14,
-                                    color: const Color(0xFF8A8A8F),
+                                    color: colors.textSecondary,
                                     height: 1.6,
                                   ),
                                 ),
@@ -248,9 +253,9 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                             runSpacing: 12,
                             alignment: WrapAlignment.center,
                             children: [
-                              _buildFeaturePill(Icons.calculate_rounded, 'Numere 1-5'),
-                              _buildFeaturePill(Icons.draw_rounded, 'Desenează'),
-                              _buildFeaturePill(Icons.auto_awesome, '3 Nivele AI'),
+                              _buildFeaturePill(Icons.calculate_rounded, NumbersMission.featureNumbers),
+                              _buildFeaturePill(Icons.draw_rounded, NumbersMission.featureDraw),
+                              _buildFeaturePill(Icons.auto_awesome, NumbersMission.featureLevels),
                             ],
                           ),
                         ),
@@ -269,7 +274,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _primaryColor.withOpacity(0.4),
+                                  color: _primaryColor.withValues(alpha: 0.4),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -289,7 +294,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'ÎNCEPE AVENTURA',
+                                    NumbersMission.startAdventure,
                                     style: GoogleFonts.alata(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -301,7 +306,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                                   Container(
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -334,6 +339,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
   // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildCompletionScreen(NumbersState state) {
+    final colors = context.appColors;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -358,7 +364,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                   FadeInWidget(
                     delay: const Duration(milliseconds: 400),
                     child: Text(
-                      'Felicitări!',
+                      NumbersMission.completionCongrats,
                       style: GoogleFonts.alata(
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
@@ -372,16 +378,16 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                     child: Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
                         children: [
                           Text(
-                            'Pixy a învățat numerele!',
+                            NumbersMission.completionTitle,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.alata(
                               fontSize: 20,
@@ -391,12 +397,11 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Mulțumesc! Acum recunosc mai bine numerele! 🌟\n\n'
-                            'AI-ul învață bine atunci când oamenii\nsunt atenți și răbdători.',
+                            NumbersMission.completionBody,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.alata(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               height: 1.6,
                             ),
                           ),
@@ -411,11 +416,11 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildLevelBadge('🐣', 'Junior', true),
+                        _buildLevelBadge('🐣', NumbersMission.badgeJunior, true),
                         const SizedBox(width: 12),
-                        _buildLevelBadge('📚', 'Student', true),
+                        _buildLevelBadge('📚', NumbersMission.badgeStudent, true),
                         const SizedBox(width: 12),
-                        _buildLevelBadge('🌟', 'Expert', true),
+                        _buildLevelBadge('🌟', NumbersMission.badgeExpert, true),
                       ],
                     ),
                   ),
@@ -428,7 +433,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                         onPressed: () => Navigator.of(context).pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: _primaryDark,
+                          foregroundColor: colors.textPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
@@ -436,7 +441,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                           elevation: 0,
                         ),
                         child: Text(
-                          'ÎNAPOI LA MISIUNI',
+                          NumbersMission.backToMissionsCaps,
                           style: GoogleFonts.alata(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
@@ -468,7 +473,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -480,7 +485,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -490,7 +495,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
                     color: Colors.white, size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  'Numerele',
+                  NumbersMission.appBarTitle,
                   style: GoogleFonts.alata(
                     color: Colors.white,
                     fontSize: 13,
@@ -509,10 +514,10 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.08),
+        color: _primaryColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _primaryColor.withOpacity(0.15),
+          color: _primaryColor.withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -538,10 +543,10 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: unlocked ? Colors.white.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+        color: unlocked ? Colors.white.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(unlocked ? 0.4 : 0.1),
+          color: Colors.white.withValues(alpha: unlocked ? 0.4 : 0.1),
         ),
       ),
       child: Column(
@@ -552,7 +557,7 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
             label,
             style: GoogleFonts.alata(
               fontSize: 11,
-              color: Colors.white.withOpacity(unlocked ? 1.0 : 0.4),
+              color: Colors.white.withValues(alpha: unlocked ? 1.0 : 0.4),
               fontWeight: FontWeight.w600,
             ),
           ),

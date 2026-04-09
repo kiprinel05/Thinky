@@ -56,8 +56,12 @@ class VocabularyRepository {
     }
   }
 
-  /// Build full image URL from relative path
-  static String getImageUrl(String relativePath) {
-    return '${AppConfig.apiBaseUrl}$relativePath';
+  /// Resolves API-relative paths, absolute URLs, or bundled `assets/...` paths.
+  static String getImageUrl(String path) {
+    final p = path.trim();
+    if (p.isEmpty) return p;
+    if (p.startsWith('http://') || p.startsWith('https://')) return p;
+    if (p.startsWith('assets/')) return p;
+    return '${AppConfig.apiBaseUrl}$p';
   }
 }
