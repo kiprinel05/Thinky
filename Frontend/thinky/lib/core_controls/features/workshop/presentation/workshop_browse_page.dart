@@ -11,6 +11,7 @@ import 'package:thinky/core_controls/services/auth_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 
 class WorkshopBrowsePage extends StatefulWidget {
   const WorkshopBrowsePage({super.key});
@@ -366,9 +367,7 @@ class _WorkshopBrowsePageState extends State<WorkshopBrowsePage> {
   Widget _buildBody() {
     final colors = context.appColors;
     if (_isLoading && _missions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryPurple),
-      );
+      return AppContentSkeletons.workshopMissionList(context);
     }
 
     if (_error != null && _missions.isEmpty) {

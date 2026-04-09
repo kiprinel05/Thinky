@@ -6,10 +6,30 @@ import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
+import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/core/errors/error_logger.dart';
+
+/// Per-mission breakdown when API provides it (future / optional).
+/// Backend contract idea: `mission_points: [{ "mission_id": "quiz", "points": 12.5 }, ...]`.
+class LeaderboardMissionPointsModel {
+  final String missionId;
+  final double points;
+
+  const LeaderboardMissionPointsModel({
+    required this.missionId,
+    required this.points,
+  });
+
+  factory LeaderboardMissionPointsModel.fromJson(Map<String, dynamic> json) {
+    return LeaderboardMissionPointsModel(
+      missionId: json['mission_id'] as String? ?? json['missionId'] as String? ?? '',
+      points: (json['points'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
 
 class LeaderboardEntryModel {
   final int userId;
@@ -17,6 +37,8 @@ class LeaderboardEntryModel {
   final double points;
   final int missionsCompleted;
   final int workshopMissionsCompleted;
+  /// Present when API sends `mission_points` (or `missionPoints`) per row.
+  final List<LeaderboardMissionPointsModel> missionPoints;
 
   LeaderboardEntryModel({
     required this.userId,
@@ -24,15 +46,26 @@ class LeaderboardEntryModel {
     required this.points,
     required this.missionsCompleted,
     required this.workshopMissionsCompleted,
+    this.missionPoints = const [],
   });
 
   factory LeaderboardEntryModel.fromJson(Map<String, dynamic> json) {
+    final raw = json['mission_points'] ?? json['missionPoints'];
+    List<LeaderboardMissionPointsModel> mp = const [];
+    if (raw is List) {
+      mp = raw
+          .map((e) => LeaderboardMissionPointsModel.fromJson(
+                e as Map<String, dynamic>,
+              ))
+          .toList();
+    }
     return LeaderboardEntryModel(
       userId: json['user_id'] as int,
       username: json['username'] as String,
       points: (json['points'] as num).toDouble(),
       missionsCompleted: json['missions_completed'] as int,
       workshopMissionsCompleted: json['workshop_missions_completed'] as int,
+      missionPoints: mp,
     );
   }
 }
@@ -224,44 +257,10 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
     );
   }
 
-  Widget _buildLeaderboardSkeleton(AppColorsExtension colors) {
-    Widget row() => Container(
-          height: 64,
-          margin: const EdgeInsets.only(bottom: AppDimens.sm),
-          decoration: BoxDecoration(
-            color: colors.shimmer,
-            borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-          ),
-        );
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppDimens.lg,
-        AppDimens.md,
-        AppDimens.lg,
-        AppDimens.xxl,
-      ),
-      children: [
-        Container(
-          height: 140,
-          decoration: BoxDecoration(
-            color: colors.shimmer,
-            borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-          ),
-        ),
-        const SizedBox(height: AppDimens.lg),
-        row(),
-        row(),
-        row(),
-        row(),
-        row(),
-      ],
-    );
-  }
-
   Widget _buildBody() {
     final colors = context.appColors;
     if (_isLoading) {
-      return _buildLeaderboardSkeleton(colors);
+      return AppContentSkeletons.leaderboardList(context);
     }
 
     if (_error != null) {
@@ -507,8 +506,8 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      color.withOpacity(0.9),
-                      color.withOpacity(0.6),
+                      color.withValues(alpha: 0.9),
+                      color.withValues(alpha: 0.6),
                     ],
                   ),
                 ),
@@ -618,6 +617,22 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                       color: colors.textSecondary,
                     ),
                   ),
+                  if (entry.missionPoints.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      entry.missionPoints
+                          .map(
+                            (m) =>
+                                '${MissionTitles.forPath(m.missionId, m.missionId)}: ${m.points.toStringAsFixed(0)} ${LeaderboardTexts.ptsSuffix}',
+                          )
+                          .join(' · '),
+                      style: GoogleFonts.alata(
+                        fontSize: 11,
+                        height: 1.35,
+                        color: colors.textHint,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

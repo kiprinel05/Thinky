@@ -407,7 +407,7 @@
         "missionsLabel": "misiuni",
         "workshopLabel": "atelier",
         "pointsGuideTitle": "Cum funcționează punctajul",
-        "pointsGuideBody": "Primești puncte pentru fiecare misiune integrată pe care o termini. Misiunile din Atelier pe care le finalizezi adaugă puncte bonus când opțiunea „Include misiunile din Atelier” este activă. Totalul din clasament combină ambele surse ca să te poți compara cu ceilalți.",
+        "pointsGuideBody": "Primești puncte pentru fiecare misiune integrată pe care o termini. Misiunile din Atelier pe care le finalizezi adaugă puncte bonus când opțiunea „Include misiunile din Atelier” este activă. Totalul din clasament combină ambele surse ca să te poți compara cu ceilalți. Dacă serverul trimite puncte pe misiune pentru un jucător, apare un rezumat sub nume; altfel totalul rămâne suma tuturor misiunilor.",
         "ptsSuffix": "pct"
     },
     "MissionTitles": {

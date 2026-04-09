@@ -10,6 +10,7 @@ import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import '../controllers/pixy_learns_controller.dart';
 import '../controllers/pixy_learns_state.dart';
+import '../../data/pixy_learns_image_url.dart';
 import '../../domain/pixy_learns_models.dart';
 
 /// Main page for Pixy Learns mission
@@ -101,7 +102,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: const CircularProgressIndicator(
@@ -178,7 +179,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                             ),
                             child: ScaleTransition(
                               scale: _pixyScaleAnimation,
@@ -200,11 +201,12 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.appColors.cardColor,
                               borderRadius: BorderRadius.circular(28),
+                              border: Border.all(color: context.appColors.border),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _primaryColor.withOpacity(0.15),
+                                  color: _primaryColor.withValues(alpha: 0.15),
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
                                 ),
@@ -282,7 +284,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _primaryColor.withOpacity(0.4),
+                                  color: _primaryColor.withValues(alpha: 0.4),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -314,7 +316,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                   Container(
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -346,10 +348,10 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.08),
+        color: _primaryColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: _primaryColor.withOpacity(0.15),
+          color: _primaryColor.withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -437,7 +439,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
@@ -448,7 +450,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -477,10 +479,10 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -491,7 +493,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
             children: [
               Row(
                 children: [
-                  Icon(Icons.auto_graph_rounded, color: Colors.white.withOpacity(0.9), size: 18),
+                  Icon(Icons.auto_graph_rounded, color: Colors.white.withValues(alpha: 0.9), size: 18),
                   const SizedBox(width: 8),
                   Text(
                     PixyLearnsTexts.learningProgress,
@@ -528,7 +530,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                 Container(
                   height: 10,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -545,7 +547,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           blurRadius: 8,
                           spreadRadius: 1,
                         ),
@@ -562,17 +564,20 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
   }
 
   Widget _buildInstructions() {
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FadeInWidget(
       delay: const Duration(milliseconds: 300),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardColor,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -583,7 +588,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _primaryColor.withOpacity(0.1),
+                color: _primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: const Icon(
@@ -602,7 +607,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                     style: GoogleFonts.alata(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF222222),
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -610,7 +615,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                     PixyLearnsTexts.teachPixyHint,
                     style: GoogleFonts.alata(
                       fontSize: 13,
-                      color: const Color(0xFF8A8A8F),
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -648,25 +653,27 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     PixyLearnsController controller,
   ) {
     final bool isLabeled = selectedLabel != null;
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return ScaleInWidget(
       delay: Duration(milliseconds: 400 + (index * 80)),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardColor,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: isLabeled 
-                  ? _primaryColor.withOpacity(0.15) 
-                  : Colors.black.withOpacity(0.06),
+                  ? _primaryColor.withValues(alpha: 0.15) 
+                  : Colors.black.withValues(alpha: isDark ? 0.28 : 0.06),
               blurRadius: isLabeled ? 20 : 15,
               offset: const Offset(0, 6),
             ),
           ],
           border: isLabeled
-              ? Border.all(color: _primaryColor.withOpacity(0.3), width: 2)
-              : null,
+              ? Border.all(color: _primaryColor.withValues(alpha: 0.3), width: 2)
+              : Border.all(color: colors.border),
         ),
         child: Column(
           children: [
@@ -676,7 +683,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                 width: double.infinity,
                 margin: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FC),
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Stack(
@@ -684,7 +691,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                     ClipRRect(
                       borderRadius: BorderRadius.circular(18),
                       child: Center(
-                        child: _buildImageDisplay(image.url),
+                        child: _buildImageDisplay(context, image.url),
                       ),
                     ),
                     if (isLabeled)
@@ -739,8 +746,33 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     );
   }
 
-  Widget _buildImageDisplay(String imageUrl) {
-    // Check if it's an emoji fallback (offline mode)
+  Widget _buildImageLoadFailure(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_not_supported_rounded,
+            size: 48,
+            color: colors.textHint,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            PixyLearnsTexts.imageUnavailable,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.alata(
+              fontSize: 11,
+              color: colors.textHint,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageDisplay(BuildContext context, String imageUrl) {
     if (imageUrl.startsWith('emoji:')) {
       final emoji = imageUrl.substring(6);
       return Container(
@@ -753,18 +785,22 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
         ),
       );
     }
-    
-    // Load from local assets (e.g. assets/missions/pixy_learns/images/cat1.png)
+
     if (imageUrl.startsWith('assets/')) {
       return Image.asset(
         imageUrl,
         fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildImageLoadFailure(context),
       );
     }
-    
-    // Load network image from URL
+
+    final resolved = PixyLearnsImageUrl.resolve(imageUrl);
+    if (resolved.isEmpty) {
+      return _buildImageLoadFailure(context);
+    }
+
     return Image.network(
-      imageUrl,
+      resolved,
       fit: BoxFit.cover,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -779,34 +815,12 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
           ),
         );
       },
-      errorBuilder: (context, error, stackTrace) {
-        // Fallback to emoji on image load error
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.image_not_supported_rounded,
-                size: 48,
-                color: Color(0xFFB7BAC3),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                PixyLearnsTexts.imageUnavailable,
-                style: GoogleFonts.alata(
-                  fontSize: 11,
-                  color: const Color(0xFFB7BAC3),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      errorBuilder: (_, __, ___) => _buildImageLoadFailure(context),
     );
   }
 
   Widget _buildLabelButton(String label, String value, bool isSelected, VoidCallback onTap) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -817,12 +831,15 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
           gradient: isSelected
               ? const LinearGradient(colors: [_primaryColor, _primaryLightColor])
               : null,
-          color: isSelected ? null : const Color(0xFFF2F3F7),
+          color: isSelected ? null : colors.surface,
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : colors.border,
+          ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _primaryColor.withOpacity(0.3),
+                    color: _primaryColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -835,7 +852,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
           style: GoogleFonts.alata(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : const Color(0xFF60646D),
+            color: isSelected ? Colors.white : colors.textSecondary,
           ),
         ),
       ),
@@ -844,6 +861,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
 
   Widget _buildSubmitButton(PixyLearnsState state, PixyLearnsController controller) {
     final allLabeled = state.allLabeled;
+    final colors = context.appColors;
     
     return FadeInWidget(
       delay: const Duration(milliseconds: 500),
@@ -855,11 +873,12 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
           gradient: allLabeled
               ? const LinearGradient(colors: [_primaryColor, _primaryLightColor])
               : null,
-          color: allLabeled ? null : const Color(0xFFE0E2EA),
+          color: allLabeled ? null : colors.inputFill,
+          border: Border.all(color: allLabeled ? Colors.transparent : colors.border),
           boxShadow: allLabeled
               ? [
                   BoxShadow(
-                    color: _primaryColor.withOpacity(0.4),
+                    color: _primaryColor.withValues(alpha: 0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -888,14 +907,14 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                   children: [
                     Icon(
                       Icons.auto_awesome,
-                      color: allLabeled ? Colors.white : const Color(0xFFA3A6AD),
+                      color: allLabeled ? Colors.white : colors.textHint,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       PixyLearnsTexts.teachPixyCta,
                       style: GoogleFonts.alata(
-                        color: allLabeled ? Colors.white : const Color(0xFFA3A6AD),
+                        color: allLabeled ? Colors.white : colors.textHint,
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                         letterSpacing: 0.5,
@@ -914,15 +933,18 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
 
   Widget _buildCompletionScreen(PixyLearnsState state) {
     final result = state.result;
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomGradient = isDark ? AppColors.darkBackground : const Color(0xFFF5F6FA);
     
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [_primaryColor, _primaryLightColor, Color(0xFFF5F6FA)],
-            stops: [0.0, 0.35, 1.0],
+            colors: [_primaryColor, _primaryLightColor, bottomGradient],
+            stops: const [0.0, 0.35, 1.0],
           ),
         ),
         child: SafeArea(
@@ -978,11 +1000,12 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                           width: double.infinity,
                           padding: const EdgeInsets.all(28),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: colors.cardColor,
                             borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: colors.border),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                                 blurRadius: 30,
                                 offset: const Offset(0, 15),
                               ),
@@ -999,7 +1022,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFFFFD700).withOpacity(0.4),
+                                      color: const Color(0xFFFFD700).withValues(alpha: 0.4),
                                       blurRadius: 15,
                                       offset: const Offset(0, 8),
                                     ),
@@ -1020,7 +1043,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                 style: GoogleFonts.alata(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF222222),
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -1030,7 +1053,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _primaryColor.withOpacity(0.08),
+                                  color: _primaryColor.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Row(
@@ -1064,15 +1087,16 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         child: Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.7),
+                            color: colors.cardColor.withValues(alpha: isDark ? 0.95 : 0.92),
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: colors.border.withValues(alpha: 0.6)),
                           ),
                           child: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: _primaryColor.withOpacity(0.1),
+                                  color: _primaryColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -1087,7 +1111,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                   PixyLearnsTexts.aiExplanation,
                                   style: GoogleFonts.alata(
                                     fontSize: 14,
-                                    color: const Color(0xFF60646D),
+                                    color: colors.textSecondary,
                                     height: 1.5,
                                   ),
                                 ),
@@ -1111,7 +1135,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: _primaryColor.withOpacity(0.4),
+                                color: _primaryColor.withValues(alpha: 0.4),
                                 blurRadius: 20,
                                 offset: const Offset(0, 10),
                               ),
@@ -1143,7 +1167,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                                 Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(

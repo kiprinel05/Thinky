@@ -1,0 +1,52 @@
+{
+  "1": {
+    "question": "What is Artificial Intelligence, really?",
+    "options": {
+      "1": "An invisible robot that lives inside your phone.",
+      "2": "A kind of magic that guesses what you think.",
+      "3": "A smart computer program that can learn to do new things.",
+      "4": "A very powerful battery."
+    },
+    "explanation": "Exactly! AI is like a very fast student. It is a set of instructions (code) written by people, which can learn from examples."
+  },
+  "2": {
+    "question": "How does Artificial Intelligence learn to recognize a cat in a picture?",
+    "options": {
+      "1": "It looks at thousands of pictures of cats until it understands what a cat looks like.",
+      "2": "It asks another cat.",
+      "3": "It just guesses and gets lucky every time.",
+      "4": "It has real eyes and sees exactly like we do."
+    },
+    "explanation": "Correct! This is called \"training\". The more examples (data) it sees, the smarter it becomes."
+  },
+  "3": {
+    "question": "Where have you already met Artificial Intelligence, maybe without knowing?",
+    "options": {
+      "1": "When you tie your shoelaces.",
+      "2": "When you eat cereal in the morning.",
+      "3": "When YouTube or TikTok recommends a video you like.",
+      "4": "When you write with a pen on paper."
+    },
+    "explanation": "Bingo! Recommendation algorithms are AI. They \"learn\" what you like and try to show you more similar things."
+  },
+  "4": {
+    "question": "What can Artificial Intelligence NOT do (yet)?",
+    "options": {
+      "1": "Play chess better than a human.",
+      "2": "Write a poem or a short story.",
+      "3": "Draw a colorful picture.",
+      "4": "Have real feelings (to be happy or sad)."
+    },
+    "explanation": "Very good! AI can imitate emotions, but it doesn’t feel anything. It has no heart or consciousness; it is just math and code."
+  },
+  "5": {
+    "question": "What is the best way to use Artificial Intelligence?",
+    "options": {
+      "1": "Let it do all our homework so we don’t have to learn anything.",
+      "2": "Be afraid of it and shut it down.",
+      "3": "Use it as a helper (copilot) to be more creative and faster.",
+      "4": "Let it rule the world by itself."
+    },
+    "explanation": "Great attitude! AI is a tool. The best results happen when humans and AI work together as a team."
+  }
+}

@@ -19,6 +19,7 @@ import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/core_controls/network/mission_network_guard.dart';
 import 'package:thinky/shared_controls/assets/app_assets.dart';
+import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 
 class MissionsMenuPage extends ConsumerStatefulWidget {
   const MissionsMenuPage({super.key});
@@ -177,7 +178,7 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
                   const SizedBox(height: 24),
                   _selectedTab == 0
                       ? (_isLoading
-                          ? _buildMissionsGridSkeleton(context)
+                          ? AppContentSkeletons.missionsCatalogGrid(context)
                           : _buildMissionsGrid(context))
                       : _buildWorkshopGrid(),
                   const SizedBox(height: 24),
@@ -186,44 +187,6 @@ class _MissionsMenuPageState extends ConsumerState<MissionsMenuPage>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildMissionsGridSkeleton(BuildContext context) {
-    final colors = context.appColors;
-    Widget skel(double h) => Container(
-          height: h,
-          decoration: BoxDecoration(
-            color: colors.shimmer,
-            borderRadius: BorderRadius.circular(20),
-          ),
-        );
-    return SizedBox(
-      height: 420,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                skel(200),
-                const SizedBox(height: 16),
-                skel(180),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              children: [
-                skel(220),
-                const SizedBox(height: 16),
-                skel(160),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -90,4 +90,7 @@ abstract final class AppAssets {
 
   /// Word Match / vocabulary mission images (`assets/missions/vocabulary/`).
   static String vocabularyImage(String filename) => '$_missions/vocabulary/$filename';
+
+  /// Pixy Learns (Apple vs Cat) training images under `assets/missions/pixy_learns/images/`.
+  static String pixyLearnsImage(String filename) => '$_missions/pixy_learns/images/$filename';
 }

@@ -12,6 +12,7 @@ import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart';
 import 'package:thinky/core_controls/routing/route_names.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -108,9 +109,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       backgroundColor: colors.background,
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryPurple),
-            )
+          ? AppContentSkeletons.profilePage(context)
           : RefreshIndicator(
               color: AppColors.primaryPurple,
               onRefresh: _loadUserData,

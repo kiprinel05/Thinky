@@ -14,6 +14,7 @@ import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
+import 'package:thinky/shared_controls/widgets/states/app_content_skeletons.dart';
 
 // We might need to import these if we extract them or just define here
 // import 'quiz_result_page.dart'; // We will inline or use existing
@@ -23,6 +24,11 @@ class QuizPageNew extends BasePage {
 
   @override
   String? get title => Quiz.title;
+
+  @override
+  Widget buildLoading(BuildContext context) {
+    return AppContentSkeletons.quizPageBody(context);
+  }
 
   // Specific implementation for Quiz - we want custom background handling perhaps?
   // BasePage provides Scaffold. The original page had a specific gradient background for header.
@@ -181,9 +187,7 @@ class _QuizContentState extends ConsumerState<_QuizContent>
         if (widget.state.isSubmitting)
           Container(
             color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryPurple),
-            ),
+            child: AppContentSkeletons.quizSubmittingOverlay(context),
           ),
       ],
     );

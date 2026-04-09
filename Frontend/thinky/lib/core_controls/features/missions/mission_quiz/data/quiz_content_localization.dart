@@ -4,29 +4,43 @@ import 'package:flutter/services.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'package:thinky/core_controls/services/text_service.dart';
 
-/// Romanian copy for quiz items (API returns English). Keys match [Question.id].
+/// Localized quiz copy. Keys match [Question.id].
+/// - `quiz_ro.json` — Romanian (API is English).
+/// - `quiz_en.json` — mirrors [Backend/api/routers/quiz_router.py] `QUIZ_QUESTIONS` for 100% bundle-based EN or offline parity.
 class QuizContentLocalization {
   QuizContentLocalization._();
 
-  static const _assetPath = 'assets/i18n/quiz_ro.json';
+  static const _roPath = 'assets/i18n/quiz_ro.json';
+  static const _enPath = 'assets/i18n/quiz_en.json';
 
-  static Map<String, dynamic>? _cache;
+  static Map<String, dynamic>? _roCache;
+  static Map<String, dynamic>? _enCache;
 
-  static Future<void> _ensureLoaded() async {
-    if (_cache != null) return;
+  static Future<Map<String, dynamic>> _loadMap(String assetPath) async {
     try {
-      final raw = await rootBundle.loadString(_assetPath);
-      _cache = jsonDecode(raw) as Map<String, dynamic>;
+      final raw = await rootBundle.loadString(assetPath);
+      return jsonDecode(raw) as Map<String, dynamic>;
     } catch (_) {
-      _cache = {};
+      return {};
     }
   }
 
-  /// Returns a new list with RO text applied when locale is `ro` and overrides exist.
+  static Future<void> _ensureLoaded(String languageCode) async {
+    if (languageCode == 'ro') {
+      _roCache ??= await _loadMap(_roPath);
+      return;
+    }
+    if (languageCode == 'en') {
+      _enCache ??= await _loadMap(_enPath);
+    }
+  }
+
+  /// Applies `quiz_ro.json` or `quiz_en.json` when the locale matches and the bundle has entries.
   static Future<List<Question>> applyLocale(List<Question> questions) async {
-    if (TextService.currentLanguageCode != 'ro') return questions;
-    await _ensureLoaded();
-    final map = _cache;
+    final code = TextService.currentLanguageCode;
+    if (code != 'ro' && code != 'en') return questions;
+    await _ensureLoaded(code);
+    final map = code == 'ro' ? _roCache : _enCache;
     if (map == null || map.isEmpty) return questions;
 
     return questions.map((q) {

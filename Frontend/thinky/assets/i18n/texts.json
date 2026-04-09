@@ -407,7 +407,7 @@
         "missionsLabel": "missions",
         "workshopLabel": "workshop",
         "pointsGuideTitle": "How scoring works",
-        "pointsGuideBody": "You earn points for each built-in mission you complete. Finished Workshop missions add bonus points when “Include Workshop missions” is on. The leaderboard total combines both so you can compare with other learners.",
+        "pointsGuideBody": "You earn points for each built-in mission you complete. Finished Workshop missions add bonus points when “Include Workshop missions” is on. The leaderboard total combines both so you can compare with other learners. If the API sends per-mission points for a player, a short breakdown appears under their name; otherwise the total is still the sum of all missions.",
         "ptsSuffix": "pts"
     },
     "MissionTitles": {
