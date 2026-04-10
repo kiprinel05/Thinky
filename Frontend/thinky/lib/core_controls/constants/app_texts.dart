@@ -105,10 +105,40 @@ class Quiz {
   static String get resultGood => TextService.getString('Quiz', 'resultGood');
   static String get resultKeepLearning => TextService.getString('Quiz', 'resultKeepLearning');
   static String get resultHelperText => TextService.getString('Quiz', 'resultHelperText');
+  static String get resultHelperTextHigh =>
+      TextService.getString('Quiz', 'resultHelperTextHigh');
+  static String get resultHelperTextMid =>
+      TextService.getString('Quiz', 'resultHelperTextMid');
+  static String get resultHelperTextLow =>
+      TextService.getString('Quiz', 'resultHelperTextLow');
   static String get resultOutOf => TextService.getString('Quiz', 'resultOutOf');
   static String get resultCorrect => TextService.getString('Quiz', 'resultCorrect');
   static String get showDetailedResults => TextService.getString('Quiz', 'showDetailedResults');
   static String get continueToMissions => TextService.getString('Quiz', 'continueToMissions');
+  static String get missionHintLine => TextService.getString('Quiz', 'missionHintLine');
+  static String get reviewTitle => TextService.getString('Quiz', 'reviewTitle');
+  static String get reviewSubtitle => TextService.getString('Quiz', 'reviewSubtitle');
+  static String get yourAnswerLabel => TextService.getString('Quiz', 'yourAnswerLabel');
+  static String get correctAnswerLabel => TextService.getString('Quiz', 'correctAnswerLabel');
+  static String get backToSummary => TextService.getString('Quiz', 'backToSummary');
+  static String get notAnsweredLabel => TextService.getString('Quiz', 'notAnsweredLabel');
+  static String get reviewCorrectBadge =>
+      TextService.getString('Quiz', 'reviewCorrectBadge');
+  static String get reviewMissedBadge =>
+      TextService.getString('Quiz', 'reviewMissedBadge');
+  static String get startNextMission =>
+      TextService.getString('Quiz', 'startNextMission');
+  static String get badgeUnlockedSummary =>
+      TextService.getString('Quiz', 'badgeUnlockedSummary');
+  static String get summaryCorrectRow =>
+      TextService.getString('Quiz', 'summaryCorrectRow');
+  static String get summaryWrongRow =>
+      TextService.getString('Quiz', 'summaryWrongRow');
+  static String get keepImprovingSummary =>
+      TextService.getString('Quiz', 'keepImprovingSummary');
+
+  static String xpEarnedLine(int points) =>
+      TextService.getString('Quiz', 'xpEarned').replaceAll('{points}', '$points');
 }
 
 /// Accessors for 'Animals' texts

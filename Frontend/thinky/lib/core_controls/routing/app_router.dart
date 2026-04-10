@@ -12,7 +12,7 @@ import 'package:thinky/core_controls/features/auth/presentation/profile_page.dar
 import 'package:thinky/core_controls/features/navigation/main_shell_page.dart';
 import 'package:thinky/core_controls/features/missions/presentation/missions_menu_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_pixy_learns/presentation/pages/pixy_learns_page.dart';
-import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page_new.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/pages/quiz_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/draw_shapes_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/presentation/color_circle_page.dart';
 import 'package:thinky/core_controls/features/missions/mission_animals/presentation/pages/animals_mission_page.dart';
@@ -172,7 +172,7 @@ class AppRouter {
     // Quiz
     GoRoute(
       path: RouteNames.quiz,
-      builder: (context, state) => const QuizPageNew(),
+      builder: (context, state) => const QuizPage(),
     ),
 
     // Drawing Mission

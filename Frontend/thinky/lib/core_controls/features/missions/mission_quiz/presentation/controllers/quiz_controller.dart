@@ -7,6 +7,7 @@ import '../../data/quiz_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/domain/quiz_models.dart';
 import 'package:thinky/core_controls/features/missions/mission_quiz/data/quiz_content_localization.dart';
 import 'quiz_state.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/utils/quiz_feedback_text.dart';
 
 // Import local storage provider for repository DI
 import 'package:thinky/core_controls/storage/storage_provider.dart';
@@ -43,6 +44,7 @@ class QuizController extends BaseAsyncController<QuizState> {
         currentQuestionIndex: 0,
         selectedAnswers: {},
         quizResult: null,
+        showAnswerReview: false,
       ),
       errorState: (message) => QuizState.error(message),
     );
@@ -55,7 +57,6 @@ class QuizController extends BaseAsyncController<QuizState> {
     if (currentState.questions.isEmpty) return;
     
     final currentIndex = currentState.currentQuestionIndex;
-    final currentQuestion = currentState.questions[currentIndex];
 
     // Update selected answer map
     final newSelectedAnswers = Map<int, int>.from(currentState.selectedAnswers);
@@ -79,11 +80,23 @@ class QuizController extends BaseAsyncController<QuizState> {
     
     final isCorrect = selectedAnswerId == question.correctAnswerId;
     
+    final body = quizFeedbackBodyForDisplay(
+      question.explanation,
+      isCorrect: isCorrect,
+    );
     safeUpdate(state.copyWith(
       showFeedback: true,
       isLastAnswerCorrect: isCorrect,
-      feedbackText: question.explanation,
+      feedbackText: body,
     ));
+  }
+
+  void openAnswerReview() {
+    safeUpdate(state.copyWith(showAnswerReview: true));
+  }
+
+  void closeAnswerReview() {
+    safeUpdate(state.copyWith(showAnswerReview: false));
   }
 
   /// Hide feedback and proceed

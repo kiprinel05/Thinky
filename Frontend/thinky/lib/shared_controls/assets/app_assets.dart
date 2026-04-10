@@ -64,6 +64,8 @@ abstract final class AppAssets {
 
   static const String missionQuizCard = '$_missions/quiz/quiz.png';
   static const String missionQuizHappy = '$_missions/quiz/happy.png';
+  /// Professor character (full asset; UI clips to show head above cards).
+  static const String missionQuizProfessor = '$_missions/quiz/professor.png';
 
   /// List / card thumbnails (e.g. offline API fallback). Files live in `assets/missions/catalog/`.
   static const String missionCatalogPixyLearns =

@@ -17,6 +17,8 @@ class QuizState extends BaseState {
   final bool showFeedback;
   final bool isLastAnswerCorrect;
   final String feedbackText;
+  /// After submit: full question-by-question review (vs. score summary).
+  final bool showAnswerReview;
 
   const QuizState({
     super.status = StateStatus.initial,
@@ -29,6 +31,7 @@ class QuizState extends BaseState {
     this.showFeedback = false,
     this.isLastAnswerCorrect = false,
     this.feedbackText = '',
+    this.showAnswerReview = false,
   });
 
   Question? get currentQuestion {
@@ -53,6 +56,7 @@ class QuizState extends BaseState {
     bool? showFeedback,
     bool? isLastAnswerCorrect,
     String? feedbackText,
+    bool? showAnswerReview,
   }) {
     return QuizState(
       status: status ?? this.status,
@@ -70,6 +74,7 @@ class QuizState extends BaseState {
       showFeedback: showFeedback ?? this.showFeedback,
       isLastAnswerCorrect: isLastAnswerCorrect ?? this.isLastAnswerCorrect,
       feedbackText: feedbackText ?? this.feedbackText,
+      showAnswerReview: showAnswerReview ?? this.showAnswerReview,
     );
   }
   
