@@ -104,8 +104,14 @@ class QuizService(BaseService[QuizResult, QuizResultResponse, QuizResultResponse
         score = correct_count
         percentage = (correct_count / total) * 100 if total > 0 else 0
         incorrect_count = total - correct_count
-        
-        # Save quiz result to database
+
+        if percentage >= 80:
+            xp_earned = 50
+        elif percentage >= 50:
+            xp_earned = 30
+        else:
+            xp_earned = 10
+
         quiz_result = QuizResult(
             user_id=user_id,
             quiz_type="introduction",
@@ -113,7 +119,8 @@ class QuizService(BaseService[QuizResult, QuizResultResponse, QuizResultResponse
             total_questions=total,
             percentage=percentage,
             correct_answers=correct_count,
-            incorrect_answers=incorrect_count
+            incorrect_answers=incorrect_count,
+            xp_earned=xp_earned,
         )
         
         self.repository.db.add(quiz_result)

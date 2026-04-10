@@ -19,6 +19,8 @@ class QuizState extends BaseState {
   final String feedbackText;
   /// After submit: full question-by-question review (vs. score summary).
   final bool showAnswerReview;
+  /// After submit: swipeable lesson cards with the professor.
+  final bool showLearning;
 
   const QuizState({
     super.status = StateStatus.initial,
@@ -32,6 +34,7 @@ class QuizState extends BaseState {
     this.isLastAnswerCorrect = false,
     this.feedbackText = '',
     this.showAnswerReview = false,
+    this.showLearning = false,
   });
 
   Question? get currentQuestion {
@@ -57,15 +60,11 @@ class QuizState extends BaseState {
     bool? isLastAnswerCorrect,
     String? feedbackText,
     bool? showAnswerReview,
+    bool? showLearning,
   }) {
     return QuizState(
       status: status ?? this.status,
-      errorMessage: errorMessage, // Nullable to clear error if passed null? No, copyWith semantics usually require helper or nullable wrapper.
-      // BaseState errorMessage is String?. 
-      // If I want to clear it, I should allow passing null.
-      // Here: errorMessage ?? this.errorMessage means if passed null, keep existing.
-      // To strictly clear, I usually use a separate flag or specific method. 
-      // But for simple "setError" BaseController handles it.
+      errorMessage: errorMessage,
       questions: questions ?? this.questions,
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       selectedAnswers: selectedAnswers ?? this.selectedAnswers,
@@ -75,6 +74,7 @@ class QuizState extends BaseState {
       isLastAnswerCorrect: isLastAnswerCorrect ?? this.isLastAnswerCorrect,
       feedbackText: feedbackText ?? this.feedbackText,
       showAnswerReview: showAnswerReview ?? this.showAnswerReview,
+      showLearning: showLearning ?? this.showLearning,
     );
   }
   

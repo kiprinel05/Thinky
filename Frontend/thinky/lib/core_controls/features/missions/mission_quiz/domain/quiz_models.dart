@@ -54,6 +54,7 @@ class QuizResult {
   final double percentage;
   final int correctAnswers;
   final int incorrectAnswers;
+  final int xpEarned;
 
   const QuizResult({
     required this.score,
@@ -61,6 +62,7 @@ class QuizResult {
     required this.percentage,
     required this.correctAnswers,
     required this.incorrectAnswers,
+    required this.xpEarned,
   });
 
   factory QuizResult.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,7 @@ class QuizResult {
       percentage: (json['percentage'] as num).toDouble(),
       correctAnswers: json['correct_answers'] as int,
       incorrectAnswers: json['incorrect_answers'] as int,
+      xpEarned: (json['xp_earned'] as num?)?.toInt() ?? 0,
     );
   }
 }

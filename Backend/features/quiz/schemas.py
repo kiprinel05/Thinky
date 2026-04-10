@@ -29,5 +29,6 @@ class QuizResultResponse(BaseModel):
     percentage: float
     correct_answers: int
     incorrect_answers: int
-    
+    xp_earned: int
+
     model_config = ConfigDict(from_attributes=True)

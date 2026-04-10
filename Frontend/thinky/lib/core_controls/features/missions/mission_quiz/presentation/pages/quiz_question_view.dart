@@ -152,9 +152,9 @@ class _QuizQuestionViewState extends ConsumerState<QuizQuestionView>
                       alignment: Alignment.bottomCenter,
                       child: const QuizMascotBehindCard(
                         width: 140,
-                        slotHeight: 100,
+                        slotHeight: 140,
                         imageScale: 1.15,
-                        offsetY: -30,
+                        offsetY: -20,
                       ),
                     ),
                     Transform.translate(
@@ -584,8 +584,7 @@ class _QuizQuestionViewState extends ConsumerState<QuizQuestionView>
                           borderRadius: BorderRadius.circular(28),
                           child: Container(
                             width: maxW,
-                            padding:
-                                const EdgeInsets.fromLTRB(22, 36, 22, 22),
+                            padding: const EdgeInsets.fromLTRB(22, 36, 22, 22),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
@@ -598,8 +597,7 @@ class _QuizQuestionViewState extends ConsumerState<QuizQuestionView>
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color:
-                                        accentColor.withValues(alpha: 0.12),
+                                    color: accentColor.withValues(alpha: 0.12),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -635,8 +633,8 @@ class _QuizQuestionViewState extends ConsumerState<QuizQuestionView>
                                 SizedBox(
                                   width: double.infinity,
                                   child: FilledButton(
-                                    onPressed: widget
-                                        .controller.goToNextAfterFeedback,
+                                    onPressed:
+                                        widget.controller.goToNextAfterFeedback,
                                     style: FilledButton.styleFrom(
                                       backgroundColor: accentColor,
                                       foregroundColor: Colors.white,
@@ -644,8 +642,7 @@ class _QuizQuestionViewState extends ConsumerState<QuizQuestionView>
                                         vertical: 16,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
                                     child: Text(

@@ -45,6 +45,7 @@ class QuizController extends BaseAsyncController<QuizState> {
         selectedAnswers: {},
         quizResult: null,
         showAnswerReview: false,
+        showLearning: false,
       ),
       errorState: (message) => QuizState.error(message),
     );
@@ -97,6 +98,14 @@ class QuizController extends BaseAsyncController<QuizState> {
 
   void closeAnswerReview() {
     safeUpdate(state.copyWith(showAnswerReview: false));
+  }
+
+  void openLearning() {
+    safeUpdate(state.copyWith(showLearning: true));
+  }
+
+  void closeLearning() {
+    safeUpdate(state.copyWith(showLearning: false));
   }
 
   /// Hide feedback and proceed

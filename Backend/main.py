@@ -74,12 +74,17 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.on_event("startup")
 def startup_event():
     try:
-        # Create tables
         Base.metadata.create_all(bind=engine)
         print("[OK] Database tables verified/created")
     except Exception as e:
         print(f"[WARNING] Database initialization failed: {e}")
         traceback.print_exc()
+
+    try:
+        from migrations.add_xp_earned_to_quiz_results import migrate as migrate_xp
+        migrate_xp()
+    except Exception as e:
+        print(f"[WARNING] XP migration skipped: {e}")
 
 # Include Routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)

@@ -15,6 +15,7 @@ import '../controllers/quiz_controller.dart';
 import '../controllers/quiz_state.dart';
 import '../widgets/quiz_widgets.dart';
 import 'quiz_answer_review_view.dart';
+import 'quiz_learning_view.dart';
 
 class QuizResultView extends ConsumerStatefulWidget {
   final QuizState state;
@@ -55,6 +56,12 @@ class _QuizResultViewState extends ConsumerState<QuizResultView>
   @override
   Widget build(BuildContext context) {
     ref.watch(textRefreshProvider);
+
+    if (widget.state.showLearning) {
+      return QuizLearningView(
+        onDone: () => ref.read(quizStateProvider.notifier).closeLearning(),
+      );
+    }
 
     if (widget.state.showAnswerReview) {
       return QuizAnswerReviewView(
@@ -281,6 +288,44 @@ class _QuizResultViewState extends ConsumerState<QuizResultView>
                           ],
                         ),
                       ),
+                      const SizedBox(height: AppDimens.md),
+                      // XP earned badge
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 440),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimens.md,
+                            vertical: AppDimens.sm + 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                            borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.star_rounded,
+                                color: accentColor,
+                                size: 22,
+                              ),
+                              const SizedBox(width: AppDimens.sm),
+                              Text(
+                                Quiz.xpEarnedLine(result.xpEarned),
+                                style: GoogleFonts.alata(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: accentColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: AppDimens.xl),
                     ],
                   ),
@@ -296,8 +341,10 @@ class _QuizResultViewState extends ConsumerState<QuizResultView>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       PrimaryButton(
-                        text: Quiz.continueToMissions,
-                        onPressed: () => Navigator.of(context).pop(),
+                        text: Quiz.lessonButton,
+                        onPressed: () => ref
+                            .read(quizStateProvider.notifier)
+                            .openLearning(),
                       ),
                       const SizedBox(height: AppDimens.sm),
                       SizedBox(

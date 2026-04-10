@@ -13,6 +13,7 @@ class QuizResult(Base):
     percentage = Column(Float, nullable=False)
     correct_answers = Column(Integer, nullable=False)
     incorrect_answers = Column(Integer, nullable=False)
+    xp_earned = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):

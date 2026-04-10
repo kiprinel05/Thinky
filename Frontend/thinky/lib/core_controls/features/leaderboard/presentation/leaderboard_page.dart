@@ -16,17 +16,17 @@ import 'package:thinky/core/errors/error_logger.dart';
 /// Backend contract idea: `mission_points: [{ "mission_id": "quiz", "points": 12.5 }, ...]`.
 class LeaderboardMissionPointsModel {
   final String missionId;
-  final double points;
+  final double xp;
 
   const LeaderboardMissionPointsModel({
     required this.missionId,
-    required this.points,
+    required this.xp,
   });
 
   factory LeaderboardMissionPointsModel.fromJson(Map<String, dynamic> json) {
     return LeaderboardMissionPointsModel(
       missionId: json['mission_id'] as String? ?? json['missionId'] as String? ?? '',
-      points: (json['points'] as num?)?.toDouble() ?? 0,
+      xp: (json['xp'] as num?)?.toDouble() ?? 0,
     );
   }
 }
@@ -34,16 +34,15 @@ class LeaderboardMissionPointsModel {
 class LeaderboardEntryModel {
   final int userId;
   final String username;
-  final double points;
+  final double xp;
   final int missionsCompleted;
   final int workshopMissionsCompleted;
-  /// Present when API sends `mission_points` (or `missionPoints`) per row.
   final List<LeaderboardMissionPointsModel> missionPoints;
 
   LeaderboardEntryModel({
     required this.userId,
     required this.username,
-    required this.points,
+    required this.xp,
     required this.missionsCompleted,
     required this.workshopMissionsCompleted,
     this.missionPoints = const [],
@@ -62,7 +61,7 @@ class LeaderboardEntryModel {
     return LeaderboardEntryModel(
       userId: json['user_id'] as int,
       username: json['username'] as String,
-      points: (json['points'] as num).toDouble(),
+      xp: (json['xp'] as num).toDouble(),
       missionsCompleted: json['missions_completed'] as int,
       workshopMissionsCompleted: json['workshop_missions_completed'] as int,
       missionPoints: mp,
@@ -72,23 +71,23 @@ class LeaderboardEntryModel {
 
 class LeaderboardStatsModel {
   final int totalPlayers;
-  final double averagePoints;
-  final double maxPoints;
-  final double minPoints;
+  final double averageXp;
+  final double maxXp;
+  final double minXp;
 
   LeaderboardStatsModel({
     required this.totalPlayers,
-    required this.averagePoints,
-    required this.maxPoints,
-    required this.minPoints,
+    required this.averageXp,
+    required this.maxXp,
+    required this.minXp,
   });
 
   factory LeaderboardStatsModel.fromJson(Map<String, dynamic> json) {
     return LeaderboardStatsModel(
       totalPlayers: json['total_players'] as int,
-      averagePoints: (json['average_points'] as num).toDouble(),
-      maxPoints: (json['max_points'] as num).toDouble(),
-      minPoints: (json['min_points'] as num).toDouble(),
+      averageXp: (json['average_xp'] as num).toDouble(),
+      maxXp: (json['max_xp'] as num).toDouble(),
+      minXp: (json['min_xp'] as num).toDouble(),
     );
   }
 }
@@ -346,9 +345,9 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
   Widget _buildStatsCard(LeaderboardStatsModel stats) {
     final colors = context.appColors;
     final values = [
-      stats.minPoints,
-      stats.averagePoints,
-      stats.maxPoints,
+      stats.minXp,
+      stats.averageXp,
+      stats.maxXp,
     ];
 
     double maxValue =
@@ -380,7 +379,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(bottom: AppDimens.sm),
                 title: Text(
-                  LeaderboardTexts.pointsGuideTitle,
+                  LeaderboardTexts.xpGuideTitle,
                   style: GoogleFonts.alata(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -389,7 +388,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                 ),
                 children: [
                   Text(
-                    LeaderboardTexts.pointsGuideBody,
+                    LeaderboardTexts.xpGuideBody,
                     style: GoogleFonts.alata(
                       fontSize: 12,
                       height: 1.45,
@@ -409,8 +408,8 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                 ),
                 const SizedBox(width: AppDimens.sm),
                 _buildStatChip(
-                  label: LeaderboardTexts.avgPoints,
-                  value: stats.averagePoints.toStringAsFixed(1),
+                  label: LeaderboardTexts.avgXp,
+                  value: stats.averageXp.toStringAsFixed(1),
                   icon: Icons.star_half_rounded,
                 ),
               ],
@@ -423,21 +422,21 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                 children: [
                   _buildBar(
                     label: LeaderboardTexts.min,
-                    value: stats.minPoints,
+                    value: stats.minXp,
                     maxValue: maxValue,
                     color: colors.textHint,
                   ),
                   const SizedBox(width: AppDimens.sm),
                   _buildBar(
                     label: LeaderboardTexts.avg,
-                    value: stats.averagePoints,
+                    value: stats.averageXp,
                     maxValue: maxValue,
                     color: AppColors.primaryPurple,
                   ),
                   const SizedBox(width: AppDimens.sm),
                   _buildBar(
                     label: LeaderboardTexts.max,
-                    value: stats.maxPoints,
+                    value: stats.maxXp,
                     maxValue: maxValue,
                     color: const Color(0xFFFFA726),
                   ),
@@ -623,7 +622,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
                       entry.missionPoints
                           .map(
                             (m) =>
-                                '${MissionTitles.forPath(m.missionId, m.missionId)}: ${m.points.toStringAsFixed(0)} ${LeaderboardTexts.ptsSuffix}',
+                                '${MissionTitles.forPath(m.missionId, m.missionId)}: ${m.xp.toStringAsFixed(0)} ${LeaderboardTexts.xpSuffix}',
                           )
                           .join(' · '),
                       style: GoogleFonts.alata(
@@ -641,7 +640,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${entry.points.toStringAsFixed(0)} ${LeaderboardTexts.ptsSuffix}',
+                  '${entry.xp.toStringAsFixed(0)} ${LeaderboardTexts.xpSuffix}',
                   style: GoogleFonts.alata(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,

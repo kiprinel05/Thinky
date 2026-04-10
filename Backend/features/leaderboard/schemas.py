@@ -4,16 +4,16 @@ from pydantic import BaseModel
 
 
 class LeaderboardMissionPoints(BaseModel):
-    """Optional per-mission score for a user row (frontend shows a breakdown when present)."""
+    """Per-mission XP breakdown for a user row."""
 
     mission_id: str
-    points: float
+    xp: float
 
 
 class LeaderboardEntry(BaseModel):
     user_id: int
     username: str
-    points: float
+    xp: float
     missions_completed: int
     workshop_missions_completed: int
     mission_points: Optional[List[LeaderboardMissionPoints]] = None
@@ -21,12 +21,11 @@ class LeaderboardEntry(BaseModel):
 
 class LeaderboardStats(BaseModel):
     total_players: int
-    average_points: float
-    max_points: float
-    min_points: float
+    average_xp: float
+    max_xp: float
+    min_xp: float
 
 
 class LeaderboardResponse(BaseModel):
     entries: List[LeaderboardEntry]
     stats: LeaderboardStats
-

@@ -139,6 +139,45 @@ class Quiz {
 
   static String xpEarnedLine(int points) =>
       TextService.getString('Quiz', 'xpEarned').replaceAll('{points}', '$points');
+
+  static String get lessonButton =>
+      TextService.getString('Quiz', 'lessonButton');
+  static String get lessonNext =>
+      TextService.getString('Quiz', 'lessonNext');
+  static String get lessonDone =>
+      TextService.getString('Quiz', 'lessonDone');
+  static String get lessonCard1Title =>
+      TextService.getString('Quiz', 'lessonCard1Title');
+  static String get lessonCard1Body =>
+      TextService.getString('Quiz', 'lessonCard1Body');
+  static String get lessonCard1Fact =>
+      TextService.getString('Quiz', 'lessonCard1Fact');
+  static String get lessonCard2Title =>
+      TextService.getString('Quiz', 'lessonCard2Title');
+  static String get lessonCard2Body =>
+      TextService.getString('Quiz', 'lessonCard2Body');
+  static String get lessonCard2Fact =>
+      TextService.getString('Quiz', 'lessonCard2Fact');
+  static String get lessonCard3Title =>
+      TextService.getString('Quiz', 'lessonCard3Title');
+  static String get lessonCard3Body =>
+      TextService.getString('Quiz', 'lessonCard3Body');
+  static String get lessonCard3Fact =>
+      TextService.getString('Quiz', 'lessonCard3Fact');
+  static String get lessonCard4Title =>
+      TextService.getString('Quiz', 'lessonCard4Title');
+  static String get lessonCard4Body =>
+      TextService.getString('Quiz', 'lessonCard4Body');
+  static String get lessonCard4Fact =>
+      TextService.getString('Quiz', 'lessonCard4Fact');
+  static String get lessonCard5Title =>
+      TextService.getString('Quiz', 'lessonCard5Title');
+  static String get lessonCard5Body =>
+      TextService.getString('Quiz', 'lessonCard5Body');
+  static String get lessonCard5Fact =>
+      TextService.getString('Quiz', 'lessonCard5Fact');
+  static String get lessonDidYouKnow =>
+      TextService.getString('Quiz', 'lessonDidYouKnow');
 }
 
 /// Accessors for 'Animals' texts
@@ -562,7 +601,7 @@ class LeaderboardTexts {
   static String get globalStats =>
       TextService.getString('Leaderboard', 'globalStats');
   static String get players => TextService.getString('Leaderboard', 'players');
-  static String get avgPoints => TextService.getString('Leaderboard', 'avgPoints');
+  static String get avgXp => TextService.getString('Leaderboard', 'avgXp');
   static String get min => TextService.getString('Leaderboard', 'min');
   static String get avg => TextService.getString('Leaderboard', 'avg');
   static String get max => TextService.getString('Leaderboard', 'max');
@@ -570,11 +609,11 @@ class LeaderboardTexts {
       TextService.getString('Leaderboard', 'missionsLabel');
   static String get workshopLabel =>
       TextService.getString('Leaderboard', 'workshopLabel');
-  static String get pointsGuideTitle =>
-      TextService.getString('Leaderboard', 'pointsGuideTitle');
-  static String get pointsGuideBody =>
-      TextService.getString('Leaderboard', 'pointsGuideBody');
-  static String get ptsSuffix => TextService.getString('Leaderboard', 'ptsSuffix');
+  static String get xpGuideTitle =>
+      TextService.getString('Leaderboard', 'xpGuideTitle');
+  static String get xpGuideBody =>
+      TextService.getString('Leaderboard', 'xpGuideBody');
+  static String get xpSuffix => TextService.getString('Leaderboard', 'xpSuffix');
 }
 
 class AboutTexts {

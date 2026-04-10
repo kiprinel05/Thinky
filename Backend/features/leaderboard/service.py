@@ -1,10 +1,12 @@
 from collections import defaultdict
 from typing import Dict, List, Optional
 
+from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
 
 from features.auth.models import User
-from features.mission.models import Mission, MissionProgress
+from features.quiz.models import QuizResult
+from features.mission.models import MissionProgress
 from features.workshop.models import WorkshopDownload
 from features.leaderboard.schemas import (
     LeaderboardEntry,
@@ -13,145 +15,126 @@ from features.leaderboard.schemas import (
     LeaderboardStats,
 )
 
-# Aggregated workshop bonus uses this slug; app i18n can add MissionTitles.workshop later.
-_WORKSHOP_SLUG = "workshop"
-
 
 class LeaderboardService:
-    """Compute leaderboard data based on missions and workshop downloads."""
+    """Compute leaderboard data based on quiz XP."""
 
     def __init__(self, db: Session):
         self.db = db
-
-    def _get_mission_points(self) -> Dict[int, float]:
-        """
-        Returns a mapping mission_id -> points.
-
-        For now, each core mission is worth 1 point. This can be extended later
-        by adding a `points` column on the Mission model and reading it here.
-        """
-        missions = self.db.query(Mission.id).filter(Mission.is_active == True).all()
-        return {m.id: 1.0 for m in missions}
 
     def get_leaderboard(
         self,
         include_workshop: bool = True,
         limit: int = 50,
     ) -> LeaderboardResponse:
-        mission_points_map = self._get_mission_points()
-
-        # id -> mission_path (slug aligned with app MissionTitles keys, e.g. quiz, pixy_learns)
-        mission_rows = self.db.query(Mission.id, Mission.mission_path).all()
-        mission_id_to_path: Dict[int, str] = {m.id: m.mission_path for m in mission_rows}
-
-        # Aggregate mission progress (completed missions only)
-        mission_progress_rows: List[MissionProgress] = (
-            self.db.query(MissionProgress)
-            .filter(MissionProgress.is_completed == True)
+        # Aggregate XP from quiz_results per user
+        xp_rows = (
+            self.db.query(
+                QuizResult.user_id,
+                sa_func.sum(QuizResult.xp_earned).label("total_xp"),
+            )
+            .group_by(QuizResult.user_id)
             .all()
         )
 
-        user_points: Dict[int, float] = defaultdict(float)
-        user_missions_completed: Dict[int, int] = defaultdict(int)
-        user_workshop_completed: Dict[int, int] = defaultdict(int)
-        # user_id -> mission_path -> points earned for that built-in mission
-        user_slug_points: Dict[int, Dict[str, float]] = defaultdict(
-            lambda: defaultdict(float)
+        user_xp: Dict[int, float] = {row.user_id: float(row.total_xp) for row in xp_rows}
+
+        # Per-user quiz type breakdown (quiz_type serves as the mission slug)
+        breakdown_rows = (
+            self.db.query(
+                QuizResult.user_id,
+                QuizResult.quiz_type,
+                sa_func.sum(QuizResult.xp_earned).label("slug_xp"),
+            )
+            .group_by(QuizResult.user_id, QuizResult.quiz_type)
+            .all()
         )
 
-        for p in mission_progress_rows:
-            pts = mission_points_map.get(p.mission_id, 1.0)
-            user_points[p.user_id] += pts
-            user_missions_completed[p.user_id] += 1
-            slug = mission_id_to_path.get(p.mission_id)
-            if not slug:
-                slug = f"mission_{p.mission_id}"
-            user_slug_points[p.user_id][slug] += pts
+        user_slug_xp: Dict[int, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        for row in breakdown_rows:
+            user_slug_xp[row.user_id][row.quiz_type] = float(row.slug_xp)
 
-        # Each distinct downloaded workshop mission counts as 1 point
-        if include_workshop:
-            workshop_rows: List[WorkshopDownload] = (
-                self.db.query(WorkshopDownload).all()
+        # Count completed missions per user (display-only, no ranking weight)
+        mission_progress_rows = (
+            self.db.query(
+                MissionProgress.user_id,
+                sa_func.count(MissionProgress.id).label("cnt"),
             )
+            .filter(MissionProgress.is_completed == True)
+            .group_by(MissionProgress.user_id)
+            .all()
+        )
+        user_missions_completed: Dict[int, int] = {
+            row.user_id: row.cnt for row in mission_progress_rows
+        }
 
-            seen_user_mission = set()
-            for download in workshop_rows:
-                key = (download.user_id, download.mission_id)
-                if key in seen_user_mission:
-                    continue
-                seen_user_mission.add(key)
-                user_points[download.user_id] += 1.0
-                user_workshop_completed[download.user_id] += 1
+        # Count distinct workshop downloads per user (display-only)
+        user_workshop_completed: Dict[int, int] = {}
+        if include_workshop:
+            workshop_rows = (
+                self.db.query(
+                    WorkshopDownload.user_id,
+                    sa_func.count(sa_func.distinct(WorkshopDownload.mission_id)).label("cnt"),
+                )
+                .group_by(WorkshopDownload.user_id)
+                .all()
+            )
+            user_workshop_completed = {row.user_id: row.cnt for row in workshop_rows}
 
-        # Load usernames only for users that have any points
-        user_ids = list(user_points.keys())
+        # Collect all user IDs that have XP
+        user_ids = list(user_xp.keys())
         if not user_ids:
             empty_stats = LeaderboardStats(
                 total_players=0,
-                average_points=0.0,
-                max_points=0.0,
-                min_points=0.0,
+                average_xp=0.0,
+                max_xp=0.0,
+                min_xp=0.0,
             )
             return LeaderboardResponse(entries=[], stats=empty_stats)
 
-        users = (
-            self.db.query(User)
-            .filter(User.id.in_(user_ids))
-            .all()
-        )
-        # Guest users may have username=None; use guest_name or fallback
+        users = self.db.query(User).filter(User.id.in_(user_ids)).all()
         username_map = {
             u.id: (u.username or u.guest_name or f"User {u.id}")
             for u in users
         }
 
-        def build_mission_points_breakdown(uid: int) -> Optional[List[LeaderboardMissionPoints]]:
-            combined: Dict[str, float] = dict(user_slug_points.get(uid, {}))
-            if include_workshop:
-                wcount = user_workshop_completed.get(uid, 0)
-                if wcount > 0:
-                    combined[_WORKSHOP_SLUG] = (
-                        combined.get(_WORKSHOP_SLUG, 0.0) + float(wcount)
-                    )
+        def build_mission_xp_breakdown(uid: int) -> Optional[List[LeaderboardMissionPoints]]:
+            combined = dict(user_slug_xp.get(uid, {}))
             if not combined:
                 return None
             return [
-                LeaderboardMissionPoints(mission_id=s, points=p)
-                for s, p in sorted(combined.items(), key=lambda x: (-x[1], x[0]))
+                LeaderboardMissionPoints(mission_id=slug, xp=xp)
+                for slug, xp in sorted(combined.items(), key=lambda x: (-x[1], x[0]))
             ]
 
         entries: List[LeaderboardEntry] = []
-        for user_id, points in user_points.items():
+        for uid, xp in user_xp.items():
             entries.append(
                 LeaderboardEntry(
-                    user_id=user_id,
-                    username=username_map.get(user_id, f"User {user_id}"),
-                    points=points,
-                    missions_completed=user_missions_completed[user_id],
-                    workshop_missions_completed=user_workshop_completed[user_id],
-                    mission_points=build_mission_points_breakdown(user_id),
+                    user_id=uid,
+                    username=username_map.get(uid, f"User {uid}"),
+                    xp=xp,
+                    missions_completed=user_missions_completed.get(uid, 0),
+                    workshop_missions_completed=user_workshop_completed.get(uid, 0),
+                    mission_points=build_mission_xp_breakdown(uid),
                 )
             )
 
-        # Sort by points desc, then username asc for stable ordering
-        entries.sort(key=lambda e: (-e.points, e.username.lower()))
+        entries.sort(key=lambda e: (-e.xp, e.username.lower()))
 
-        # Stats from ALL players (before limiting display)
-        all_point_values = [e.points for e in entries]
+        all_xp_values = [e.xp for e in entries]
         total_players = len(entries)
-        average_points = sum(all_point_values) / total_players if total_players else 0.0
-        max_points = max(all_point_values) if all_point_values else 0.0
-        min_points = min(all_point_values) if all_point_values else 0.0
+        average_xp = sum(all_xp_values) / total_players if total_players else 0.0
+        max_xp = max(all_xp_values) if all_xp_values else 0.0
+        min_xp = min(all_xp_values) if all_xp_values else 0.0
 
         stats = LeaderboardStats(
             total_players=total_players,
-            average_points=average_points,
-            max_points=max_points,
-            min_points=min_points,
+            average_xp=average_xp,
+            max_xp=max_xp,
+            min_xp=min_xp,
         )
 
-        # Limit displayed entries to top 20
         entries = entries[:limit]
 
         return LeaderboardResponse(entries=entries, stats=stats)
-
