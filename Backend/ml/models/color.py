@@ -21,8 +21,6 @@ class ColorModel(BaseMLModel):
             self._is_loaded = True
             print(f"ColorModel loaded from {self.model_path}")
         except FileNotFoundError:
-            print(f"[WARNING] ColorModel model file not found at {self.model_path}")
-            # Ensure we can still instantiate for testing but _is_loaded stays False OR we provide a mock behavior if critical
             self._is_loaded = False
         except Exception as e:
             print(f"[ERROR] Failed to load ColorModel: {e}")

@@ -30,8 +30,7 @@ class ShapeModel(BaseMLModel):
             self._is_loaded = True
             print(f"ShapeModel loaded from {self.model_path}")
         except FileNotFoundError:
-             print(f"[WARNING] ShapeModel file not found at {self.model_path}")
-             self._is_loaded = False
+            self._is_loaded = False
         except Exception as e:
             print(f"[ERROR] Failed to load ShapeModel: {e}")
             self._is_loaded = False
