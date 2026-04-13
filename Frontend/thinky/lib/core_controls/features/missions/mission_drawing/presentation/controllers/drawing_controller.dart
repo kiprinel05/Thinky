@@ -26,6 +26,7 @@ class DrawingState extends BaseState {
   final DrawingAnalysisResult? analysisResult;
   final String pixyEmotion;
   final bool showResult;
+  final bool showLearning;
 
   static const List<DrawingRoundConfig> roundConfigs = [
     DrawingRoundConfig(shape: 'triangle', color: 'blue'),
@@ -44,6 +45,7 @@ class DrawingState extends BaseState {
     this.analysisResult,
     this.pixyEmotion = 'neutral',
     this.showResult = false,
+    this.showLearning = false,
   });
 
   DrawingRoundConfig get currentRoundConfig =>
@@ -62,6 +64,7 @@ class DrawingState extends BaseState {
     DrawingAnalysisResult? analysisResult,
     String? pixyEmotion,
     bool? showResult,
+    bool? showLearning,
   }) {
     return DrawingState(
       status: status ?? this.status,
@@ -74,6 +77,7 @@ class DrawingState extends BaseState {
       analysisResult: analysisResult ?? this.analysisResult,
       pixyEmotion: pixyEmotion ?? this.pixyEmotion,
       showResult: showResult ?? this.showResult,
+      showLearning: showLearning ?? this.showLearning,
     );
   }
 }
@@ -153,6 +157,14 @@ class DrawingController extends BaseAsyncController<DrawingState> {
       analysisResult: null,
       pixyEmotion: 'neutral',
     ));
+  }
+
+  void openLearning() {
+    safeUpdate(state.copyWith(showLearning: true));
+  }
+
+  void closeLearning() {
+    safeUpdate(state.copyWith(showLearning: false));
   }
 
   /// Advance to next round (after correct drawing)

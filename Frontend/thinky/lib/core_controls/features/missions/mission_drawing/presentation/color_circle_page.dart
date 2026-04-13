@@ -11,6 +11,7 @@ import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'controllers/color_circle_controller.dart';
+import 'color_circle_learning_view.dart';
 
 /// Color Circle Mission Page
 /// 
@@ -135,6 +136,14 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(colorCircleControllerProvider);
     
+    if (state.showLearning) {
+      return Scaffold(
+        body: ColorCircleLearningView(
+          onDone: () => ref.read(colorCircleControllerProvider.notifier).closeLearning(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -696,10 +705,25 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
                   const SizedBox(height: 32),
                   
                   if (isCorrect)
-                    _buildGradientButton(
-                      onTap: _onComplete,
-                      label: Drawing.continueAction,
-                      gradientColors: [AppColors.success, AppColors.correctGreen],
+                    Column(
+                      children: [
+                        _buildGradientButton(
+                          onTap: () => ref.read(colorCircleControllerProvider.notifier).openLearning(),
+                          label: Drawing.colorLessonButton,
+                          gradientColors: [AppColors.primaryPurple, AppColors.primaryPurpleLight],
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _onComplete,
+                          child: Text(
+                            Drawing.colorBackToMissions,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
                     )
                   else
                     Column(

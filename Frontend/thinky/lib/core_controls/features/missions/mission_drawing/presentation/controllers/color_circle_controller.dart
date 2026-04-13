@@ -16,6 +16,7 @@ class ColorCircleState extends BaseState {
   final DrawingAnalysisResult? analysisResult;
   final String pixyEmotion;
   final bool showResult;
+  final bool showLearning;
 
   const ColorCircleState({
     super.status = StateStatus.initial,
@@ -26,6 +27,7 @@ class ColorCircleState extends BaseState {
     this.analysisResult,
     this.pixyEmotion = 'neutral',
     this.showResult = false,
+    this.showLearning = false,
   });
 
   ColorCircleState copyWith({
@@ -37,6 +39,7 @@ class ColorCircleState extends BaseState {
     DrawingAnalysisResult? analysisResult,
     String? pixyEmotion,
     bool? showResult,
+    bool? showLearning,
   }) {
     return ColorCircleState(
       status: status ?? this.status,
@@ -47,6 +50,7 @@ class ColorCircleState extends BaseState {
       analysisResult: analysisResult ?? this.analysisResult,
       pixyEmotion: pixyEmotion ?? this.pixyEmotion,
       showResult: showResult ?? this.showResult,
+      showLearning: showLearning ?? this.showLearning,
     );
   }
 }
@@ -114,6 +118,14 @@ class ColorCircleController extends BaseAsyncController<ColorCircleState> {
       pixyEmotion: 'neutral',
       status: StateStatus.initial,
     ));
+  }
+
+  void openLearning() {
+    safeUpdate(state.copyWith(showLearning: true));
+  }
+
+  void closeLearning() {
+    safeUpdate(state.copyWith(showLearning: false));
   }
 
   /// Clear canvas state

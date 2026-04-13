@@ -298,6 +298,50 @@ class Drawing {
       TextService.getString('Drawing', 'checkColoringSparkle');
   static String get resultPerfect => TextService.getString('Drawing', 'resultPerfect');
   static String get colorCircleFirst => TextService.getString('Drawing', 'colorCircleFirst');
+
+  // Draw Shapes learning
+  static String get shapesLessonButton => TextService.getString('Drawing', 'shapesLessonButton');
+  static String get shapesLessonNext => TextService.getString('Drawing', 'shapesLessonNext');
+  static String get shapesLessonDidYouKnow => TextService.getString('Drawing', 'shapesLessonDidYouKnow');
+  static String get shapesBackToResults => TextService.getString('Drawing', 'shapesBackToResults');
+  static String get shapesBackToMissions => TextService.getString('Drawing', 'shapesBackToMissions');
+  static String get shapesLessonCard1Title => TextService.getString('Drawing', 'shapesLessonCard1Title');
+  static String get shapesLessonCard1Body => TextService.getString('Drawing', 'shapesLessonCard1Body');
+  static String get shapesLessonCard1Fact => TextService.getString('Drawing', 'shapesLessonCard1Fact');
+  static String get shapesLessonCard2Title => TextService.getString('Drawing', 'shapesLessonCard2Title');
+  static String get shapesLessonCard2Body => TextService.getString('Drawing', 'shapesLessonCard2Body');
+  static String get shapesLessonCard2Fact => TextService.getString('Drawing', 'shapesLessonCard2Fact');
+  static String get shapesLessonCard3Title => TextService.getString('Drawing', 'shapesLessonCard3Title');
+  static String get shapesLessonCard3Body => TextService.getString('Drawing', 'shapesLessonCard3Body');
+  static String get shapesLessonCard3Fact => TextService.getString('Drawing', 'shapesLessonCard3Fact');
+  static String get shapesLessonCard4Title => TextService.getString('Drawing', 'shapesLessonCard4Title');
+  static String get shapesLessonCard4Body => TextService.getString('Drawing', 'shapesLessonCard4Body');
+  static String get shapesLessonCard4Fact => TextService.getString('Drawing', 'shapesLessonCard4Fact');
+  static String get shapesLessonCard5Title => TextService.getString('Drawing', 'shapesLessonCard5Title');
+  static String get shapesLessonCard5Body => TextService.getString('Drawing', 'shapesLessonCard5Body');
+  static String get shapesLessonCard5Fact => TextService.getString('Drawing', 'shapesLessonCard5Fact');
+
+  // Color Circle learning
+  static String get colorLessonButton => TextService.getString('Drawing', 'colorLessonButton');
+  static String get colorLessonNext => TextService.getString('Drawing', 'colorLessonNext');
+  static String get colorLessonDidYouKnow => TextService.getString('Drawing', 'colorLessonDidYouKnow');
+  static String get colorBackToResults => TextService.getString('Drawing', 'colorBackToResults');
+  static String get colorBackToMissions => TextService.getString('Drawing', 'colorBackToMissions');
+  static String get colorLessonCard1Title => TextService.getString('Drawing', 'colorLessonCard1Title');
+  static String get colorLessonCard1Body => TextService.getString('Drawing', 'colorLessonCard1Body');
+  static String get colorLessonCard1Fact => TextService.getString('Drawing', 'colorLessonCard1Fact');
+  static String get colorLessonCard2Title => TextService.getString('Drawing', 'colorLessonCard2Title');
+  static String get colorLessonCard2Body => TextService.getString('Drawing', 'colorLessonCard2Body');
+  static String get colorLessonCard2Fact => TextService.getString('Drawing', 'colorLessonCard2Fact');
+  static String get colorLessonCard3Title => TextService.getString('Drawing', 'colorLessonCard3Title');
+  static String get colorLessonCard3Body => TextService.getString('Drawing', 'colorLessonCard3Body');
+  static String get colorLessonCard3Fact => TextService.getString('Drawing', 'colorLessonCard3Fact');
+  static String get colorLessonCard4Title => TextService.getString('Drawing', 'colorLessonCard4Title');
+  static String get colorLessonCard4Body => TextService.getString('Drawing', 'colorLessonCard4Body');
+  static String get colorLessonCard4Fact => TextService.getString('Drawing', 'colorLessonCard4Fact');
+  static String get colorLessonCard5Title => TextService.getString('Drawing', 'colorLessonCard5Title');
+  static String get colorLessonCard5Body => TextService.getString('Drawing', 'colorLessonCard5Body');
+  static String get colorLessonCard5Fact => TextService.getString('Drawing', 'colorLessonCard5Fact');
 }
 
 /// Accessors for 'GroupingSorting' texts

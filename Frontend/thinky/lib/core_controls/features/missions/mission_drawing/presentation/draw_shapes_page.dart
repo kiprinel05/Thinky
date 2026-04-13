@@ -11,6 +11,7 @@ import 'package:thinky/shared_controls/widgets/drawing/drawing_canvas.dart';
 import 'package:thinky/shared_controls/widgets/error_handler_ui.dart';
 import 'package:thinky/shared_controls/assets/app_assets.dart';
 import 'controllers/drawing_controller.dart';
+import 'draw_shapes_learning_view.dart';
 
 /// Draw Shapes Mission Page
 ///
@@ -136,6 +137,14 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(drawingControllerProvider);
     
+    if (state.showLearning) {
+      return Scaffold(
+        body: DrawShapesLearningView(
+          onDone: () => ref.read(drawingControllerProvider.notifier).closeLearning(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
@@ -711,15 +720,32 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
                   
                   const SizedBox(height: 32),
                   
-                  if (isCorrect)
+                  if (isCorrect && state.currentRound < state.totalRounds)
                     _buildGradientButton(
-                      onTap: state.currentRound < state.totalRounds
-                          ? _onNextRound
-                          : _onComplete,
-                      label: state.currentRound < state.totalRounds
-                          ? Drawing.nextRound
-                          : Drawing.missionCompleteButton,
+                      onTap: _onNextRound,
+                      label: Drawing.nextRound,
                       gradientColors: [AppColors.success, AppColors.correctGreen],
+                    )
+                  else if (isCorrect)
+                    Column(
+                      children: [
+                        _buildGradientButton(
+                          onTap: () => ref.read(drawingControllerProvider.notifier).openLearning(),
+                          label: Drawing.shapesLessonButton,
+                          gradientColors: [AppColors.primaryPurple, AppColors.primaryPurpleLight],
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _onComplete,
+                          child: Text(
+                            Drawing.shapesBackToMissions,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
                     )
                   else
                     Column(
