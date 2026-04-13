@@ -339,7 +339,7 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 repaintKey: _repaintKey,
                 selectedColor: colors.textPrimary,
                 strokeWidth: 10.0,
-                backgroundColor: colors.surface,
+
                 onDrawingChanged: () {
                   setState(() {
                     _hasDrawing = _canvasKey.currentState?.hasDrawing ?? false;
