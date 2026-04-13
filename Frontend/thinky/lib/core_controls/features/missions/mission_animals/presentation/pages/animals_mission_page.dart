@@ -13,6 +13,7 @@ import 'package:thinky/shared_controls/assets/app_assets.dart';
 import '../../data/animals_models.dart';
 import '../../data/animals_repository.dart';
 import '../controllers/animals_controller.dart';
+import 'animals_learning_view.dart';
 
 /// Main page for the Animals Mission
 /// "Teach Pixy to recognize animals"
@@ -226,6 +227,11 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
       case AnimalsMissionPhase.roundComplete:
         return _buildRoundComplete(state, colors);
       case AnimalsMissionPhase.missionComplete:
+        if (state.showLearning) {
+          return AnimalsLearningView(
+            onDone: () => ref.read(animalsControllerProvider.notifier).closeLearning(),
+          );
+        }
         return _buildMissionComplete(colors);
       case AnimalsMissionPhase.error:
         return _buildError(state, colors);
@@ -1463,57 +1469,107 @@ class _AnimalsMissionPageState extends ConsumerState<AnimalsMissionPage>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('🏆', style: TextStyle(fontSize: 88)),
-                const SizedBox(height: 20),
-                Text(
-                  Animals.missionCompleteTitle,
-                  style: GoogleFonts.alata(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    color: _primaryColor,
+                ScaleInWidget(
+                  delay: const Duration(milliseconds: 200),
+                  child: Image.asset(
+                    AppAssets.welcomePage1Hello,
+                    height: 140,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FadeInWidget(
+                  delay: const Duration(milliseconds: 400),
+                  child: Text(
+                    Animals.missionCompleteTitle,
+                    style: GoogleFonts.alata(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w700,
+                      color: _primaryColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  Animals.missionCompleteBody,
-                  style: GoogleFonts.alata(
-                    fontSize: 16,
-                    color: colors.textSecondary,
+                FadeInWidget(
+                  delay: const Duration(milliseconds: 500),
+                  child: Text(
+                    Animals.missionCompleteBody,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.alata(
+                      fontSize: 16,
+                      color: colors.textSecondary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 28),
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 36,
-                      vertical: 18,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [_primaryColor, _primaryLightColor],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _primaryColor.withValues(alpha: 0.4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                FadeInWidget(
+                  delay: const Duration(milliseconds: 600),
+                  child: GestureDetector(
+                    onTap: () => ref.read(animalsControllerProvider.notifier).openLearning(),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_primaryColor, _primaryLightColor],
                         ),
-                      ],
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withValues(alpha: 0.4),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.school_rounded, color: Colors.white, size: 20),
+                          const SizedBox(width: 10),
+                          Text(
+                            Animals.lessonButton,
+                            style: GoogleFonts.alata(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FadeInWidget(
+                  delay: const Duration(milliseconds: 700),
+                  child: TextButton(
+                    onPressed: () => context.pop(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.textSecondary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
-                        const SizedBox(width: 10),
                         Text(
                           Animals.backToMissions,
                           style: GoogleFonts.alata(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: colors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            letterSpacing: 0.3,
                           ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: colors.textSecondary,
+                          size: 16,
                         ),
                       ],
                     ),

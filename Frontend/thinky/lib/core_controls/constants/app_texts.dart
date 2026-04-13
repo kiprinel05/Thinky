@@ -226,6 +226,26 @@ class Animals {
   static String roundCompleteTitleFor(int round) =>
       TextService.getString('Animals', 'roundCompleteTitle')
           .replaceAll('{round}', '$round');
+
+  static String get lessonButton => TextService.getString('Animals', 'lessonButton');
+  static String get lessonNext => TextService.getString('Animals', 'lessonNext');
+  static String get lessonDidYouKnow => TextService.getString('Animals', 'lessonDidYouKnow');
+  static String get backToResults => TextService.getString('Animals', 'backToResults');
+  static String get lessonCard1Title => TextService.getString('Animals', 'lessonCard1Title');
+  static String get lessonCard1Body => TextService.getString('Animals', 'lessonCard1Body');
+  static String get lessonCard1Fact => TextService.getString('Animals', 'lessonCard1Fact');
+  static String get lessonCard2Title => TextService.getString('Animals', 'lessonCard2Title');
+  static String get lessonCard2Body => TextService.getString('Animals', 'lessonCard2Body');
+  static String get lessonCard2Fact => TextService.getString('Animals', 'lessonCard2Fact');
+  static String get lessonCard3Title => TextService.getString('Animals', 'lessonCard3Title');
+  static String get lessonCard3Body => TextService.getString('Animals', 'lessonCard3Body');
+  static String get lessonCard3Fact => TextService.getString('Animals', 'lessonCard3Fact');
+  static String get lessonCard4Title => TextService.getString('Animals', 'lessonCard4Title');
+  static String get lessonCard4Body => TextService.getString('Animals', 'lessonCard4Body');
+  static String get lessonCard4Fact => TextService.getString('Animals', 'lessonCard4Fact');
+  static String get lessonCard5Title => TextService.getString('Animals', 'lessonCard5Title');
+  static String get lessonCard5Body => TextService.getString('Animals', 'lessonCard5Body');
+  static String get lessonCard5Fact => TextService.getString('Animals', 'lessonCard5Fact');
 }
 
 /// Accessors for 'Drawing' texts

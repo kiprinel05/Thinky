@@ -30,6 +30,7 @@ class AnimalsMissionState {
   final Set<String> selectedImageIds;
   final String? errorMessage;
   final bool isLoading;
+  final bool showLearning;
 
   const AnimalsMissionState({
     this.phase = AnimalsMissionPhase.loading,
@@ -43,6 +44,7 @@ class AnimalsMissionState {
     this.selectedImageIds = const {},
     this.errorMessage,
     this.isLoading = false,
+    this.showLearning = false,
   });
 
   AnimalsMissionState copyWith({
@@ -57,6 +59,7 @@ class AnimalsMissionState {
     Set<String>? selectedImageIds,
     String? errorMessage,
     bool? isLoading,
+    bool? showLearning,
   }) {
     return AnimalsMissionState(
       phase: phase ?? this.phase,
@@ -70,6 +73,7 @@ class AnimalsMissionState {
       selectedImageIds: selectedImageIds ?? this.selectedImageIds,
       errorMessage: errorMessage,
       isLoading: isLoading ?? this.isLoading,
+      showLearning: showLearning ?? this.showLearning,
     );
   }
 }
@@ -287,6 +291,14 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
   /// Start next round
   Future<void> nextRound() async {
     await _loadNextRound();
+  }
+
+  void openLearning() {
+    state = state.copyWith(showLearning: true);
+  }
+
+  void closeLearning() {
+    state = state.copyWith(showLearning: false);
   }
 
   /// Reset mission
