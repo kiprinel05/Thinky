@@ -26,6 +26,11 @@ from features.drawing.router import router as drawing_router
 from features.numbers.router import router as numbers_router
 from features.workshop.router import router as workshop_router
 from features.animals.router import router as animals_router
+from features.grouping.router import router as grouping_router
+from features.vocabulary.router import router as vocabulary_router
+from features.mascot.router import router as mascot_router
+from features.describe.router import router as describe_router
+from features.pattern.router import router as pattern_router
 from features.leaderboard.router import router as leaderboard_router
 
 app = FastAPI(
@@ -98,6 +103,11 @@ app.include_router(drawing_router, prefix=settings.API_V1_STR)
 app.include_router(numbers_router, prefix=settings.API_V1_STR)
 app.include_router(workshop_router, prefix=settings.API_V1_STR)
 app.include_router(animals_router, prefix=settings.API_V1_STR)
+app.include_router(grouping_router, prefix=settings.API_V1_STR)
+app.include_router(vocabulary_router, prefix=settings.API_V1_STR)
+app.include_router(mascot_router, prefix=settings.API_V1_STR)
+app.include_router(describe_router, prefix=settings.API_V1_STR)
+app.include_router(pattern_router, prefix=settings.API_V1_STR)
 app.include_router(leaderboard_router, prefix=settings.API_V1_STR)
 
 @app.get("/")

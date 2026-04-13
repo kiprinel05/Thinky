@@ -167,8 +167,15 @@ def _circularity_vertex_scores(contour: np.ndarray) -> Dict[str, float]:
     # Triangle: 3 vertices, circularity ~0.6
     if median_v == 3:
         scores["triangle"] = 0.7 + 0.3 * max(0, 1 - abs(circ - 0.6) / 0.3)
-    elif median_v == 4 and circ < 0.7:
-        scores["triangle"] = 0.3
+    elif median_v == 4 and circ < 0.75:
+        # Could be a rounded triangle — also check hull vertices
+        hull = cv2.convexHull(contour)
+        hull_peri = cv2.arcLength(hull, True)
+        hull_approx = cv2.approxPolyDP(hull, 0.03 * hull_peri, True) if hull_peri > 1 else hull
+        if len(hull_approx) == 3:
+            scores["triangle"] = 0.65
+        else:
+            scores["triangle"] = 0.3
 
     # Square / Rectangle
     if median_v == 4 and circ < 0.88:
@@ -311,6 +318,19 @@ def _ellipse_circularity(contour: np.ndarray) -> float:
         return 0.0
 
 
+def _hull_vertex_count(contour: np.ndarray) -> int:
+    """Approximate vertex count of the convex hull — robust to morphological rounding."""
+    hull = cv2.convexHull(contour)
+    peri = cv2.arcLength(hull, True)
+    if peri < 1:
+        return 0
+    counts = []
+    for eps in [0.02, 0.03, 0.04]:
+        approx = cv2.approxPolyDP(hull, eps * peri, True)
+        counts.append(len(approx))
+    return int(np.median(counts))
+
+
 def _consensus(
     hu: Dict[str, float],
     circ: Dict[str, float],
@@ -328,12 +348,22 @@ def _consensus(
             W_FOUR * four.get(s, 0)
         )
 
-    # Ellipse-based circle boost: if the contour fits a circle well,
-    # ensure circle isn't penalized by Hu moments seeing a polygon.
+    # Ellipse-based circle boost
     ec = _ellipse_circularity(contour)
     if ec > 0.70:
         combined["circle"] = max(combined.get("circle", 0),
                                  0.45 + ec * 0.45)
+
+    # Hull-based triangle boost: convex hull of a triangle approximates to
+    # 3 vertices even when morphological ops round the raw contour.
+    hull_v = _hull_vertex_count(contour)
+    if hull_v == 3:
+        hull = cv2.convexHull(contour)
+        hull_peri = cv2.arcLength(hull, True)
+        hull_area = cv2.contourArea(hull)
+        hull_circ = 4 * np.pi * hull_area / (hull_peri ** 2) if hull_peri > 1 else 0
+        if hull_circ < 0.82:
+            combined["triangle"] = max(combined.get("triangle", 0), 0.80)
 
     return combined
 
@@ -392,11 +422,10 @@ def _preprocess(gray: np.ndarray) -> np.ndarray:
             chosen = candidate
             break
 
-    # Dilate to thicken thin strokes, close to bridge gaps, open to remove noise
-    kernel_dilate = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    kernel_dilate = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
     kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    cleaned = cv2.dilate(chosen, kernel_dilate, iterations=2)
+    cleaned = cv2.dilate(chosen, kernel_dilate, iterations=1)
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel_close)
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_OPEN, kernel_open)
 
