@@ -32,11 +32,22 @@ for arg in "$@"; do
   esac
 done
 
+kill_port() {
+  local pids
+  pids=$(lsof -t -i:8000 2>/dev/null || true)
+  if [ -n "$pids" ]; then
+    echo "$pids" | xargs kill -9 2>/dev/null || true
+    sleep 1
+    ok "Killed existing process(es) on port 8000"
+  fi
+}
+
 start_server() {
   echo ""
   echo "========================================="
   echo "  Starting Thinky Backend"
   echo "========================================="
+  kill_port
   source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
   exec uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1
 }
