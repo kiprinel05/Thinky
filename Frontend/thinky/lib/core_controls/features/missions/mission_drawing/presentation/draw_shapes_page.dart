@@ -443,7 +443,6 @@ class _DrawShapesPageState extends ConsumerState<DrawShapesPage>
           repaintKey: _canvasKey,
           selectedColor: state.selectedColor,
           strokeWidth: 12.0,
-          backgroundColor: colors.surface,
           isEraserMode: _isEraserSelected,
           onDrawingChanged: () {
             ref.read(drawingControllerProvider.notifier).setHasDrawing(true);

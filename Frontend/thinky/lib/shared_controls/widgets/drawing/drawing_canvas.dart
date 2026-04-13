@@ -21,20 +21,23 @@ class DrawingPoint {
   });
 }
 
-/// Interactive drawing canvas widget
+/// Interactive drawing canvas widget.
+/// Canvas is always white (like paper) regardless of theme — this ensures
+/// consistent backend analysis and proper eraser behaviour.
 class DrawingCanvas extends StatefulWidget {
   final Color selectedColor;
   final double strokeWidth;
-  final Color backgroundColor;
   final VoidCallback? onDrawingChanged;
   final GlobalKey? repaintKey;
   final bool isEraserMode;
+
+  /// Always white — drawing surfaces should behave like paper.
+  Color get backgroundColor => Colors.white;
 
   const DrawingCanvas({
     super.key,
     this.selectedColor = AppColors.drawingBlue,
     this.strokeWidth = 8.0,
-    this.backgroundColor = AppColors.white,
     this.onDrawingChanged,
     this.repaintKey,
     this.isEraserMode = false,

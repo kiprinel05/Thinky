@@ -398,7 +398,8 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
   }
 
   Widget _buildCanvasSection(ColorCircleState state, AppColorsExtension colors) {
-    final outlineColor = Color.lerp(colors.textSecondary, colors.border, 0.35)!;
+    // Fixed dark outline that contrasts well on the always-white canvas
+    const outlineColor = Color(0xFF616161);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
@@ -420,7 +421,6 @@ class _ColorCirclePageState extends ConsumerState<ColorCirclePage>
               repaintKey: _canvasKey,
               selectedColor: state.selectedColor,
               strokeWidth: 20.0,
-              backgroundColor: colors.surface,
               isEraserMode: _isEraserSelected,
               onDrawingChanged: () {
                 ref.read(colorCircleControllerProvider.notifier).setHasDrawing(true);
