@@ -59,31 +59,63 @@ if ! command -v python3 &>/dev/null; then
 fi
 ok "Python 3 found: $(python3 --version)"
 
-# ODBC Driver 17 for SQL Server (Ubuntu / Debian)
-if ! odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 17"; then
-  warn "ODBC Driver 17 not found — installing..."
-  if command -v apt-get &>/dev/null; then
-    if ! dpkg -l | grep -q msodbcsql17; then
-      sudo apt-get update -qq
-      sudo ACCEPT_EULA=Y apt-get install -y -qq msodbcsql17 unixodbc-dev 2>/dev/null || {
-        warn "msodbcsql17 not in default repos — adding Microsoft repo..."
-        curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
-        DISTRO=$(lsb_release -cs 2>/dev/null || echo "jammy")
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/$(lsb_release -rs)/prod $DISTRO main" | sudo tee /etc/apt/sources.list.d/mssql-release.list
-        sudo apt-get update -qq
-        sudo ACCEPT_EULA=Y apt-get install -y -qq msodbcsql17 unixodbc-dev
-      }
-    fi
-  else
-    warn "Not a Debian-based system. Install ODBC Driver 17 manually:"
-    warn "  https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server"
-  fi
+# ODBC Driver for SQL Server (Ubuntu / Debian)
+# Driver 18 is required for Ubuntu 24.04+; Driver 17 for older versions.
+ODBC_INSTALLED=false
+if odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 18"; then
+  ok "ODBC Driver 18 for SQL Server is installed"
+  ODBC_INSTALLED=true
+elif odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 17"; then
+  ok "ODBC Driver 17 for SQL Server is installed"
+  ODBC_INSTALLED=true
 fi
 
-if odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 17"; then
-  ok "ODBC Driver 17 for SQL Server is installed"
+if ! $ODBC_INSTALLED && command -v apt-get &>/dev/null; then
+  warn "ODBC Driver not found — installing..."
+  # Add Microsoft repo
+  if [ ! -f /usr/share/keyrings/microsoft-prod.gpg ]; then
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+  fi
+  UBUNTU_VER=$(lsb_release -rs 2>/dev/null || echo "22.04")
+  DISTRO=$(lsb_release -cs 2>/dev/null || echo "jammy")
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/${UBUNTU_VER}/prod ${DISTRO} main" \
+    | sudo tee /etc/apt/sources.list.d/mssql-release.list >/dev/null
+  sudo apt-get update -qq
+
+  # Try Driver 18 first (Ubuntu 24.04+), fall back to 17
+  if sudo ACCEPT_EULA=Y apt-get install -y -qq msodbcsql18 unixodbc-dev 2>/dev/null; then
+    ok "Installed ODBC Driver 18 for SQL Server"
+    ODBC_INSTALLED=true
+  elif sudo ACCEPT_EULA=Y apt-get install -y -qq msodbcsql17 unixodbc-dev 2>/dev/null; then
+    ok "Installed ODBC Driver 17 for SQL Server"
+    ODBC_INSTALLED=true
+  else
+    err "Could not install ODBC driver. Install manually:"
+    err "  https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server"
+  fi
+elif ! $ODBC_INSTALLED; then
+  warn "Not a Debian-based system. Install ODBC Driver 18 manually:"
+  warn "  https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server"
+fi
+
+# Detect which driver is installed and ensure .env has the right DB_DRIVER
+if odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 18"; then
+  DETECTED_DRIVER="ODBC Driver 18 for SQL Server"
+elif odbcinst -q -d 2>/dev/null | grep -qi "ODBC Driver 17"; then
+  DETECTED_DRIVER="ODBC Driver 17 for SQL Server"
 else
-  warn "Could not verify ODBC Driver 17. The server may fail to connect to the database."
+  DETECTED_DRIVER=""
+fi
+
+if [ -n "$DETECTED_DRIVER" ] && [ -f ".env" ]; then
+  if grep -q "^DB_DRIVER=" .env; then
+    sed -i "s|^DB_DRIVER=.*|DB_DRIVER=${DETECTED_DRIVER}|" .env
+  else
+    echo "DB_DRIVER=${DETECTED_DRIVER}" >> .env
+  fi
+  ok "DB_DRIVER set to: ${DETECTED_DRIVER}"
+elif [ -n "$DETECTED_DRIVER" ]; then
+  warn "Remember to add DB_DRIVER=${DETECTED_DRIVER} to your .env"
 fi
 
 # ── 2. Virtual environment ──────────────────────────────────
