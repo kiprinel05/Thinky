@@ -55,31 +55,38 @@ class LeaderboardService:
             user_slug_xp[row.user_id][row.quiz_type] = float(row.slug_xp)
 
         # Count completed missions per user (display-only, no ranking weight)
-        mission_progress_rows = (
-            self.db.query(
-                MissionProgress.user_id,
-                sa_func.count(MissionProgress.id).label("cnt"),
+        user_missions_completed: Dict[int, int] = {}
+        try:
+            mission_progress_rows = (
+                self.db.query(
+                    MissionProgress.user_id,
+                    sa_func.count(MissionProgress.id).label("cnt"),
+                )
+                .filter(MissionProgress.is_completed == True)
+                .group_by(MissionProgress.user_id)
+                .all()
             )
-            .filter(MissionProgress.is_completed == True)
-            .group_by(MissionProgress.user_id)
-            .all()
-        )
-        user_missions_completed: Dict[int, int] = {
-            row.user_id: row.cnt for row in mission_progress_rows
-        }
+            user_missions_completed = {
+                row.user_id: row.cnt for row in mission_progress_rows
+            }
+        except Exception:
+            self.db.rollback()
 
         # Count distinct workshop downloads per user (display-only)
         user_workshop_completed: Dict[int, int] = {}
         if include_workshop:
-            workshop_rows = (
-                self.db.query(
-                    WorkshopDownload.user_id,
-                    sa_func.count(sa_func.distinct(WorkshopDownload.mission_id)).label("cnt"),
+            try:
+                workshop_rows = (
+                    self.db.query(
+                        WorkshopDownload.user_id,
+                        sa_func.count(sa_func.distinct(WorkshopDownload.mission_id)).label("cnt"),
+                    )
+                    .group_by(WorkshopDownload.user_id)
+                    .all()
                 )
-                .group_by(WorkshopDownload.user_id)
-                .all()
-            )
-            user_workshop_completed = {row.user_id: row.cnt for row in workshop_rows}
+                user_workshop_completed = {row.user_id: row.cnt for row in workshop_rows}
+            except Exception:
+                self.db.rollback()
 
         # Collect all user IDs that have XP
         user_ids = list(user_xp.keys())

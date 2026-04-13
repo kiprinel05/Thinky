@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_models.dart';
@@ -127,6 +128,9 @@ class DrawingController extends BaseAsyncController<DrawingState> {
           showResult: true,
           status: StateStatus.success,
         ));
+        if (analysisResult.isCorrect && state.currentRound >= state.totalRounds) {
+          XpService.awardXp('draw_shapes', 100.0);
+        }
       },
       onFailure: (error) {
         safeUpdate(state.copyWith(

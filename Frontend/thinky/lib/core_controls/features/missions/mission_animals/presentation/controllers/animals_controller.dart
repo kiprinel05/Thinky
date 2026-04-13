@@ -2,6 +2,7 @@ import 'package:thinky/core/errors/error_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import '../../data/animals_models.dart';
 import '../../data/animals_repository.dart';
 
@@ -278,10 +279,11 @@ class AnimalsController extends StateNotifier<AnimalsMissionState> {
     if (state.currentRound >= state.totalRounds) {
       // Mark mission as complete
       try {
-        await MissionService.completeMission(-5); // -5 is animals mission ID in offline list
+        await MissionService.completeMission(-5);
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
+      XpService.awardXp('animals', 100.0);
       state = state.copyWith(phase: AnimalsMissionPhase.missionComplete);
     } else {
       state = state.copyWith(phase: AnimalsMissionPhase.roundComplete);

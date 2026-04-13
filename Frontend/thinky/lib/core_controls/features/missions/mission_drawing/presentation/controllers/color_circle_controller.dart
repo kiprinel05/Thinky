@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_repository.dart';
 import 'package:thinky/core_controls/features/missions/mission_drawing/data/drawing_models.dart';
@@ -98,6 +99,9 @@ class ColorCircleController extends BaseAsyncController<ColorCircleState> {
           showResult: true,
           status: StateStatus.success,
         ));
+        if (analysisResult.isCorrect) {
+          XpService.awardXp('color_circle', 100.0);
+        }
       },
       onFailure: (error) {
         safeUpdate(state.copyWith(

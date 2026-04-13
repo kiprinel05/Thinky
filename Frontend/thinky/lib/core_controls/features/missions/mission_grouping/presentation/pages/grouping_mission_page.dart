@@ -8,6 +8,7 @@ import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
 import '../../data/grouping_models.dart';
 import '../../data/grouping_repository.dart';
 import '../controllers/grouping_controller.dart';
+import 'grouping_learning_view.dart';
 
 /// Main page for the Grouping Mission
 /// "Group images: fruits, vegetables, toys"
@@ -79,6 +80,14 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
         });
       }
     });
+
+    if (state.showLearning) {
+      return Scaffold(
+        body: GroupingLearningView(
+          onDone: () => ref.read(groupingControllerProvider.notifier).closeLearning(),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -907,7 +916,7 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () => ref.read(groupingControllerProvider.notifier).openLearning(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryPurple,
                   foregroundColor: Colors.white,
@@ -915,8 +924,19 @@ class _GroupingMissionPageState extends ConsumerState<GroupingMissionPage>
                   elevation: 4,
                 ),
                 child: Text(
-                  GroupingSorting.backToMissions,
+                  GroupingSorting.lessonButton,
                   style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                GroupingSorting.backToMissions,
+                style: GoogleFonts.alata(
+                  fontSize: 14,
+                  color: colors.textSecondary,
                 ),
               ),
             ),

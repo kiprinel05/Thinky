@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import '../../data/grouping_models.dart';
 import '../../data/grouping_repository.dart';
 
@@ -29,7 +30,8 @@ class GroupingMissionState {
   final DateTime? startTime;
   final String? errorMessage;
   final bool isLoading;
-  final String? motivationalText; // Microcopy feedback
+  final String? motivationalText;
+  final bool showLearning;
 
   const GroupingMissionState({
     this.phase = GroupingMissionPhase.loading,
@@ -43,6 +45,7 @@ class GroupingMissionState {
     this.errorMessage,
     this.isLoading = false,
     this.motivationalText,
+    this.showLearning = false,
   });
 
   /// Items not yet assigned to a category
@@ -74,6 +77,7 @@ class GroupingMissionState {
     String? errorMessage,
     bool? isLoading,
     String? motivationalText,
+    bool? showLearning,
   }) {
     return GroupingMissionState(
       phase: phase ?? this.phase,
@@ -87,6 +91,7 @@ class GroupingMissionState {
       errorMessage: errorMessage,
       isLoading: isLoading ?? this.isLoading,
       motivationalText: motivationalText,
+      showLearning: showLearning ?? this.showLearning,
     );
   }
 }
@@ -206,10 +211,12 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
     if (state.currentRound >= state.totalRounds) {
       // Mark mission as complete
       try {
-        await MissionService.completeMission(-6); // -6 = grouping mission
+        await MissionService.completeMission(-6);
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
+      final accuracy = state.lastResult?.accuracy ?? 1.0;
+      XpService.awardXp('group_images', accuracy * 100.0);
       state = state.copyWith(phase: GroupingMissionPhase.missionComplete);
     } else {
       state = state.copyWith(
@@ -237,6 +244,14 @@ class GroupingController extends StateNotifier<GroupingMissionState> {
         isLoading: false,
       );
     }
+  }
+
+  void openLearning() {
+    state = state.copyWith(showLearning: true);
+  }
+
+  void closeLearning() {
+    state = state.copyWith(showLearning: false);
   }
 
   /// Reset mission

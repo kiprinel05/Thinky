@@ -389,6 +389,26 @@ class GroupingSorting {
     final keys = ['moti1', 'moti2', 'moti3', 'moti4', 'moti5', 'moti6'];
     return TextService.getString('GroupingSorting', keys[index % keys.length]);
   }
+
+  static String get lessonButton => TextService.getString('GroupingSorting', 'lessonButton');
+  static String get lessonNext => TextService.getString('GroupingSorting', 'lessonNext');
+  static String get lessonDidYouKnow => TextService.getString('GroupingSorting', 'lessonDidYouKnow');
+  static String get backToResults => TextService.getString('GroupingSorting', 'backToResults');
+  static String get lessonCard1Title => TextService.getString('GroupingSorting', 'lessonCard1Title');
+  static String get lessonCard1Body => TextService.getString('GroupingSorting', 'lessonCard1Body');
+  static String get lessonCard1Fact => TextService.getString('GroupingSorting', 'lessonCard1Fact');
+  static String get lessonCard2Title => TextService.getString('GroupingSorting', 'lessonCard2Title');
+  static String get lessonCard2Body => TextService.getString('GroupingSorting', 'lessonCard2Body');
+  static String get lessonCard2Fact => TextService.getString('GroupingSorting', 'lessonCard2Fact');
+  static String get lessonCard3Title => TextService.getString('GroupingSorting', 'lessonCard3Title');
+  static String get lessonCard3Body => TextService.getString('GroupingSorting', 'lessonCard3Body');
+  static String get lessonCard3Fact => TextService.getString('GroupingSorting', 'lessonCard3Fact');
+  static String get lessonCard4Title => TextService.getString('GroupingSorting', 'lessonCard4Title');
+  static String get lessonCard4Body => TextService.getString('GroupingSorting', 'lessonCard4Body');
+  static String get lessonCard4Fact => TextService.getString('GroupingSorting', 'lessonCard4Fact');
+  static String get lessonCard5Title => TextService.getString('GroupingSorting', 'lessonCard5Title');
+  static String get lessonCard5Body => TextService.getString('GroupingSorting', 'lessonCard5Body');
+  static String get lessonCard5Fact => TextService.getString('GroupingSorting', 'lessonCard5Fact');
 }
 
 /// Accessors for 'Vocabulary' texts

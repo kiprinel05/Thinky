@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import '../../data/pixy_learns_repository.dart';
 import '../../domain/pixy_learns_models.dart';
@@ -86,9 +87,9 @@ class PixyLearnsController extends BaseAsyncController<PixyLearnsState> {
             result: pixyResult,
             showCompletion: true,
           ));
+          _awardXp();
         },
         onFailure: (error) {
-          // Show completion anyway with local result
           safeUpdate(state.copyWith(
             isSubmitting: false,
             result: PixyLearnsResult(
@@ -99,6 +100,7 @@ class PixyLearnsController extends BaseAsyncController<PixyLearnsState> {
             ),
             showCompletion: true,
           ));
+          _awardXp();
         },
       );
     } catch (e) {
@@ -112,7 +114,18 @@ class PixyLearnsController extends BaseAsyncController<PixyLearnsState> {
         ),
         showCompletion: true,
       ));
+      _awardXp();
     }
+  }
+
+  void _awardXp() {
+    final correctCount = state.images.where((img) {
+      final label = state.labels[img.id];
+      return label != null && label == img.correctLabel;
+    }).length;
+    final total = state.images.length;
+    final percentage = total > 0 ? (correctCount / total) * 100.0 : 0.0;
+    XpService.awardXp('pixy_learns', percentage);
   }
 
   void openLearning() {
