@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -10,3 +12,15 @@ class AwardXpResponse(BaseModel):
     xp_earned: int
     mission_slug: str
     already_awarded: bool
+
+
+class MissionXpDetail(BaseModel):
+    mission_slug: str
+    xp: int
+
+
+class UserXpResponse(BaseModel):
+    total_xp: int
+    rank: int
+    total_players: int
+    missions: List[MissionXpDetail] = []

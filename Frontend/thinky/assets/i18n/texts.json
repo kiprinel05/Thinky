@@ -446,7 +446,18 @@
         "helpFaq": "Help & FAQ",
         "darkMode": "Dark Mode",
         "guest": "Guest",
-        "user": "User"
+        "user": "User",
+        "totalXp": "Total XP",
+        "rank": "Rank",
+        "outOf": "out of",
+        "noXpYet": "Complete missions to earn XP!",
+        "xpBreakdown": "XP Breakdown",
+        "missionPixyLearns": "Apple vs Cat",
+        "missionAnimals": "Select Animals",
+        "missionDrawShapes": "Draw Shapes",
+        "missionColorCircle": "Color Circle",
+        "missionGroupImages": "Group Images",
+        "missionWorkshop": "Workshop Quiz"
     },
     "Workshop": {
         "title": "Workshop",

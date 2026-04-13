@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thinky/core_controls/services/auth_service.dart';
+import 'package:thinky/core_controls/services/api_client.dart';
 import 'package:thinky/core_controls/services/app_state_service.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/core_controls/services/theme_service.dart';
@@ -23,6 +27,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   Map<String, dynamic>? _userData;
+  Map<String, dynamic>? _xpData;
   bool _isLoading = true;
 
   @override
@@ -33,10 +38,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> _loadUserData() async {
     final user = await AuthService.getCurrentUser();
+    if (!mounted) return;
     setState(() {
       _userData = user;
       _isLoading = false;
     });
+    _loadXpData();
+  }
+
+  Future<void> _loadXpData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null) return;
+
+      final response = await ApiClient.get('/xp/me');
+      if (!mounted) return;
+      if (response.statusCode == 200) {
+        setState(() => _xpData = jsonDecode(response.body) as Map<String, dynamic>);
+      }
+    } catch (_) {}
   }
 
   Future<void> _handleLogout() async {
@@ -112,7 +133,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ? AppContentSkeletons.profilePage(context)
           : RefreshIndicator(
               color: AppColors.primaryPurple,
-              onRefresh: _loadUserData,
+              onRefresh: () async {
+                await _loadUserData();
+                await _loadXpData();
+              },
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
@@ -144,6 +168,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildProfileHeader(colors),
+                          const SizedBox(height: AppDimens.xl),
+                          _buildXpCard(colors),
                           const SizedBox(height: AppDimens.xl),
                           _buildSettingsSection(currentLocale, themeMode, colors),
                           const SizedBox(height: AppDimens.xl),
@@ -249,6 +275,223 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ],
         ),
       ),
+    );
+  }
+
+  String _missionLabel(String slug) {
+    switch (slug) {
+      case 'pixy_learns':
+        return ProfileTexts.missionPixyLearns;
+      case 'animals':
+        return ProfileTexts.missionAnimals;
+      case 'draw_shapes':
+        return ProfileTexts.missionDrawShapes;
+      case 'color_circle':
+        return ProfileTexts.missionColorCircle;
+      case 'group_images':
+        return ProfileTexts.missionGroupImages;
+      default:
+        if (slug.startsWith('workshop_')) return ProfileTexts.missionWorkshop;
+        return slug;
+    }
+  }
+
+  Widget _buildXpCard(AppColorsExtension colors) {
+    final isGuest = _userData?['isGuest'] == true;
+
+    if (isGuest || _xpData == null) {
+      return FadeInWidget(
+        delay: const Duration(milliseconds: 80),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppDimens.xl),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(AppDimens.radiusXl),
+            border: Border.all(color: colors.border),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.emoji_events_outlined,
+                size: 36,
+                color: colors.textHint,
+              ),
+              const SizedBox(height: AppDimens.sm),
+              Text(
+                ProfileTexts.noXpYet,
+                style: GoogleFonts.alata(
+                  fontSize: 14,
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final totalXp = (_xpData!['total_xp'] as num?)?.toInt() ?? 0;
+    final rank = (_xpData!['rank'] as num?)?.toInt() ?? 0;
+    final totalPlayers = (_xpData!['total_players'] as num?)?.toInt() ?? 0;
+    final missions = (_xpData!['missions'] as List<dynamic>?) ?? [];
+
+    return FadeInWidget(
+      delay: const Duration(milliseconds: 80),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppDimens.xl),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryPurple.withValues(alpha: 0.08),
+              AppColors.primaryPurple.withValues(alpha: 0.03),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(AppDimens.radiusXl),
+          border: Border.all(
+            color: AppColors.primaryPurple.withValues(alpha: 0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryPurple.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _buildXpStat(
+                    icon: Icons.bolt_rounded,
+                    label: ProfileTexts.totalXp,
+                    value: '$totalXp XP',
+                    iconColor: const Color(0xFFFFA726),
+                    colors: colors,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 48,
+                  color: colors.divider,
+                ),
+                Expanded(
+                  child: _buildXpStat(
+                    icon: Icons.leaderboard_rounded,
+                    label: ProfileTexts.rank,
+                    value: '#$rank',
+                    subtitle: '${ProfileTexts.outOf} $totalPlayers',
+                    iconColor: AppColors.primaryPurple,
+                    colors: colors,
+                  ),
+                ),
+              ],
+            ),
+            if (missions.isNotEmpty) ...[
+              const SizedBox(height: AppDimens.lg),
+              Divider(height: 1, color: colors.divider),
+              const SizedBox(height: AppDimens.md),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  ProfileTexts.xpBreakdown,
+                  style: GoogleFonts.alata(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppDimens.sm),
+              ...missions.map((m) {
+                final slug = m['mission_slug'] as String? ?? '';
+                final xp = (m['xp'] as num?)?.toInt() ?? 0;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryPurple,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: AppDimens.sm),
+                      Expanded(
+                        child: Text(
+                          _missionLabel(slug),
+                          style: GoogleFonts.alata(
+                            fontSize: 13,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '+$xp XP',
+                        style: GoogleFonts.alata(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildXpStat({
+    required IconData icon,
+    required String label,
+    required String value,
+    String? subtitle,
+    required Color iconColor,
+    required AppColorsExtension colors,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 28, color: iconColor),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: GoogleFonts.alata(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: GoogleFonts.alata(
+            fontSize: 12,
+            color: colors.textSecondary,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 1),
+          Text(
+            subtitle,
+            style: GoogleFonts.alata(
+              fontSize: 11,
+              color: colors.textHint,
+            ),
+          ),
+        ],
+      ],
     );
   }
 

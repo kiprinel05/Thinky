@@ -585,6 +585,17 @@ class ProfileTexts {
   static String get darkMode => TextService.getString('Profile', 'darkMode');
   static String get guest => TextService.getString('Profile', 'guest');
   static String get user => TextService.getString('Profile', 'user');
+  static String get totalXp => TextService.getString('Profile', 'totalXp');
+  static String get rank => TextService.getString('Profile', 'rank');
+  static String get outOf => TextService.getString('Profile', 'outOf');
+  static String get noXpYet => TextService.getString('Profile', 'noXpYet');
+  static String get xpBreakdown => TextService.getString('Profile', 'xpBreakdown');
+  static String get missionPixyLearns => TextService.getString('Profile', 'missionPixyLearns');
+  static String get missionAnimals => TextService.getString('Profile', 'missionAnimals');
+  static String get missionDrawShapes => TextService.getString('Profile', 'missionDrawShapes');
+  static String get missionColorCircle => TextService.getString('Profile', 'missionColorCircle');
+  static String get missionGroupImages => TextService.getString('Profile', 'missionGroupImages');
+  static String get missionWorkshop => TextService.getString('Profile', 'missionWorkshop');
 }
 
 /// Accessors for 'Workshop' texts

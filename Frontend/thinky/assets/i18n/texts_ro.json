@@ -446,7 +446,18 @@
         "helpFaq": "Ajutor & Întrebări",
         "darkMode": "Mod Întunecat",
         "guest": "Oaspete",
-        "user": "Utilizator"
+        "user": "Utilizator",
+        "totalXp": "XP Total",
+        "rank": "Loc",
+        "outOf": "din",
+        "noXpYet": "Completează misiuni pentru a câștiga XP!",
+        "xpBreakdown": "Detalii XP",
+        "missionPixyLearns": "Măr vs Pisică",
+        "missionAnimals": "Selectează Animalele",
+        "missionDrawShapes": "Desenează Forme",
+        "missionColorCircle": "Colorează Cercul",
+        "missionGroupImages": "Grupează Imaginile",
+        "missionWorkshop": "Quiz Atelier"
     },
     "Workshop": {
         "title": "Atelier",
