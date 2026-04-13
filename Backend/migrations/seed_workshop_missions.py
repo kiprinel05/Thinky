@@ -240,12 +240,16 @@ def migrate() -> None:
             print("[SEED] workshop_missions table does not exist — skipping seed.")
             return
 
-        existing = conn.execute(
-            text("SELECT COUNT(*) FROM workshop_missions WHERE title = 'How AI Learns From Data'"),
-        ).scalar()
-        if existing and existing > 0:
-            print("[SEED] Workshop mock missions already seeded — skipping.")
-            return
+        seed_titles = [m["title"] for m in MISSIONS]
+        placeholders = ",".join(f"'{t}'" for t in seed_titles)
+
+        # Cleanup old seeded missions (handles duplicates from previous runs)
+        old_titles = "('Solar System Explorer','Amazing Animals'," + ",".join(f"'{t}'" for t in seed_titles) + ")"
+        dup_count = conn.execute(text(f"SELECT COUNT(*) FROM workshop_missions WHERE title IN {old_titles}")).scalar()
+        if dup_count and dup_count > 0:
+            conn.execute(text(f"DELETE FROM workshop_downloads WHERE mission_id IN (SELECT id FROM workshop_missions WHERE title IN {old_titles})"))
+            conn.execute(text(f"DELETE FROM workshop_missions WHERE title IN {old_titles}"))
+            print(f"[SEED] Cleaned up {dup_count} old seeded mission(s).")
 
         # Find first user to use as author
         author_row = conn.execute(text("SELECT TOP 1 id FROM users ORDER BY id")).fetchone()
