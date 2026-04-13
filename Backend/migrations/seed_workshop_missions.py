@@ -10,72 +10,117 @@ from core.database import engine
 
 MISSIONS = [
     {
-        "title": "Solar System Explorer",
-        "description": "Test your knowledge about the planets, the Sun, and our solar system!",
-        "tags": ["science", "space", "planets"],
+        "title": "How AI Learns From Data",
+        "description": "Discover how artificial intelligence learns patterns from examples, just like you!",
+        "tags": ["AI", "machine learning", "data"],
         "is_verified": True,
         "questions": [
             {
-                "text": "Which planet is closest to the Sun?",
-                "answers": [{"text": "Venus"}, {"text": "Mercury"}, {"text": "Earth"}, {"text": "Mars"}],
-                "correct_answer_index": 1,
-            },
-            {
-                "text": "What is the largest planet in our solar system?",
-                "answers": [{"text": "Saturn"}, {"text": "Neptune"}, {"text": "Jupiter"}, {"text": "Uranus"}],
-                "correct_answer_index": 2,
-            },
-            {
-                "text": "How many planets are in our solar system?",
-                "answers": [{"text": "7"}, {"text": "8"}, {"text": "9"}, {"text": "10"}],
-                "correct_answer_index": 1,
-            },
-            {
-                "text": "Which planet is known as the Red Planet?",
-                "answers": [{"text": "Jupiter"}, {"text": "Mars"}, {"text": "Venus"}, {"text": "Saturn"}],
-                "correct_answer_index": 1,
-            },
-            {
-                "text": "What gives the Sun its energy?",
+                "text": "What does AI need to learn how to recognize a cat in a photo?",
                 "answers": [
-                    {"text": "Burning gas like a campfire"},
-                    {"text": "Electricity from space"},
-                    {"text": "Nuclear fusion of hydrogen"},
-                    {"text": "Batteries inside it"},
+                    {"text": "A single perfect photo"},
+                    {"text": "Thousands of labeled example photos"},
+                    {"text": "A written description of a cat"},
+                    {"text": "A real cat next to the computer"},
+                ],
+                "correct_answer_index": 1,
+            },
+            {
+                "text": "What is 'training data'?",
+                "answers": [
+                    {"text": "Data that exercises the computer's muscles"},
+                    {"text": "Examples with correct answers that AI studies to learn"},
+                    {"text": "Secret codes only robots understand"},
+                    {"text": "The battery power used during learning"},
+                ],
+                "correct_answer_index": 1,
+            },
+            {
+                "text": "When AI learns by being shown correct answers, this is called...",
+                "answers": [
+                    {"text": "Unsupervised learning"},
+                    {"text": "Random guessing"},
+                    {"text": "Supervised learning"},
+                    {"text": "Copy-paste learning"},
                 ],
                 "correct_answer_index": 2,
+            },
+            {
+                "text": "Why does AI get better with more training examples?",
+                "answers": [
+                    {"text": "It memorizes every single image pixel by pixel"},
+                    {"text": "It finds patterns that help it recognize new things it hasn't seen"},
+                    {"text": "More examples make the computer faster"},
+                    {"text": "It doesn't — more data makes it confused"},
+                ],
+                "correct_answer_index": 1,
+            },
+            {
+                "text": "What happens if you train AI with only pictures of red apples?",
+                "answers": [
+                    {"text": "It will recognize all fruits perfectly"},
+                    {"text": "It might not recognize green apples because it never saw them"},
+                    {"text": "It will become smarter than humans"},
+                    {"text": "Nothing — AI doesn't care about colors"},
+                ],
+                "correct_answer_index": 1,
             },
         ],
     },
     {
-        "title": "Amazing Animals",
-        "description": "How much do you know about the animal kingdom? Find out!",
-        "tags": ["animals", "nature", "biology"],
+        "title": "AI in Everyday Life",
+        "description": "You use AI every day without knowing it! Test how much you know.",
+        "tags": ["AI", "technology", "real world"],
         "is_verified": True,
         "questions": [
             {
-                "text": "Which animal is the tallest in the world?",
-                "answers": [{"text": "Elephant"}, {"text": "Giraffe"}, {"text": "Horse"}, {"text": "Camel"}],
+                "text": "Which of these uses AI?",
+                "answers": [
+                    {"text": "A light switch"},
+                    {"text": "YouTube video recommendations"},
+                    {"text": "A regular calculator"},
+                    {"text": "A paper notebook"},
+                ],
                 "correct_answer_index": 1,
             },
             {
-                "text": "What do you call a group of fish?",
-                "answers": [{"text": "A herd"}, {"text": "A flock"}, {"text": "A school"}, {"text": "A pack"}],
-                "correct_answer_index": 2,
-            },
-            {
-                "text": "Which animal can change its color to blend in?",
-                "answers": [{"text": "Parrot"}, {"text": "Chameleon"}, {"text": "Goldfish"}, {"text": "Penguin"}],
+                "text": "How does your phone unlock with your face?",
+                "answers": [
+                    {"text": "It reads your mind"},
+                    {"text": "AI compares your face to a stored pattern it learned"},
+                    {"text": "The camera just checks if someone is there"},
+                    {"text": "It recognizes your clothes"},
+                ],
                 "correct_answer_index": 1,
             },
             {
-                "text": "How many legs does a spider have?",
-                "answers": [{"text": "6"}, {"text": "10"}, {"text": "8"}, {"text": "4"}],
-                "correct_answer_index": 2,
+                "text": "What does a spam filter in email use to block junk mail?",
+                "answers": [
+                    {"text": "It blocks all emails from strangers"},
+                    {"text": "AI that learned to recognize spam patterns from millions of examples"},
+                    {"text": "A person reads every email first"},
+                    {"text": "It only allows emails with pictures"},
+                ],
+                "correct_answer_index": 1,
             },
             {
-                "text": "Which ocean animal is the largest?",
-                "answers": [{"text": "Great white shark"}, {"text": "Blue whale"}, {"text": "Giant squid"}, {"text": "Orca"}],
+                "text": "Self-driving cars use AI to...",
+                "answers": [
+                    {"text": "Fly over traffic"},
+                    {"text": "See roads, signs, and other cars using cameras and sensors"},
+                    {"text": "Follow a pre-drawn line on the road"},
+                    {"text": "Listen to the driver's thoughts"},
+                ],
+                "correct_answer_index": 1,
+            },
+            {
+                "text": "Can AI have real feelings like being happy or sad?",
+                "answers": [
+                    {"text": "Yes, all AI has emotions"},
+                    {"text": "No — AI can imitate emotions but doesn't actually feel anything"},
+                    {"text": "Only the most expensive AI has feelings"},
+                    {"text": "Yes, but only when turned off"},
+                ],
                 "correct_answer_index": 1,
             },
         ],
@@ -196,8 +241,7 @@ def migrate() -> None:
             return
 
         existing = conn.execute(
-            text("SELECT COUNT(*) FROM workshop_missions WHERE title = :t"),
-            {"t": MISSIONS[0]["title"]},
+            text("SELECT COUNT(*) FROM workshop_missions WHERE title = 'How AI Learns From Data'"),
         ).scalar()
         if existing and existing > 0:
             print("[SEED] Workshop mock missions already seeded — skipping.")
