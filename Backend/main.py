@@ -99,6 +99,18 @@ def startup_event():
     except Exception as e:
         print(f"[WARNING] is_admin migration skipped: {e}")
 
+    try:
+        from migrations.add_workshop_verified_columns import migrate as migrate_workshop
+        migrate_workshop()
+    except Exception as e:
+        print(f"[WARNING] Workshop verified columns migration skipped: {e}")
+
+    try:
+        from migrations.seed_workshop_missions import migrate as seed_workshop
+        seed_workshop()
+    except Exception as e:
+        print(f"[WARNING] Workshop seed skipped: {e}")
+
 # Include Routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(mission_router, prefix=settings.API_V1_STR)
