@@ -14,15 +14,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     ALGORITHM: str = "HS256"
     
-    # Database (Azure SQL)
-    DATABASE_URL: Optional[str] = None
+    # Database (Azure SQL) — DB_* fields must be declared before DATABASE_URL
+    # so the validator can read them from `values`.
     DB_USER: Optional[str] = None
     DB_PASSWORD: Optional[str] = None
     DB_HOST: Optional[str] = None
     DB_PORT: str = "1433"
     DB_NAME: Optional[str] = None
-    DB_DRIVER: str = "ODBC Driver 17 for SQL Server"
+    DB_DRIVER: str = "ODBC Driver 18 for SQL Server"
     USE_AZURE_AD: bool = False
+    DATABASE_URL: Optional[str] = None
     
     # Supabase (Legacy/Reference)
     SUPABASE_URL: Optional[str] = None
