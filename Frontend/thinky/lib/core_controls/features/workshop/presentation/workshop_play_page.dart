@@ -7,6 +7,7 @@ import 'package:thinky/shared_controls/theme/app_dimens.dart';
 import 'package:thinky/core_controls/models/workshop_models.dart';
 import 'package:thinky/core_controls/storage/workshop_storage.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 
 class WorkshopPlayPage extends StatefulWidget {
   final int missionId;
@@ -55,6 +56,9 @@ class _WorkshopPlayPageState extends State<WorkshopPlayPage> {
   void _nextQuestion() {
     if (_currentQuestion + 1 >= _mission!.questions.length) {
       setState(() => _isFinished = true);
+      if (_mission!.isVerified) {
+        XpService.awardXp('workshop_${_mission!.id}', 0.0);
+      }
     } else {
       setState(() {
         _currentQuestion++;

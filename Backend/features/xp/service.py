@@ -25,7 +25,8 @@ class XpService:
         self.db = db
 
     def award_xp(self, user_id: int, req: AwardXpRequest) -> AwardXpResponse:
-        if req.mission_slug not in VALID_MISSION_SLUGS:
+        is_workshop = req.mission_slug.startswith("workshop_")
+        if req.mission_slug not in VALID_MISSION_SLUGS and not is_workshop:
             raise ValueError(f"Unknown mission slug: {req.mission_slug}")
 
         existing = (
