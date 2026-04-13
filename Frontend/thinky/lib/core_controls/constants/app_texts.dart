@@ -682,6 +682,44 @@ class PixyLearnsTexts {
       TextService.getString('PixyLearns', 'aiExplanation');
   static String get continueMissions =>
       TextService.getString('PixyLearns', 'continueMissions');
+  static String get lessonButton =>
+      TextService.getString('PixyLearns', 'lessonButton');
+  static String get lessonNext =>
+      TextService.getString('PixyLearns', 'lessonNext');
+  static String get lessonDidYouKnow =>
+      TextService.getString('PixyLearns', 'lessonDidYouKnow');
+  static String get backToResults =>
+      TextService.getString('PixyLearns', 'backToResults');
+  static String get lessonCard1Title =>
+      TextService.getString('PixyLearns', 'lessonCard1Title');
+  static String get lessonCard1Body =>
+      TextService.getString('PixyLearns', 'lessonCard1Body');
+  static String get lessonCard1Fact =>
+      TextService.getString('PixyLearns', 'lessonCard1Fact');
+  static String get lessonCard2Title =>
+      TextService.getString('PixyLearns', 'lessonCard2Title');
+  static String get lessonCard2Body =>
+      TextService.getString('PixyLearns', 'lessonCard2Body');
+  static String get lessonCard2Fact =>
+      TextService.getString('PixyLearns', 'lessonCard2Fact');
+  static String get lessonCard3Title =>
+      TextService.getString('PixyLearns', 'lessonCard3Title');
+  static String get lessonCard3Body =>
+      TextService.getString('PixyLearns', 'lessonCard3Body');
+  static String get lessonCard3Fact =>
+      TextService.getString('PixyLearns', 'lessonCard3Fact');
+  static String get lessonCard4Title =>
+      TextService.getString('PixyLearns', 'lessonCard4Title');
+  static String get lessonCard4Body =>
+      TextService.getString('PixyLearns', 'lessonCard4Body');
+  static String get lessonCard4Fact =>
+      TextService.getString('PixyLearns', 'lessonCard4Fact');
+  static String get lessonCard5Title =>
+      TextService.getString('PixyLearns', 'lessonCard5Title');
+  static String get lessonCard5Body =>
+      TextService.getString('PixyLearns', 'lessonCard5Body');
+  static String get lessonCard5Fact =>
+      TextService.getString('PixyLearns', 'lessonCard5Fact');
 }
 
 class MascotTexts {

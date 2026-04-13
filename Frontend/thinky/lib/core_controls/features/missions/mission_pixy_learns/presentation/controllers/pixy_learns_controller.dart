@@ -115,6 +115,14 @@ class PixyLearnsController extends BaseAsyncController<PixyLearnsState> {
     }
   }
 
+  void openLearning() {
+    safeUpdate(state.copyWith(showLearning: true));
+  }
+
+  void closeLearning() {
+    safeUpdate(state.copyWith(showLearning: false));
+  }
+
   @override
   void setLoading() => state = state.copyWith(status: StateStatus.loading);
   

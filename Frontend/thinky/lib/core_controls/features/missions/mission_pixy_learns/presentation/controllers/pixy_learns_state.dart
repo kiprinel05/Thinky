@@ -9,6 +9,7 @@ class PixyLearnsState extends BaseState {
   final Map<String, String> labels; // imageId -> label
   final bool showIntroduction;
   final bool showCompletion;
+  final bool showLearning;
   final PixyLearnsResult? result;
   final bool isSubmitting;
 
@@ -19,6 +20,7 @@ class PixyLearnsState extends BaseState {
     this.labels = const {},
     this.showIntroduction = true,
     this.showCompletion = false,
+    this.showLearning = false,
     this.result,
     this.isSubmitting = false,
   });
@@ -39,6 +41,7 @@ class PixyLearnsState extends BaseState {
     Map<String, String>? labels,
     bool? showIntroduction,
     bool? showCompletion,
+    bool? showLearning,
     PixyLearnsResult? result,
     bool? isSubmitting,
   }) {
@@ -49,6 +52,7 @@ class PixyLearnsState extends BaseState {
       labels: labels ?? this.labels,
       showIntroduction: showIntroduction ?? this.showIntroduction,
       showCompletion: showCompletion ?? this.showCompletion,
+      showLearning: showLearning ?? this.showLearning,
       result: result ?? this.result,
       isSubmitting: isSubmitting ?? this.isSubmitting,
     );

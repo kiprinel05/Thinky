@@ -12,6 +12,7 @@ import '../controllers/pixy_learns_controller.dart';
 import '../controllers/pixy_learns_state.dart';
 import '../../data/pixy_learns_image_url.dart';
 import '../../domain/pixy_learns_models.dart';
+import 'pixy_learns_learning_view.dart';
 
 /// Main page for Pixy Learns mission
 class PixyLearnsPage extends ConsumerStatefulWidget {
@@ -70,6 +71,13 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
     }
 
     if (state.showCompletion) {
+      if (state.showLearning) {
+        return Scaffold(
+          body: PixyLearnsLearningView(
+            onDone: () => ref.read(pixyLearnsStateProvider.notifier).closeLearning(),
+          ),
+        );
+      }
       return _buildCompletionScreen(state);
     }
 
@@ -958,7 +966,6 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                     children: [
                       const SizedBox(height: 20),
                       
-                      // Celebration
                       ScaleInWidget(
                         delay: const Duration(milliseconds: 200),
                         child: Image.asset(
@@ -968,30 +975,29 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         ),
                       ),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
                       
                       FadeInWidget(
                         delay: const Duration(milliseconds: 400),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('🎉', style: TextStyle(fontSize: 36)),
-                            const SizedBox(width: 12),
-                            Text(
-                              PixyLearnsTexts.amazingJob,
-                              style: GoogleFonts.alata(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                        child: Text(
+                          PixyLearnsTexts.amazingJob,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.alata(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text('🎉', style: TextStyle(fontSize: 36)),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 28),
                       
                       // Stats card
                       FadeInWidget(
@@ -1079,7 +1085,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         ),
                       ),
                       
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       
                       // Explanation
                       FadeInWidget(
@@ -1121,9 +1127,9 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         ),
                       ),
                       
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 28),
                       
-                      // Continue button
+                      // Learn with Pixy button (primary)
                       FadeInWidget(
                         delay: const Duration(milliseconds: 700),
                         child: Container(
@@ -1142,7 +1148,7 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
+                            onPressed: () => ref.read(pixyLearnsStateProvider.notifier).openLearning(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -1154,26 +1160,19 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                const Icon(
+                                  Icons.auto_stories_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
                                 Text(
-                                  PixyLearnsTexts.continueMissions,
+                                  PixyLearnsTexts.lessonButton,
                                   style: GoogleFonts.alata(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 16,
                                     letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_forward_rounded,
-                                    color: Colors.white,
-                                    size: 16,
                                   ),
                                 ),
                               ],
@@ -1182,7 +1181,47 @@ class _PixyLearnsPageState extends ConsumerState<PixyLearnsPage>
                         ),
                       ),
                       
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 12),
+                      
+                      // Continue to missions button (secondary)
+                      FadeInWidget(
+                        delay: const Duration(milliseconds: 800),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            style: TextButton.styleFrom(
+                              foregroundColor: colors.textSecondary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  PixyLearnsTexts.continueMissions,
+                                  style: GoogleFonts.alata(
+                                    color: colors.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: colors.textSecondary,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
