@@ -93,6 +93,12 @@ def startup_event():
     except Exception as e:
         print(f"[WARNING] XP migration skipped: {e}")
 
+    try:
+        from migrations.add_is_admin_to_users import migrate as migrate_admin
+        migrate_admin()
+    except Exception as e:
+        print(f"[WARNING] is_admin migration skipped: {e}")
+
 # Include Routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(mission_router, prefix=settings.API_V1_STR)

@@ -99,11 +99,22 @@ class LeaderboardService:
             )
             return LeaderboardResponse(entries=[], stats=empty_stats)
 
-        users = self.db.query(User).filter(User.id.in_(user_ids)).all()
-        username_map = {
-            u.id: (u.username or u.guest_name or f"User {u.id}")
-            for u in users
-        }
+        try:
+            users = self.db.query(User).filter(User.id.in_(user_ids)).all()
+            username_map = {
+                u.id: (u.username or u.guest_name or f"User {u.id}")
+                for u in users
+            }
+        except Exception:
+            self.db.rollback()
+            from sqlalchemy import text as sa_text
+            rows = self.db.execute(
+                sa_text("SELECT id, username, guest_name FROM users WHERE id IN :ids"),
+                {"ids": tuple(user_ids)},
+            ).fetchall()
+            username_map = {
+                r[0]: (r[1] or r[2] or f"User {r[0]}") for r in rows
+            }
 
         def build_mission_xp_breakdown(uid: int) -> Optional[List[LeaderboardMissionPoints]]:
             combined = dict(user_slug_xp.get(uid, {}))
