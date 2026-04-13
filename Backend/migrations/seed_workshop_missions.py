@@ -195,9 +195,12 @@ def migrate() -> None:
             print("[SEED] workshop_missions table does not exist — skipping seed.")
             return
 
-        count = conn.execute(text("SELECT COUNT(*) FROM workshop_missions")).scalar()
-        if count and count > 0:
-            print(f"[SEED] Workshop already has {count} mission(s) — skipping seed.")
+        existing = conn.execute(
+            text("SELECT COUNT(*) FROM workshop_missions WHERE title = :t"),
+            {"t": MISSIONS[0]["title"]},
+        ).scalar()
+        if existing and existing > 0:
+            print("[SEED] Workshop mock missions already seeded — skipping.")
             return
 
         # Find first user to use as author
