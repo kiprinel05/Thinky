@@ -1,17 +1,21 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/widgets/quiz_widgets.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
-import '../../data/vocabulary_models.dart';
-import '../../data/vocabulary_repository.dart';
-import '../controllers/vocabulary_controller.dart';
+import 'package:thinky/shared_controls/widgets/buttons/primary_button.dart';
 
-/// Main page for the Vocabulary Mission
-/// "Select the image that matches the word"
+import '../../data/vocabulary_models.dart';
+import '../controllers/vocabulary_controller.dart';
+import 'vocabulary_learning_view.dart';
+
+/// Word Match mission — bilingual, emoji-based.
 class VocabularyMissionPage extends ConsumerStatefulWidget {
   const VocabularyMissionPage({super.key});
 
@@ -22,16 +26,13 @@ class VocabularyMissionPage extends ConsumerStatefulWidget {
 
 class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     with TickerProviderStateMixin {
-  // Animation controllers
   late AnimationController _wordBounceController;
   late AnimationController _feedbackController;
   late AnimationController _sparkleController;
-  late AnimationController _encouragementController;
 
   late Animation<double> _wordScale;
   late Animation<double> _feedbackSlide;
   late Animation<double> _sparkleOpacity;
-  late Animation<double> _encouragementOpacity;
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _wordScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _wordScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _wordBounceController, curve: Curves.elasticOut),
     );
 
@@ -49,7 +50,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _feedbackSlide = Tween<double>(begin: 50.0, end: 0.0).animate(
+    _feedbackSlide = Tween<double>(begin: 40.0, end: 0.0).animate(
       CurvedAnimation(parent: _feedbackController, curve: Curves.easeOutBack),
     );
 
@@ -64,19 +65,6 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
         reverseCurve: const Interval(0.6, 1.0, curve: Curves.easeOut),
       ),
     );
-
-    _encouragementController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _encouragementOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _encouragementController, curve: Curves.easeOut),
-    );
-
-    // Start mission
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(vocabularyControllerProvider.notifier).startMission();
-    });
   }
 
   @override
@@ -84,137 +72,358 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     _wordBounceController.dispose();
     _feedbackController.dispose();
     _sparkleController.dispose();
-    _encouragementController.dispose();
     super.dispose();
   }
+
+  String _activeLang() => ref.read(languageProvider).languageCode;
 
   @override
   Widget build(BuildContext context) {
     ref.watch(textRefreshProvider);
+    ref.watch(languageProvider);
+
     final colors = context.appColors;
     final state = ref.watch(vocabularyControllerProvider);
 
-    // Listen for phase changes to trigger animations
     ref.listen<VocabMissionState>(vocabularyControllerProvider, (prev, next) {
       if (next.phase == VocabMissionPhase.question &&
           prev?.phase != VocabMissionPhase.question) {
         _wordBounceController.forward(from: 0.0);
       }
-      if (next.phase == VocabMissionPhase.feedback) {
+      if (next.phase == VocabMissionPhase.feedback &&
+          prev?.phase != VocabMissionPhase.feedback) {
         _feedbackController.forward(from: 0.0);
         if (next.lastAnswer?.correct == true) {
           _sparkleController.forward(from: 0.0);
-        }
-        if (next.encouragement != null) {
-          _encouragementController.forward(from: 0.0);
         }
       }
     });
 
     return Scaffold(
       backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildAppBar(state, colors),
-            if (state.phase == VocabMissionPhase.question ||
-                state.phase == VocabMissionPhase.feedback ||
-                state.phase == VocabMissionPhase.submitting)
-              _buildProgressDots(state, colors),
-            Expanded(child: _buildContent(state, colors)),
-          ],
+      body: _buildPhase(state, colors),
+    );
+  }
+
+  Widget _buildPhase(VocabMissionState state, AppColorsExtension colors) {
+    switch (state.phase) {
+      case VocabMissionPhase.intro:
+        return _IntroScaffold(
+          onStart: () {
+            ref.read(vocabularyControllerProvider.notifier).startFromIntro();
+          },
+          onBack: () => Navigator.of(context).pop(true),
+        );
+      case VocabMissionPhase.loading:
+        return _LoadingScaffold(message: Vocabulary.loadingWords);
+      case VocabMissionPhase.submitting:
+        return _QuestionScaffold(
+          state: state,
+          languageCode: _activeLang(),
+          isSubmitting: true,
+          wordScaleAnim: _wordScale,
+          wordBounceController: _wordBounceController,
+          onBack: () => Navigator.of(context).pop(true),
+          onSelect: (_) {},
+          onSubmit: () {},
+        );
+      case VocabMissionPhase.question:
+        return _QuestionScaffold(
+          state: state,
+          languageCode: _activeLang(),
+          isSubmitting: false,
+          wordScaleAnim: _wordScale,
+          wordBounceController: _wordBounceController,
+          onBack: () => Navigator.of(context).pop(true),
+          onSelect: (id) {
+            ref.read(vocabularyControllerProvider.notifier).selectImage(id);
+          },
+          onSubmit: () {
+            ref
+                .read(vocabularyControllerProvider.notifier)
+                .submitAnswer(languageCode: _activeLang());
+          },
+        );
+      case VocabMissionPhase.feedback:
+        return _FeedbackScaffold(
+          state: state,
+          languageCode: _activeLang(),
+          feedbackSlide: _feedbackSlide,
+          feedbackController: _feedbackController,
+          sparkleOpacity: _sparkleOpacity,
+          sparkleController: _sparkleController,
+          onNext: () {
+            ref.read(vocabularyControllerProvider.notifier).nextQuestion();
+          },
+        );
+      case VocabMissionPhase.missionComplete:
+        return _CompleteScaffold(
+          state: state,
+          onContinue: () => Navigator.of(context).pop(true),
+          onLearn: _openLearningView,
+          onRetry: () {
+            ref.read(vocabularyControllerProvider.notifier).restart();
+          },
+        );
+      case VocabMissionPhase.error:
+        return _ErrorScaffold(
+          message: state.errorMessage,
+          onRetry: () {
+            ref.read(vocabularyControllerProvider.notifier).startFromIntro();
+          },
+          onBack: () => Navigator.of(context).pop(true),
+        );
+    }
+  }
+
+  Future<void> _openLearningView() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (ctx) => VocabularyLearningView(
+          onDone: () => Navigator.of(ctx).pop(),
         ),
       ),
     );
   }
+}
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // APP BAR
-  // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED LAYOUT HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildAppBar(VocabMissionState state, AppColorsExtension colors) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+/// Soft gradient + decorative circles used by every phase for visual unity.
+class _BackgroundDecor extends StatelessWidget {
+  const _BackgroundDecor({this.vibrant = false});
+
+  /// When true, the gradient is more saturated (used for intro / complete).
+  final bool vibrant;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.appColors;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: isDark
+                    ? [
+                        const Color(0xFF4A5288),
+                        const Color(0xFF353A5C),
+                        colors.background,
+                      ]
+                    : vibrant
+                        ? [
+                            const Color(0xFF9DAAFF),
+                            const Color(0xFFE8EAFF),
+                            colors.background,
+                          ]
+                        : [
+                            const Color(0xFFE2E6FF),
+                            const Color(0xFFF3F4FF),
+                            colors.background,
+                          ],
+                stops: vibrant
+                    ? const [0.0, 0.28, 0.55]
+                    : const [0.0, 0.35, 0.8],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: -60,
+          right: -40,
+          child: IgnorePointer(
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.3),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 140,
+          left: -50,
+          child: IgnorePointer(
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryPurple.withValues(
+                  alpha: isDark ? 0.12 : 0.15,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TopBar extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final VoidCallback onBack;
+  final Widget? trailing;
+  final bool onGradient;
+
+  const _TopBar({
+    required this.title,
+    required this.onBack,
+    this.subtitle,
+    this.trailing,
+    this.onGradient = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final titleColor = onGradient ? Colors.white : colors.textPrimary;
+    final subtitleColor = onGradient
+        ? Colors.white.withValues(alpha: 0.82)
+        : colors.textSecondary;
+    final btnBg = onGradient
+        ? Colors.white.withValues(alpha: 0.18)
+        : colors.cardColor;
+    final btnBorder = onGradient
+        ? Colors.white.withValues(alpha: 0.28)
+        : colors.border;
+    final iconColor = onGradient ? Colors.white : colors.textPrimary;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(true),
+            onTap: onBack,
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: colors.cardColor,
+                color: btnBg,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.border),
+                border: Border.all(color: btnBorder),
               ),
-              child: Icon(Icons.arrow_back, color: colors.textPrimary, size: 20),
+              child: Icon(Icons.arrow_back, color: iconColor, size: 20),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  Vocabulary.title,
+                  title,
                   style: GoogleFonts.alata(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
+                    color: titleColor,
                   ),
                 ),
-                Text(
-                  Vocabulary.subtitle,
-                  style: GoogleFonts.alata(
-                    fontSize: 12,
-                    color: colors.textSecondary,
+                if (subtitle != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.alata(
+                        fontSize: 12,
+                        color: subtitleColor,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
-          if (state.answeredCount > 0)
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primaryPurple.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryPurple.withValues(alpha: 0.25)),
-              ),
-              child: Text(
-                '${state.correctCount}/${state.answeredCount}',
-                style: GoogleFonts.alata(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryPurple,
-                ),
-              ),
-            ),
+          if (trailing != null) trailing!,
         ],
       ),
     );
   }
+}
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PROGRESS DOTS
-  // ═══════════════════════════════════════════════════════════════════════════
+class _ScorePill extends StatelessWidget {
+  final int correct;
+  final int answered;
+  final bool onGradient;
 
-  Widget _buildProgressDots(VocabMissionState state, AppColorsExtension colors) {
+  const _ScorePill({
+    required this.correct,
+    required this.answered,
+    this.onGradient = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = onGradient ? Colors.white : AppColors.primaryPurple;
+    final bg = onGradient
+        ? Colors.white.withValues(alpha: 0.18)
+        : AppColors.primaryPurple.withValues(alpha: 0.12);
+    final border = onGradient
+        ? Colors.white.withValues(alpha: 0.28)
+        : AppColors.primaryPurple.withValues(alpha: 0.25);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
+      ),
+      child: Text(
+        '$correct/$answered',
+        style: GoogleFonts.alata(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: fg,
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressDots extends StatelessWidget {
+  final int total;
+  final int answered;
+  final int current;
+  final bool onGradient;
+
+  const _ProgressDots({
+    required this.total,
+    required this.answered,
+    required this.current,
+    this.onGradient = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(state.totalQuestions, (index) {
+        children: List.generate(total, (index) {
           Color dotColor;
           double size;
-          if (index < state.answeredCount) {
+          if (index < answered) {
             dotColor = AppColors.correctGreen;
             size = 8;
-          } else if (index == state.currentIndex) {
-            dotColor = AppColors.primaryPurple;
+          } else if (index == current) {
+            dotColor = onGradient ? Colors.white : AppColors.primaryPurple;
             size = 12;
           } else {
-            dotColor = colors.border;
+            dotColor = onGradient
+                ? Colors.white.withValues(alpha: 0.3)
+                : colors.border;
             size = 8;
           }
           return AnimatedContainer(
@@ -231,228 +440,483 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       ),
     );
   }
+}
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONTENT ROUTER
-  // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// INTRO PHASE
+// ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildContent(VocabMissionState state, AppColorsExtension colors) {
-    switch (state.phase) {
-      case VocabMissionPhase.loading:
-        return _buildLoading(colors, Vocabulary.loadingWords);
-      case VocabMissionPhase.submitting:
-        return _buildLoading(colors, Vocabulary.submittingShort);
-      case VocabMissionPhase.question:
-        return _buildQuestionPhase(state, colors);
-      case VocabMissionPhase.feedback:
-        return _buildFeedbackPhase(state, colors);
-      case VocabMissionPhase.missionComplete:
-        return _buildMissionComplete(state, colors);
-      case VocabMissionPhase.error:
-        return _buildError(state, colors);
-    }
+class _IntroScaffold extends StatelessWidget {
+  final VoidCallback onStart;
+  final VoidCallback onBack;
+
+  const _IntroScaffold({required this.onStart, required this.onBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Stack(
+      children: [
+        const _BackgroundDecor(vibrant: true),
+        SafeArea(
+          child: Column(
+            children: [
+              _TopBar(
+                title: Vocabulary.title,
+                subtitle: Vocabulary.subtitle,
+                onBack: onBack,
+                onGradient: true,
+              ),
+              const SizedBox(height: 8),
+              const ProfessorHeadAbovePanel(
+                width: 130,
+                viewportHeight: 110,
+                imageScale: 1.4,
+                imageOffsetY: -6,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: Transform.translate(
+                    offset: const Offset(0, -16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: colors.cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: colors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.35 : 0.08,
+                            ),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '📖',
+                            style: GoogleFonts.alata(fontSize: 44),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            Vocabulary.introTitle,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.alata(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            Vocabulary.introBody,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              height: 1.55,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _FeaturePill(
+                                icon: Icons.format_list_numbered_rounded,
+                                text: Vocabulary.introFeature1,
+                              ),
+                              _FeaturePill(
+                                icon: Icons.category_rounded,
+                                text: Vocabulary.introFeature2,
+                              ),
+                              _FeaturePill(
+                                icon: Icons.auto_awesome_rounded,
+                                text: Vocabulary.introFeature3,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 22),
+                          PrimaryButton(
+                            text: Vocabulary.startButton,
+                            onPressed: onStart,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
+}
 
-  Widget _buildLoading(AppColorsExtension colors, String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+class _FeaturePill extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FeaturePill({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.primaryPurple.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: AppColors.primaryPurple.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: AppColors.primaryPurple),
-          const SizedBox(height: 16),
+          Icon(icon, size: 14, color: AppColors.primaryPurple),
+          const SizedBox(width: 6),
           Text(
-            message,
-            style: GoogleFonts.alata(fontSize: 16, color: colors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // QUESTION PHASE — Word Card + Image Grid
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildQuestionPhase(VocabMissionState state, AppColorsExtension colors) {
-    final question = state.currentQuestion;
-    if (question == null) return _buildLoading(colors, Vocabulary.loadingWords);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          const SizedBox(height: 12),
-
-          // Word card with bounce animation
-          AnimatedBuilder(
-            animation: _wordBounceController,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _wordScale.value,
-                child: child,
-              );
-            },
-            child: _buildWordCard(question.word),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Image grid
-          Expanded(
-            child: _buildImageGrid(question, state.selectedImageId, colors),
-          ),
-
-          // Submit button
-          if (state.hasSelection)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _buildSubmitButton(),
+            text,
+            style: GoogleFonts.alata(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colors.textPrimary,
             ),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildWordCard(String word) {
+// ═══════════════════════════════════════════════════════════════════════════
+// LOADING PHASE
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _LoadingScaffold extends StatelessWidget {
+  final String message;
+  const _LoadingScaffold({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Stack(
+      children: [
+        const _BackgroundDecor(),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: AppColors.primaryPurple),
+              const SizedBox(height: 18),
+              Text(
+                message,
+                style: GoogleFonts.alata(
+                  fontSize: 16,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QUESTION PHASE
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _QuestionScaffold extends StatelessWidget {
+  final VocabMissionState state;
+  final String languageCode;
+  final bool isSubmitting;
+  final Animation<double> wordScaleAnim;
+  final AnimationController wordBounceController;
+  final VoidCallback onBack;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onSubmit;
+
+  const _QuestionScaffold({
+    required this.state,
+    required this.languageCode,
+    required this.isSubmitting,
+    required this.wordScaleAnim,
+    required this.wordBounceController,
+    required this.onBack,
+    required this.onSelect,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final question = state.currentQuestion;
+    if (question == null) {
+      return _LoadingScaffold(message: Vocabulary.loadingWords);
+    }
+
+    return Stack(
+      children: [
+        const _BackgroundDecor(),
+        SafeArea(
+          child: Column(
+            children: [
+              _TopBar(
+                title: Vocabulary.title,
+                subtitle: Vocabulary.questionPrompt,
+                onBack: onBack,
+                trailing: state.answeredCount > 0
+                    ? _ScorePill(
+                        correct: state.correctCount,
+                        answered: state.answeredCount,
+                      )
+                    : null,
+              ),
+              _ProgressDots(
+                total: state.totalQuestions,
+                answered: state.answeredCount,
+                current: state.currentIndex,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: AnimatedBuilder(
+                  animation: wordBounceController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: wordScaleAnim.value,
+                      child: child,
+                    );
+                  },
+                  child: _WordCard(word: question.wordFor(languageCode)),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _EmojiGrid(
+                    question: question,
+                    languageCode: languageCode,
+                    selectedId: state.selectedImageId,
+                    onSelect: isSubmitting ? null : onSelect,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
+                child: PrimaryButton(
+                  text: isSubmitting
+                      ? Vocabulary.submittingShort
+                      : Vocabulary.submitAnswer,
+                  onPressed: state.hasSelection && !isSubmitting
+                      ? onSubmit
+                      : null,
+                  isEnabled: state.hasSelection && !isSubmitting,
+                  isLoading: isSubmitting,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WordCard extends StatelessWidget {
+  final String word;
+  const _WordCard({required this.word});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF8E97FD), Color(0xFFA5AEFD)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF8E97FD).withAlpha(77),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: const Color(0xFF8E97FD).withValues(alpha: 0.45),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         children: [
           Text(
-            '📖',
-            style: const TextStyle(fontSize: 28),
-          ),
-          const SizedBox(height: 8),
-          Text(
             word,
+            textAlign: TextAlign.center,
             style: GoogleFonts.alata(
-              fontSize: 36,
-              fontWeight: FontWeight.w700,
+              fontSize: 38,
+              fontWeight: FontWeight.w800,
               color: Colors.white,
-              letterSpacing: 1.5,
+              letterSpacing: 1.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            Vocabulary.findMatchingImage,
+            Vocabulary.chooseEmoji,
             style: GoogleFonts.alata(
               fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.85),
+              color: Colors.white.withValues(alpha: 0.88),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildImageGrid(
-    VocabQuestion question,
-    int? selectedId,
-    AppColorsExtension colors,
-  ) {
+class _EmojiGrid extends StatelessWidget {
+  final VocabQuestion question;
+  final String languageCode;
+  final int? selectedId;
+  final ValueChanged<int>? onSelect;
+
+  const _EmojiGrid({
+    required this.question,
+    required this.languageCode,
+    required this.selectedId,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final images = question.images;
-    // Use 2 columns
+    // 2 columns look best on phones; bump to 3 for 6-option hard rounds.
+    final crossAxis = images.length >= 6 ? 3 : 2;
     return GridView.builder(
       padding: const EdgeInsets.only(bottom: 8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxis,
         childAspectRatio: 1.0,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
       itemCount: images.length,
       itemBuilder: (context, index) {
-        return _buildImageOption(images[index], selectedId, colors);
+        final image = images[index];
+        return _EmojiTile(
+          image: image,
+          languageCode: languageCode,
+          selected: selectedId == image.id,
+          onTap: onSelect == null ? null : () => onSelect!(image.id),
+        );
       },
     );
   }
+}
 
-  Widget _buildImageOption(
-    VocabImage image,
-    int? selectedId,
-    AppColorsExtension colors,
-  ) {
-    final isSelected = selectedId == image.id;
-    final resolvedUrl = VocabularyRepository.getImageUrl(image.url);
-    final controller = ref.read(vocabularyControllerProvider.notifier);
+class _EmojiTile extends StatelessWidget {
+  final VocabImage image;
+  final String languageCode;
+  final bool selected;
+  final VoidCallback? onTap;
 
+  const _EmojiTile({
+    required this.image,
+    required this.languageCode,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     return GestureDetector(
-      onTap: () => controller.selectImage(image.id),
+      onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
           color: colors.cardColor,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primaryPurple : colors.border,
-            width: isSelected ? 3.0 : 1.5,
+            color: selected ? AppColors.primaryPurple : colors.border,
+            width: selected ? 3.0 : 1.5,
           ),
-          boxShadow: isSelected
+          boxShadow: selected
               ? [
                   BoxShadow(
-                    color: AppColors.primaryPurple.withValues(alpha: 0.22),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  )
+                    color: AppColors.primaryPurple.withValues(alpha: 0.25),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
-                  )
+                  ),
                 ],
         ),
         child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: _buildVocabImage(
-                resolvedUrl: resolvedUrl,
-                label: image.label,
-                colors: colors,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(image.emoji,
+                          style: const TextStyle(fontSize: 72)),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    image.labelFor(languageCode),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.alata(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (isSelected)
+            if (selected)
               Positioned(
                 top: 8,
                 right: 8,
                 child: Container(
-                  width: 28,
-                  height: 28,
+                  width: 26,
+                  height: 26,
                   decoration: const BoxDecoration(
                     color: AppColors.primaryPurple,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 18),
-                ),
-              ),
-            if (isSelected)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppColors.primaryPurple.withValues(alpha: 0.35),
-                      width: 2,
-                    ),
-                  ),
+                  child: const Icon(Icons.check,
+                      color: Colors.white, size: 16),
                 ),
               ),
           ],
@@ -460,251 +924,178 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       ),
     );
   }
+}
 
-  Widget _buildVocabImage({
-    required String resolvedUrl,
-    required String label,
-    required AppColorsExtension colors,
-  }) {
-    Widget fallback() => Container(
-          color: colors.surface,
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              label.isNotEmpty ? label : Vocabulary.imageError,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.alata(
-                fontSize: 14,
-                color: colors.textSecondary,
-              ),
-            ),
-          ),
-        );
+// ═══════════════════════════════════════════════════════════════════════════
+// FEEDBACK PHASE
+// ═══════════════════════════════════════════════════════════════════════════
 
-    if (resolvedUrl.startsWith('assets/')) {
-      return Image.asset(
-        resolvedUrl,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        errorBuilder: (_, __, ___) => fallback(),
-      );
-    }
+class _FeedbackScaffold extends StatelessWidget {
+  final VocabMissionState state;
+  final String languageCode;
+  final Animation<double> feedbackSlide;
+  final AnimationController feedbackController;
+  final Animation<double> sparkleOpacity;
+  final AnimationController sparkleController;
+  final VoidCallback onNext;
 
-    return Image.network(
-      resolvedUrl,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return Container(
-          color: colors.surface,
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: AppColors.primaryPurple,
-              value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded /
-                      progress.expectedTotalBytes!
-                  : null,
-            ),
-          ),
-        );
-      },
-      errorBuilder: (_, __, ___) => fallback(),
-    );
-  }
+  const _FeedbackScaffold({
+    required this.state,
+    required this.languageCode,
+    required this.feedbackSlide,
+    required this.feedbackController,
+    required this.sparkleOpacity,
+    required this.sparkleController,
+    required this.onNext,
+  });
 
-  Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        onPressed: () {
-          ref.read(vocabularyControllerProvider.notifier).submitAnswer();
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8E97FD),
-          foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
-        ),
-        child: Text(
-          Vocabulary.submitAnswer,
-          style: GoogleFonts.alata(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // FEEDBACK PHASE — Correct / Incorrect with animations
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildFeedbackPhase(VocabMissionState state, AppColorsExtension colors) {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     final answer = state.lastAnswer;
-    if (answer == null) return _buildLoading(colors, Vocabulary.loadingWords);
+    final feedback = state.lastFeedback;
+    final question = state.currentQuestion;
+    if (answer == null || feedback == null || question == null) {
+      return _LoadingScaffold(message: Vocabulary.loadingWords);
+    }
 
     final isCorrect = answer.correct;
     final accentColor =
         isCorrect ? AppColors.correctGreen : AppColors.missionPeach;
-    final question = state.currentQuestion;
+
+    final correctImage = question.images.firstWhere(
+      (img) => img.id == answer.correctImageId,
+      orElse: () => question.images.first,
+    );
 
     return Stack(
       children: [
-        // Main feedback content
-        AnimatedBuilder(
-          animation: _feedbackController,
-          builder: (context, child) {
-            return Transform.translate(
-              offset: Offset(0, _feedbackSlide.value),
-              child: Opacity(
-                opacity: _feedbackController.value,
-                child: child,
-              ),
-            );
-          },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                // Big result icon
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: accentColor.withAlpha(30),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      isCorrect ? '✅' : '💡',
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                  ),
+        const _BackgroundDecor(),
+        SafeArea(
+          child: AnimatedBuilder(
+            animation: feedbackController,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(0, feedbackSlide.value),
+                child: Opacity(
+                  opacity: feedbackController.value,
+                  child: child,
                 ),
-                const SizedBox(height: 16),
-
-                // Message
-                Text(
-                  answer.message,
-                  style: GoogleFonts.alata(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-
-                // Show correct answer image if incorrect
-                if (!isCorrect && question != null) ...[
-                  Text(
-                    Vocabulary.correctImageCaption,
-                    style: GoogleFonts.alata(
-                      fontSize: 14,
-                      color: colors.textSecondary,
+              );
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              child: Column(
+                children: [
+                  Container(
+                    width: 86,
+                    height: 86,
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildCorrectAnswerCard(question, answer.correctImageId, colors),
-                  const SizedBox(height: 20),
-                ],
-
-                // Mascot encouragement bubble
-                if (state.encouragement != null)
-                  AnimatedBuilder(
-                    animation: _encouragementController,
-                    builder: (context, child) {
-                      return Opacity(
-                        opacity: _encouragementOpacity.value,
-                        child: Transform.translate(
-                          offset: Offset(
-                              0, 10 * (1 - _encouragementOpacity.value)),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryPurple.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.primaryPurple.withValues(alpha: 0.28),
-                        ),
+                    child: Center(
+                      child: Text(
+                        isCorrect ? '🎉' : '💡',
+                        style: const TextStyle(fontSize: 44),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('🤖', style: TextStyle(fontSize: 22)),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Text(
-                              state.encouragement!,
-                              style: GoogleFonts.alata(
-                                fontSize: 14,
-                                color: colors.textSecondary,
-                              ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    feedback.message,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.alata(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (!isCorrect) ...[
+                    Text(
+                      Vocabulary.theRightAnswer,
+                      style: GoogleFonts.alata(
+                        fontSize: 13,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _CorrectAnswerChip(
+                      image: correctImage,
+                      languageCode: languageCode,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color:
+                            AppColors.primaryPurple.withValues(alpha: 0.28),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🤖', style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            feedback.encouragement,
+                            style: GoogleFonts.alata(
+                              fontSize: 13,
+                              color: colors.textSecondary,
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: onNext,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: accentColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: Text(
+                        state.currentIndex + 1 >= state.totalQuestions
+                            ? Vocabulary.seeResultsWithTrophy
+                            : Vocabulary.nextWordArrow,
+                        style: GoogleFonts.alata(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
-
-                const SizedBox(height: 32),
-
-                // Next button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(vocabularyControllerProvider.notifier)
-                          .nextQuestion();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                    ),
-                    child: Text(
-                      state.currentIndex + 1 >= state.totalQuestions
-                          ? Vocabulary.seeResultsWithTrophy
-                          : Vocabulary.nextWordArrow,
-                      style: GoogleFonts.alata(
-                          fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-
-        // ✨ Sparkle animation on correct answer (UI Enhancement)
         if (isCorrect)
           AnimatedBuilder(
-            animation: _sparkleController,
+            animation: sparkleController,
             builder: (context, _) {
-              return Opacity(
-                opacity: _sparkleOpacity.value * 0.7,
-                child: IgnorePointer(
+              return IgnorePointer(
+                child: Opacity(
+                  opacity: sparkleOpacity.value * 0.7,
                   child: SizedBox.expand(
                     child: CustomPaint(
                       painter:
-                          _SparklePainter(progress: _sparkleController.value),
+                          _SparklePainter(progress: sparkleController.value),
                     ),
                   ),
                 ),
@@ -714,141 +1105,255 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
       ],
     );
   }
+}
 
-  Widget _buildCorrectAnswerCard(
-    VocabQuestion question,
-    int correctId,
-    AppColorsExtension colors,
-  ) {
-    final correctImage =
-        question.images.where((img) => img.id == correctId).firstOrNull;
-    if (correctImage == null) return const SizedBox.shrink();
+class _CorrectAnswerChip extends StatelessWidget {
+  final VocabImage image;
+  final String languageCode;
 
-    final imageUrl = VocabularyRepository.getImageUrl(correctImage.url);
+  const _CorrectAnswerChip({
+    required this.image,
+    required this.languageCode,
+  });
 
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
-      width: 120,
-      height: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
         color: colors.cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.correctGreen, width: 2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.correctGreen.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.correctGreen.withValues(alpha: 0.22),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: _buildVocabImage(
-          resolvedUrl: imageUrl,
-          label: correctImage.label,
-          colors: colors,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(image.emoji, style: const TextStyle(fontSize: 48)),
+          const SizedBox(width: 14),
+          Text(
+            image.labelFor(languageCode),
+            style: GoogleFonts.alata(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.correctGreen,
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MISSION COMPLETE
-  // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// MISSION COMPLETE PHASE
+// ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildMissionComplete(VocabMissionState state, AppColorsExtension colors) {
+class _CompleteScaffold extends StatelessWidget {
+  final VocabMissionState state;
+  final VoidCallback onContinue;
+  final VoidCallback onLearn;
+  final VoidCallback onRetry;
+
+  const _CompleteScaffold({
+    required this.state,
+    required this.onContinue,
+    required this.onLearn,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final accuracy = state.totalQuestions > 0
         ? (state.correctCount / state.totalQuestions * 100).toInt()
         : 0;
+    final accentColor = accuracy >= 80
+        ? AppColors.correctGreen
+        : accuracy >= 50
+            ? AppColors.primaryPurple
+            : AppColors.missionPeach;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF66BB6A).withAlpha(30),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('🏆', style: TextStyle(fontSize: 50)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              Vocabulary.missionComplete,
-              style: GoogleFonts.alata(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
+    final messageLine = accuracy >= 90
+        ? Vocabulary.completeLineHigh
+        : accuracy >= 70
+            ? Vocabulary.completeLineMid
+            : Vocabulary.completeLineLow;
 
-            // Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatBox(Vocabulary.statAccuracy, '$accuracy%',
-                    accuracy >= 80 ? AppColors.correctGreen : AppColors.missionPeach, colors),
-                _buildStatBox(Vocabulary.statCorrect, '${state.correctCount}/${state.totalQuestions}',
-                    AppColors.primaryPurple, colors),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            Text(
-              accuracy >= 90
-                  ? Vocabulary.completeLineHigh
-                  : accuracy >= 70
-                      ? Vocabulary.completeLineMid
-                      : Vocabulary.completeLineLow,
-              style: GoogleFonts.alata(
-                fontSize: 16,
-                color: colors.textSecondary,
-                height: 1.4,
+    return Stack(
+      children: [
+        const _BackgroundDecor(vibrant: true),
+        SafeArea(
+          child: Column(
+            children: [
+              _TopBar(
+                title: Vocabulary.title,
+                onBack: onContinue,
+                onGradient: true,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8E97FD),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 4,
+              const SizedBox(height: 8),
+              const ProfessorHeadAbovePanel(
+                width: 130,
+                viewportHeight: 110,
+                imageScale: 1.4,
+                imageOffsetY: -6,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: Transform.translate(
+                    offset: const Offset(0, -16),
+                    child: Container(
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: colors.cardColor,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: colors.border),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.35 : 0.08,
+                            ),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 86,
+                            height: 86,
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Center(
+                              child: Text('🏆',
+                                  style: TextStyle(fontSize: 44)),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            Vocabulary.completeTitle,
+                            style: GoogleFonts.alata(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            messageLine,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.alata(
+                              fontSize: 14,
+                              height: 1.5,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatBox(
+                                  label: Vocabulary.statAccuracy,
+                                  value: '$accuracy%',
+                                  color: accentColor,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _StatBox(
+                                  label: Vocabulary.statCorrect,
+                                  value:
+                                      '${state.correctCount}/${state.totalQuestions}',
+                                  color: AppColors.primaryPurple,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 22),
+                          PrimaryButton(
+                            text: Vocabulary.learnWithPixy,
+                            onPressed: onLearn,
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: OutlinedButton(
+                              onPressed: onContinue,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primaryPurple,
+                                side: const BorderSide(
+                                  color: AppColors.primaryPurple,
+                                  width: 2,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                Vocabulary.continueMissions,
+                                style: GoogleFonts.alata(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primaryPurple,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextButton(
+                            onPressed: onRetry,
+                            child: Text(
+                              Vocabulary.tryAgain,
+                              style: GoogleFonts.alata(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                child: Text(
-                  Common.backToMissions,
-                  style: GoogleFonts.alata(
-                      fontSize: 16, fontWeight: FontWeight.w600),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
+}
 
-  Widget _buildStatBox(
-    String label,
-    String value,
-    Color color,
-    AppColorsExtension colors,
-  ) {
+class _StatBox extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatBox({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14),
@@ -859,8 +1364,8 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           Text(
             value,
             style: GoogleFonts.alata(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
               color: color,
             ),
           ),
@@ -868,63 +1373,82 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           Text(
             label,
             style: GoogleFonts.alata(
-                fontSize: 12, color: colors.textSecondary),
+              fontSize: 12,
+              color: colors.textSecondary,
+            ),
           ),
         ],
       ),
     );
   }
+}
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ERROR
-  // ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// ERROR PHASE
+// ═══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildError(VocabMissionState state, AppColorsExtension colors) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 60, color: AppColors.error),
-            const SizedBox(height: 16),
-            Text(
-              Common.error,
-              style: GoogleFonts.alata(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
+class _ErrorScaffold extends StatelessWidget {
+  final String? message;
+  final VoidCallback onRetry;
+  final VoidCallback onBack;
+
+  const _ErrorScaffold({
+    required this.message,
+    required this.onRetry,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return Stack(
+      children: [
+        const _BackgroundDecor(),
+        SafeArea(
+          child: Column(
+            children: [
+              _TopBar(title: Vocabulary.title, onBack: onBack),
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            size: 60, color: AppColors.error),
+                        const SizedBox(height: 16),
+                        Text(
+                          Common.error,
+                          style: GoogleFonts.alata(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          message ?? UserErrors.somethingWentWrong,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.alata(
+                            fontSize: 14,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        PrimaryButton(
+                          text: Vocabulary.tryAgain,
+                          onPressed: onRetry,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.errorMessage ?? UserErrors.somethingWentWrong,
-              style: GoogleFonts.alata(
-                  fontSize: 14, color: colors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                ref
-                    .read(vocabularyControllerProvider.notifier)
-                    .startMission();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryPurple,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-              ),
-              child: Text(
-                Vocabulary.tryAgain,
-                style: GoogleFonts.alata(
-                    fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -935,7 +1459,7 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
 
 class _SparklePainter extends CustomPainter {
   final double progress;
-  final Random _random = Random(42); // Fixed seed for consistent sparkles
+  final Random _random = Random(42);
 
   _SparklePainter({required this.progress});
 
@@ -946,7 +1470,6 @@ class _SparklePainter extends CustomPainter {
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
 
-    // Draw sparkles at random positions
     for (int i = 0; i < 12; i++) {
       final x = _random.nextDouble() * size.width;
       final y = _random.nextDouble() * size.height * 0.6;
@@ -970,7 +1493,6 @@ class _SparklePainter extends CustomPainter {
       )!
           .withAlpha((200 * scale).toInt());
 
-      // Draw a small cross/star
       canvas.drawLine(Offset(x - s, y), Offset(x + s, y), paint);
       canvas.drawLine(Offset(x, y - s), Offset(x, y + s), paint);
     }

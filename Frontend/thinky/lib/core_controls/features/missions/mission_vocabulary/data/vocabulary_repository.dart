@@ -1,28 +1,35 @@
 import 'dart:convert';
+
 import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/services/api_client.dart';
-import 'package:thinky/core_controls/config/app_config.dart';
+
 import 'vocabulary_models.dart';
 
-/// Repository for Vocabulary Mission API calls
+/// Repository for the Word Match mission API.
+///
+/// Images are emoji glyphs returned inline — no file-serving endpoint is
+/// needed anymore.
 class VocabularyRepository {
   static const String _basePath = '/vocabulary';
 
-  /// Start a new vocabulary mission — returns all questions
+  /// Start a new round — returns a fresh set of bilingual questions.
   static Future<VocabStartResponse> startMission() async {
     try {
       final response = await ApiClient.get('$_basePath/start');
       if (response.statusCode == 200) {
-        return VocabStartResponse.fromJson(jsonDecode(response.body));
+        return VocabStartResponse.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>,
+        );
       }
-      throw Exception('Failed to start vocabulary mission: ${response.statusCode}');
+      throw Exception(
+        'Failed to start vocabulary mission: ${response.statusCode}',
+      );
     } catch (e, stack) {
       ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
   }
 
-  /// Submit an answer for a single question
   static Future<VocabAnswerResponse> submitAnswer({
     required int questionIndex,
     required int selectedImageId,
@@ -33,7 +40,9 @@ class VocabularyRepository {
         'selectedImageId': selectedImageId,
       });
       if (response.statusCode == 200) {
-        return VocabAnswerResponse.fromJson(jsonDecode(response.body));
+        return VocabAnswerResponse.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>,
+        );
       }
       throw Exception('Failed to submit answer: ${response.statusCode}');
     } catch (e, stack) {
@@ -42,26 +51,18 @@ class VocabularyRepository {
     }
   }
 
-  /// Get current mission progress
   static Future<VocabProgressResponse> getProgress() async {
     try {
       final response = await ApiClient.get('$_basePath/progress');
       if (response.statusCode == 200) {
-        return VocabProgressResponse.fromJson(jsonDecode(response.body));
+        return VocabProgressResponse.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>,
+        );
       }
       throw Exception('Failed to get progress: ${response.statusCode}');
     } catch (e, stack) {
       ErrorLogger().logError(e, stackTrace: stack);
       rethrow;
     }
-  }
-
-  /// Resolves API-relative paths, absolute URLs, or bundled `assets/...` paths.
-  static String getImageUrl(String path) {
-    final p = path.trim();
-    if (p.isEmpty) return p;
-    if (p.startsWith('http://') || p.startsWith('https://')) return p;
-    if (p.startsWith('assets/')) return p;
-    return '${AppConfig.apiBaseUrl}$p';
   }
 }

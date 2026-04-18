@@ -22,7 +22,7 @@ final List<LessonCard> pixyLearnsLessonCards = [
     funFact: () => PixyLearnsTexts.lessonCard3Fact,
   ),
   LessonCard(
-    icon: Icons.grid_view_rounded,
+    icon: Icons.hub_rounded,
     title: () => PixyLearnsTexts.lessonCard4Title,
     body: () => PixyLearnsTexts.lessonCard4Body,
     funFact: () => PixyLearnsTexts.lessonCard4Fact,

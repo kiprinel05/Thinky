@@ -27,25 +27,31 @@ class LeaderboardService:
         include_workshop: bool = True,
         limit: int = 50,
     ) -> LeaderboardResponse:
-        # Aggregate XP from quiz_results per user
+        # Aggregate XP from quiz_results per user. Guests are excluded from
+        # the leaderboard — only registered accounts compete for ranks.
         xp_rows = (
             self.db.query(
                 QuizResult.user_id,
                 sa_func.sum(QuizResult.xp_earned).label("total_xp"),
             )
+            .join(User, User.id == QuizResult.user_id)
+            .filter(User.is_guest == False)  # noqa: E712
             .group_by(QuizResult.user_id)
             .all()
         )
 
         user_xp: Dict[int, float] = {row.user_id: float(row.total_xp) for row in xp_rows}
 
-        # Per-user quiz type breakdown (quiz_type serves as the mission slug)
+        # Per-user quiz type breakdown (quiz_type serves as the mission slug).
+        # Same guest filter applies so breakdowns stay consistent with the list.
         breakdown_rows = (
             self.db.query(
                 QuizResult.user_id,
                 QuizResult.quiz_type,
                 sa_func.sum(QuizResult.xp_earned).label("slug_xp"),
             )
+            .join(User, User.id == QuizResult.user_id)
+            .filter(User.is_guest == False)  # noqa: E712
             .group_by(QuizResult.user_id, QuizResult.quiz_type)
             .all()
         )

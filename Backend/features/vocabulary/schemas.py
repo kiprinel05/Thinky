@@ -1,17 +1,27 @@
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 
 class VocabImage(BaseModel):
-    """An image option for a vocabulary question."""
+    """
+    An image option for a vocabulary question.
+
+    We don't store/serve binary assets anymore — the "image" is an emoji
+    glyph that renders identically on every platform and is trivially
+    translatable / easy to recognize for kids aged 7-12.
+    """
     id: int
-    url: str
-    label: str  # What this image actually shows
+    emoji: str
+    # Label used both for accessibility hints and fallback text.
+    labelEn: str
+    labelRo: str
 
 
 class VocabQuestion(BaseModel):
-    """A single word-image matching question."""
-    word: str
+    """A single word→image matching question, bilingual."""
+    wordEn: str
+    wordRo: str
+    category: str  # "animal", "food", "object", "nature"
     images: List[VocabImage]
     correctImageId: int
 
@@ -21,7 +31,6 @@ class VocabStartResponse(BaseModel):
     missionId: int
     questions: List[VocabQuestion]
     totalQuestions: int
-    message: str
 
 
 class VocabAnswerRequest(BaseModel):
@@ -32,7 +41,8 @@ class VocabAnswerRequest(BaseModel):
 
 class VocabAnswerResult(BaseModel):
     """Result for a single question after validation."""
-    word: str
+    wordEn: str
+    wordRo: str
     selectedImageId: int
     correctImageId: int
     correct: bool
@@ -43,8 +53,6 @@ class VocabAnswerResponse(BaseModel):
     success: bool
     correct: bool
     correctImageId: int
-    message: str
-    encouragement: str  # Mascot bubble text
     progress: Dict[str, int]  # {"completed": N, "total": M}
 
 
@@ -55,5 +63,5 @@ class VocabProgressResponse(BaseModel):
     correctCount: int
     accuracy: float
     results: List[VocabAnswerResult]
-    incorrectWords: List[str]  # Words to repeat (adaptive hook)
+    incorrectWordsEn: List[str]
     masteryScore: float  # 0.0 - 1.0

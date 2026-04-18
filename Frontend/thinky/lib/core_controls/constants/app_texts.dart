@@ -412,27 +412,59 @@ class GroupingSorting {
   static String get lessonCard5Fact => TextService.getString('GroupingSorting', 'lessonCard5Fact');
 }
 
-/// Accessors for 'Vocabulary' texts
+/// Accessors for 'Vocabulary' (Word Match mission) texts.
 class Vocabulary {
-  static String get title => TextService.getString('Vocabulary', 'title');
-  static String get subtitle => TextService.getString('Vocabulary', 'subtitle');
-  static String get submitAnswer => TextService.getString('Vocabulary', 'submitAnswer');
-  static String get nextWord => TextService.getString('Vocabulary', 'nextWord');
-  static String get missionComplete => TextService.getString('Vocabulary', 'missionComplete');
-  static String get tryAgain => TextService.getString('Vocabulary', 'tryAgain');
-  static String get seeResults => TextService.getString('Vocabulary', 'seeResults');
-  static String get loadingWords => TextService.getString('Vocabulary', 'loadingWords');
-  static String get submittingShort => TextService.getString('Vocabulary', 'submittingShort');
-  static String get findMatchingImage => TextService.getString('Vocabulary', 'findMatchingImage');
-  static String get correctImageCaption => TextService.getString('Vocabulary', 'correctImageCaption');
-  static String get statAccuracy => TextService.getString('Vocabulary', 'statAccuracy');
-  static String get statCorrect => TextService.getString('Vocabulary', 'statCorrect');
-  static String get completeLineHigh => TextService.getString('Vocabulary', 'completeLineHigh');
-  static String get completeLineMid => TextService.getString('Vocabulary', 'completeLineMid');
-  static String get completeLineLow => TextService.getString('Vocabulary', 'completeLineLow');
-  static String get seeResultsWithTrophy => TextService.getString('Vocabulary', 'seeResultsWithTrophy');
-  static String get nextWordArrow => TextService.getString('Vocabulary', 'nextWordArrow');
-  static String get imageError => TextService.getString('Vocabulary', 'imageError');
+  static String _t(String key) => TextService.getString('Vocabulary', key);
+
+  static String get title => _t('title');
+  static String get subtitle => _t('subtitle');
+
+  // Intro
+  static String get introTitle => _t('introTitle');
+  static String get introBody => _t('introBody');
+  static String get introFeature1 => _t('introFeature1');
+  static String get introFeature2 => _t('introFeature2');
+  static String get introFeature3 => _t('introFeature3');
+  static String get startButton => _t('startButton');
+
+  // Question
+  static String get questionPrompt => _t('questionPrompt');
+  static String get chooseEmoji => _t('chooseEmoji');
+  static String get submitAnswer => _t('submitAnswer');
+  static String get loadingWords => _t('loadingWords');
+  static String get submittingShort => _t('submittingShort');
+
+  // Feedback
+  static String get theRightAnswer => _t('theRightAnswer');
+  static String feedbackCorrect(int i) => _t('feedbackCorrect$i');
+  static String feedbackIncorrect(int i) => _t('feedbackIncorrect$i');
+  static String encourageCorrect(int i) => _t('encourageCorrect$i');
+  static String encourageIncorrect(int i) => _t('encourageIncorrect$i');
+  static String get nextWordArrow => _t('nextWordArrow');
+  static String get seeResultsWithTrophy => _t('seeResultsWithTrophy');
+
+  // Completion
+  static String get completeTitle => _t('completeTitle');
+  static String get completeLineHigh => _t('completeLineHigh');
+  static String get completeLineMid => _t('completeLineMid');
+  static String get completeLineLow => _t('completeLineLow');
+  static String get statAccuracy => _t('statAccuracy');
+  static String get statCorrect => _t('statCorrect');
+  static String get statMastery => _t('statMastery');
+  static String get learnWithPixy => _t('learnWithPixy');
+  static String get continueMissions => _t('continueMissions');
+  static String get tryAgain => _t('tryAgain');
+  static String get imageError => _t('imageError');
+
+  // Learning view
+  static String get lessonButton => _t('lessonButton');
+  static String get lessonNext => _t('lessonNext');
+  static String get lessonDidYouKnow => _t('lessonDidYouKnow');
+  static String get backToResults => _t('backToResults');
+
+  static String lessonCardTitle(int i) => _t('lessonCard${i}Title');
+  static String lessonCardBody(int i) => _t('lessonCard${i}Body');
+  static String lessonCardFact(int i) => _t('lessonCard${i}Fact');
 }
 
 /// Accessors for 'DescribeImage' texts

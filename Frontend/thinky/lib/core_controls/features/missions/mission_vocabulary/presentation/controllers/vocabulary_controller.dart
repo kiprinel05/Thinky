@@ -1,21 +1,37 @@
-import 'package:thinky/core/errors/error_logger.dart';
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:thinky/core/errors/error_logger.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+
 import '../../data/vocabulary_models.dart';
 import '../../data/vocabulary_repository.dart';
 
-/// Phases of the vocabulary mission
+/// Phases of the Word Match mission.
 enum VocabMissionPhase {
-  loading,
-  question,     // Showing a word + image options
-  submitting,   // Waiting for backend validation
-  feedback,     // Showing correct/incorrect
-  missionComplete,
+  intro,           // Welcome screen with mascot + CTA
+  loading,         // Fetching questions
+  question,        // Showing a word + emoji options
+  submitting,      // Waiting for backend validation
+  feedback,        // Showing correct / incorrect
+  missionComplete, // Stats & next-step CTAs
   error,
 }
 
-/// State for the Vocabulary mission
+/// Pre-computed, localized messages for the feedback phase.
+class VocabFeedbackMessage {
+  final String message;
+  final String encouragement;
+
+  const VocabFeedbackMessage({
+    required this.message,
+    required this.encouragement,
+  });
+}
+
 class VocabMissionState {
   final VocabMissionPhase phase;
   final List<VocabQuestion> questions;
@@ -23,22 +39,22 @@ class VocabMissionState {
   final int totalQuestions;
   final int? selectedImageId;
   final VocabAnswerResponse? lastAnswer;
+  final VocabFeedbackMessage? lastFeedback;
   final int correctCount;
   final int answeredCount;
   final String? errorMessage;
-  final String? encouragement; // Mascot bubble text
 
   const VocabMissionState({
-    this.phase = VocabMissionPhase.loading,
+    this.phase = VocabMissionPhase.intro,
     this.questions = const [],
     this.currentIndex = 0,
     this.totalQuestions = 0,
     this.selectedImageId,
     this.lastAnswer,
+    this.lastFeedback,
     this.correctCount = 0,
     this.answeredCount = 0,
     this.errorMessage,
-    this.encouragement,
   });
 
   VocabQuestion? get currentQuestion {
@@ -61,23 +77,27 @@ class VocabMissionState {
     int? selectedImageId,
     bool clearSelection = false,
     VocabAnswerResponse? lastAnswer,
+    bool clearLastAnswer = false,
+    VocabFeedbackMessage? lastFeedback,
+    bool clearLastFeedback = false,
     int? correctCount,
     int? answeredCount,
     String? errorMessage,
-    String? encouragement,
-    bool clearEncouragement = false,
   }) {
     return VocabMissionState(
       phase: phase ?? this.phase,
       questions: questions ?? this.questions,
       currentIndex: currentIndex ?? this.currentIndex,
       totalQuestions: totalQuestions ?? this.totalQuestions,
-      selectedImageId: clearSelection ? null : (selectedImageId ?? this.selectedImageId),
-      lastAnswer: lastAnswer ?? this.lastAnswer,
+      selectedImageId: clearSelection
+          ? null
+          : (selectedImageId ?? this.selectedImageId),
+      lastAnswer: clearLastAnswer ? null : (lastAnswer ?? this.lastAnswer),
+      lastFeedback:
+          clearLastFeedback ? null : (lastFeedback ?? this.lastFeedback),
       correctCount: correctCount ?? this.correctCount,
       answeredCount: answeredCount ?? this.answeredCount,
       errorMessage: errorMessage,
-      encouragement: clearEncouragement ? null : (encouragement ?? this.encouragement),
     );
   }
 }
@@ -85,13 +105,23 @@ class VocabMissionState {
 class VocabularyController extends StateNotifier<VocabMissionState> {
   VocabularyController() : super(const VocabMissionState());
 
-  /// Start the mission — load all questions from backend
-  Future<void> startMission() async {
-    state = state.copyWith(phase: VocabMissionPhase.loading);
+  final Random _rng = Random();
 
+  /// Move from intro screen into loading the first question set.
+  Future<void> startFromIntro() async {
+    state = state.copyWith(phase: VocabMissionPhase.loading);
+    await _fetchQuestions();
+  }
+
+  /// Replay the mission from the complete screen.
+  Future<void> restart() async {
+    state = const VocabMissionState(phase: VocabMissionPhase.loading);
+    await _fetchQuestions();
+  }
+
+  Future<void> _fetchQuestions() async {
     try {
       final response = await VocabularyRepository.startMission();
-
       state = state.copyWith(
         phase: VocabMissionPhase.question,
         questions: response.questions,
@@ -100,7 +130,8 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
         correctCount: 0,
         answeredCount: 0,
         clearSelection: true,
-        clearEncouragement: true,
+        clearLastAnswer: true,
+        clearLastFeedback: true,
       );
     } catch (e) {
       state = state.copyWith(
@@ -110,15 +141,14 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
     }
   }
 
-  /// Select an image for the current question
   void selectImage(int imageId) {
     if (state.phase != VocabMissionPhase.question) return;
     state = state.copyWith(selectedImageId: imageId);
   }
 
-  /// Submit the selected answer
-  Future<void> submitAnswer() async {
-    if (!state.hasSelection || state.currentQuestion == null) return;
+  Future<void> submitAnswer({required String languageCode}) async {
+    final question = state.currentQuestion;
+    if (!state.hasSelection || question == null) return;
 
     state = state.copyWith(phase: VocabMissionPhase.submitting);
 
@@ -128,14 +158,20 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
         selectedImageId: state.selectedImageId!,
       );
 
+      final word = question.wordFor(languageCode);
+      final feedback = _buildFeedback(
+        correct: answer.correct,
+        word: word,
+      );
+
       state = state.copyWith(
         phase: VocabMissionPhase.feedback,
         lastAnswer: answer,
+        lastFeedback: feedback,
         correctCount: answer.correct
             ? state.correctCount + 1
             : state.correctCount,
         answeredCount: state.answeredCount + 1,
-        encouragement: answer.encouragement,
       );
     } catch (e) {
       state = state.copyWith(
@@ -145,36 +181,57 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
     }
   }
 
-  /// Continue to next question or complete mission
   Future<void> nextQuestion() async {
     final nextIndex = state.currentIndex + 1;
 
     if (nextIndex >= state.totalQuestions) {
-      // Mission complete
       try {
         await MissionService.completeMission(-7);
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
       state = state.copyWith(phase: VocabMissionPhase.missionComplete);
-    } else {
-      state = state.copyWith(
-        phase: VocabMissionPhase.question,
-        currentIndex: nextIndex,
-        clearSelection: true,
-        lastAnswer: null,
-        clearEncouragement: true,
-      );
+      return;
     }
+
+    state = state.copyWith(
+      phase: VocabMissionPhase.question,
+      currentIndex: nextIndex,
+      clearSelection: true,
+      clearLastAnswer: true,
+      clearLastFeedback: true,
+    );
   }
 
-  /// Reset the mission
   void reset() {
     state = const VocabMissionState();
   }
+
+  // ────────────────────────────────────────────────────────────────────
+  // Localized feedback builder — picks a random line from the bundle.
+  // ────────────────────────────────────────────────────────────────────
+
+  VocabFeedbackMessage _buildFeedback({
+    required bool correct,
+    required String word,
+  }) {
+    final variant = _rng.nextInt(4) + 1; // 1..4
+
+    final rawMessage = correct
+        ? Vocabulary.feedbackCorrect(variant)
+        : Vocabulary.feedbackIncorrect(variant);
+    final encouragement = correct
+        ? Vocabulary.encourageCorrect(variant)
+        : Vocabulary.encourageIncorrect(variant);
+
+    final message = rawMessage.replaceAll('{{word}}', word);
+    return VocabFeedbackMessage(
+      message: message,
+      encouragement: encouragement,
+    );
+  }
 }
 
-/// Provider for VocabularyController
 final vocabularyControllerProvider =
     StateNotifierProvider<VocabularyController, VocabMissionState>((ref) {
   return VocabularyController();

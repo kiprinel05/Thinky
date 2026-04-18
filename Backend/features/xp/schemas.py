@@ -12,6 +12,9 @@ class AwardXpResponse(BaseModel):
     xp_earned: int
     mission_slug: str
     already_awarded: bool
+    # True when the request came from a guest account. Guests cannot earn XP
+    # — the frontend can use this flag to nudge them to create an account.
+    is_guest: bool = False
 
 
 class MissionXpDetail(BaseModel):

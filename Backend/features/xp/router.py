@@ -19,7 +19,7 @@ async def get_my_xp(
     current_user: User = Depends(get_current_user),
     service: XpService = Depends(get_xp_service),
 ) -> UserXpResponse:
-    return service.get_user_xp(current_user.id)
+    return service.get_user_xp(current_user)
 
 
 @router.post("/award", response_model=AwardXpResponse)
@@ -29,6 +29,6 @@ async def award_xp(
     service: XpService = Depends(get_xp_service),
 ) -> AwardXpResponse:
     try:
-        return service.award_xp(current_user.id, request)
+        return service.award_xp(current_user, request)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
