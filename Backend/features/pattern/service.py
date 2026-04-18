@@ -188,9 +188,9 @@ class PatternMissionService:
         pool = EMOJI_THEMES[theme]
 
         if difficulty == 1:
-            # ABABA → show 4, next is B.  (A, B, A, B | B)
+            # ABAB → show 4 alternating items, next is A. (A, B, A, B | A)
             a, b = random.sample(pool, 2)
-            pattern = [a, b, a, b, b]
+            pattern = [a, b, a, b, a]
             rule = "ABAB"
         elif difficulty == 2:
             # ABCABC → show 5, next is C.
