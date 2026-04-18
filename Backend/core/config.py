@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     # ML Models
     MODEL_PATH_SHAPE: str = "ml/artifacts/shape_model.pth"
     MODEL_PATH_COLOR: str = "ml/artifacts/color_model.pth"
+    # HDS-trained classifier used by the drawing mission. Produced by
+    # `python -m ml.training.train_hds`. Resolved relative to the Backend/
+    # working directory.
+    MODEL_PATH_HDS_SHAPE: str = "ml/artifacts/hds_shape_model.pth"
 
     model_config = SettingsConfigDict(
         env_file=".env", 
