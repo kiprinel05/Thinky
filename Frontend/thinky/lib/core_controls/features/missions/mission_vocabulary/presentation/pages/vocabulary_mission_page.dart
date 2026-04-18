@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:thinky/core_controls/constants/app_texts.dart';
-import 'package:thinky/core_controls/features/missions/mission_quiz/presentation/widgets/quiz_widgets.dart';
+import 'package:thinky/core_controls/features/missions/mission_animals/presentation/widgets/animals_mascots.dart';
 import 'package:thinky/core_controls/services/language_service.dart';
 import 'package:thinky/shared_controls/theme/app_colors.dart';
 import 'package:thinky/shared_controls/theme/app_colors_extension.dart';
@@ -469,88 +469,99 @@ class _IntroScaffold extends StatelessWidget {
                 onBack: onBack,
                 onGradient: true,
               ),
-              const SizedBox(height: 8),
-              const ProfessorHeadAbovePanel(
-                width: 130,
-                viewportHeight: 110,
-                imageScale: 1.4,
-                imageOffsetY: -6,
-              ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Transform.translate(
-                    offset: const Offset(0, -16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: colors.cardColor,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: colors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.08,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.72,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 8),
+                        const AnimalsMascotHead(
+                          kind: AnimalsMascotKind.pixy,
+                          width: 130,
+                          viewportHeight: 120,
+                          imageScale: 1.25,
+                          offsetY: -14,
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -16),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(22),
+                            decoration: BoxDecoration(
+                              color: colors.cardColor,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: colors.border),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: isDark ? 0.35 : 0.08,
+                                  ),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                            blurRadius: 18,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '📖',
-                            style: GoogleFonts.alata(fontSize: 44),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            Vocabulary.introTitle,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.alata(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              color: colors.textPrimary,
+                            child: Column(
+                              children: [
+                                Text(
+                                  '📖',
+                                  style: GoogleFonts.alata(fontSize: 44),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  Vocabulary.introTitle,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  Vocabulary.introBody,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 14,
+                                    height: 1.55,
+                                    color: colors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    _FeaturePill(
+                                      icon: Icons.format_list_numbered_rounded,
+                                      text: Vocabulary.introFeature1,
+                                    ),
+                                    _FeaturePill(
+                                      icon: Icons.category_rounded,
+                                      text: Vocabulary.introFeature2,
+                                    ),
+                                    _FeaturePill(
+                                      icon: Icons.auto_awesome_rounded,
+                                      text: Vocabulary.introFeature3,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 22),
+                                PrimaryButton(
+                                  text: Vocabulary.startButton,
+                                  onPressed: onStart,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            Vocabulary.introBody,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.alata(
-                              fontSize: 14,
-                              height: 1.55,
-                              color: colors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              _FeaturePill(
-                                icon: Icons.format_list_numbered_rounded,
-                                text: Vocabulary.introFeature1,
-                              ),
-                              _FeaturePill(
-                                icon: Icons.category_rounded,
-                                text: Vocabulary.introFeature2,
-                              ),
-                              _FeaturePill(
-                                icon: Icons.auto_awesome_rounded,
-                                text: Vocabulary.introFeature3,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 22),
-                          PrimaryButton(
-                            text: Vocabulary.startButton,
-                            onPressed: onStart,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -689,29 +700,56 @@ class _QuestionScaffold extends StatelessWidget {
                 answered: state.answeredCount,
                 current: state.currentIndex,
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: AnimatedBuilder(
-                  animation: wordBounceController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: wordScaleAnim.value,
-                      child: child,
-                    );
-                  },
-                  child: _WordCard(word: question.wordFor(languageCode)),
-                ),
-              ),
-              const SizedBox(height: 18),
+              // Center the word card + grid block vertically so there isn't
+              // a huge dead zone below when the grid is short.
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _EmojiGrid(
-                    question: question,
-                    languageCode: languageCode,
-                    selectedId: state.selectedImageId,
-                    onSelect: isSubmitting ? null : onSelect,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedBuilder(
+                          animation: wordBounceController,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: wordScaleAnim.value,
+                              child: child,
+                            );
+                          },
+                          child: _WordCard(
+                            word: question.wordFor(languageCode),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        // Grid is sized by its content — 2 rows of ~160px tiles.
+                        // Using AspectRatio on a SizedBox keeps it crisp.
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final crossAxis =
+                                question.images.length >= 6 ? 3 : 2;
+                            final spacing = 12.0;
+                            final tileSize = (constraints.maxWidth -
+                                    spacing * (crossAxis - 1)) /
+                                crossAxis;
+                            final rowCount =
+                                (question.images.length / crossAxis).ceil();
+                            final gridHeight = tileSize * rowCount +
+                                spacing * (rowCount - 1);
+                            return SizedBox(
+                              height: gridHeight,
+                              child: _EmojiGrid(
+                                question: question,
+                                languageCode: languageCode,
+                                selectedId: state.selectedImageId,
+                                onSelect:
+                                    isSubmitting ? null : onSelect,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -812,7 +850,9 @@ class _EmojiGrid extends StatelessWidget {
     // 2 columns look best on phones; bump to 3 for 6-option hard rounds.
     final crossAxis = images.length >= 6 ? 3 : 2;
     return GridView.builder(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxis,
         childAspectRatio: 1.0,
@@ -849,77 +889,72 @@ class _EmojiTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        decoration: BoxDecoration(
-          color: colors.cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? AppColors.primaryPurple : colors.border,
-            width: selected ? 3.0 : 1.5,
-          ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryPurple.withValues(alpha: 0.25),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(image.emoji,
-                          style: const TextStyle(fontSize: 72)),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    image.labelFor(languageCode),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.alata(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: colors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+    return Semantics(
+      label: image.labelFor(languageCode),
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: colors.cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? AppColors.primaryPurple : colors.border,
+              width: selected ? 3.0 : 1.5,
             ),
-            if (selected)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 26,
-                  height: 26,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryPurple,
-                    shape: BoxShape.circle,
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.25),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Text(
+                      image.emoji,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 96,
+                        height: 1.0,
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.check,
-                      color: Colors.white, size: 16),
                 ),
               ),
-          ],
+              if (selected)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryPurple,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check,
+                        color: Colors.white, size: 16),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -983,105 +1018,124 @@ class _FeedbackScaffold extends StatelessWidget {
                 ),
               );
             },
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-              child: Column(
-                children: [
-                  Container(
-                    width: 86,
-                    height: 86,
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        isCorrect ? '🎉' : '💡',
-                        style: const TextStyle(fontSize: 44),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    feedback.message,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.alata(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: colors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (!isCorrect) ...[
-                    Text(
-                      Vocabulary.theRightAnswer,
-                      style: GoogleFonts.alata(
-                        fontSize: 13,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _CorrectAnswerChip(
-                      image: correctImage,
-                      languageCode: languageCode,
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color:
-                            AppColors.primaryPurple.withValues(alpha: 0.28),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('🤖', style: TextStyle(fontSize: 20)),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            feedback.encouragement,
+                        Container(
+                          width: 86,
+                          height: 86,
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              isCorrect ? '🎉' : '💡',
+                              style: const TextStyle(fontSize: 44),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          feedback.message,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.alata(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        if (!isCorrect) ...[
+                          Text(
+                            Vocabulary.theRightAnswer,
                             style: GoogleFonts.alata(
                               fontSize: 13,
                               color: colors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          _CorrectAnswerChip(
+                            image: correctImage,
+                            languageCode: languageCode,
+                          ),
+                          const SizedBox(height: 20),
+                        ] else ...[
+                          _CorrectAnswerChip(
+                            image: correctImage,
+                            languageCode: languageCode,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPurple.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: AppColors.primaryPurple.withValues(
+                                alpha: 0.28,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🤖',
+                                  style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  feedback.encouragement,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 13,
+                                    color: colors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: onNext,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accentColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: Text(
+                              state.currentIndex + 1 >= state.totalQuestions
+                                  ? Vocabulary.seeResultsWithTrophy
+                                  : Vocabulary.nextWordArrow,
+                              style: GoogleFonts.alata(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: onNext,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 4,
-                      ),
-                      child: Text(
-                        state.currentIndex + 1 >= state.totalQuestions
-                            ? Vocabulary.seeResultsWithTrophy
-                            : Vocabulary.nextWordArrow,
-                        style: GoogleFonts.alata(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),
@@ -1199,133 +1253,144 @@ class _CompleteScaffold extends StatelessWidget {
                 onBack: onContinue,
                 onGradient: true,
               ),
-              const SizedBox(height: 8),
-              const ProfessorHeadAbovePanel(
-                width: 130,
-                viewportHeight: 110,
-                imageScale: 1.4,
-                imageOffsetY: -6,
-              ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Transform.translate(
-                    offset: const Offset(0, -16),
-                    child: Container(
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: colors.cardColor,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: colors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.08,
-                            ),
-                            blurRadius: 18,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 86,
-                            height: 86,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.72,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 8),
+                        const AnimalsMascotHead(
+                          kind: AnimalsMascotKind.pixy,
+                          width: 130,
+                          viewportHeight: 120,
+                          imageScale: 1.25,
+                          offsetY: -14,
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -16),
+                          child: Container(
+                            padding: const EdgeInsets.all(22),
                             decoration: BoxDecoration(
-                              color: accentColor.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: Text('🏆',
-                                  style: TextStyle(fontSize: 44)),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            Vocabulary.completeTitle,
-                            style: GoogleFonts.alata(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: colors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            messageLine,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.alata(
-                              fontSize: 14,
-                              height: 1.5,
-                              color: colors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _StatBox(
-                                  label: Vocabulary.statAccuracy,
-                                  value: '$accuracy%',
-                                  color: accentColor,
+                              color: colors.cardColor,
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: colors.border),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: isDark ? 0.35 : 0.08,
+                                  ),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 10),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _StatBox(
-                                  label: Vocabulary.statCorrect,
-                                  value:
-                                      '${state.correctCount}/${state.totalQuestions}',
-                                  color: AppColors.primaryPurple,
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 86,
+                                  height: 86,
+                                  decoration: BoxDecoration(
+                                    color: accentColor.withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Center(
+                                    child: Text('🏆',
+                                        style: TextStyle(fontSize: 44)),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 22),
-                          PrimaryButton(
-                            text: Vocabulary.learnWithPixy,
-                            onPressed: onLearn,
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: OutlinedButton(
-                              onPressed: onContinue,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primaryPurple,
-                                side: const BorderSide(
-                                  color: AppColors.primaryPurple,
-                                  width: 2,
+                                const SizedBox(height: 14),
+                                Text(
+                                  Vocabulary.completeTitle,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w800,
+                                    color: colors.textPrimary,
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                const SizedBox(height: 8),
+                                Text(
+                                  messageLine,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.alata(
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    color: colors.textSecondary,
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                Vocabulary.continueMissions,
-                                style: GoogleFonts.alata(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryPurple,
+                                const SizedBox(height: 22),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _StatBox(
+                                        label: Vocabulary.statAccuracy,
+                                        value: '$accuracy%',
+                                        color: accentColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: _StatBox(
+                                        label: Vocabulary.statCorrect,
+                                        value:
+                                            '${state.correctCount}/${state.totalQuestions}',
+                                        color: AppColors.primaryPurple,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
+                                const SizedBox(height: 22),
+                                PrimaryButton(
+                                  text: Vocabulary.learnWithPixy,
+                                  onPressed: onLearn,
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 48,
+                                  child: OutlinedButton(
+                                    onPressed: onContinue,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primaryPurple,
+                                      side: const BorderSide(
+                                        color: AppColors.primaryPurple,
+                                        width: 2,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      Vocabulary.continueMissions,
+                                      style: GoogleFonts.alata(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryPurple,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                TextButton(
+                                  onPressed: onRetry,
+                                  child: Text(
+                                    Vocabulary.tryAgain,
+                                    style: GoogleFonts.alata(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          TextButton(
-                            onPressed: onRetry,
-                            child: Text(
-                              Vocabulary.tryAgain,
-                              style: GoogleFonts.alata(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -479,16 +479,58 @@ class DescribeImage {
 
 /// Accessors for 'PatternMission' texts
 class PatternMission {
-  static String get title => TextService.getString('PatternMission', 'title');
-  static String get instruction => TextService.getString('PatternMission', 'instruction');
-  static String get chooseNext => TextService.getString('PatternMission', 'chooseNext');
-  static String get checkAnswer => TextService.getString('PatternMission', 'checkAnswer');
-  static String get nextPattern => TextService.getString('PatternMission', 'nextPattern');
-  static String get tryAgain => TextService.getString('PatternMission', 'tryAgain');
-  static String get loadingPattern => TextService.getString('PatternMission', 'loadingPattern');
-  static String get missionCompleteTitle =>
-      TextService.getString('PatternMission', 'missionCompleteTitle');
-  static String get backToMenu => TextService.getString('PatternMission', 'backToMenu');
+  static String _t(String key) => TextService.getString('PatternMission', key);
+
+  static String get title => _t('title');
+  static String get subtitle => _t('subtitle');
+
+  // Intro
+  static String get introTitle => _t('introTitle');
+  static String get introBody => _t('introBody');
+  static String get introFeature1 => _t('introFeature1');
+  static String get introFeature2 => _t('introFeature2');
+  static String get introFeature3 => _t('introFeature3');
+  static String get startButton => _t('startButton');
+
+  // Question
+  static String get instruction => _t('instruction');
+  static String get questionPrompt => _t('questionPrompt');
+  static String get chooseNext => _t('chooseNext');
+  static String get submitAnswer => _t('submitAnswer');
+  static String get checkAnswer => _t('checkAnswer');
+  static String get loadingPattern => _t('loadingPattern');
+  static String get submittingShort => _t('submittingShort');
+
+  // Feedback
+  static String get theRightAnswer => _t('theRightAnswer');
+  static String feedbackCorrect(int i) => _t('feedbackCorrect$i');
+  static String feedbackIncorrect(int i) => _t('feedbackIncorrect$i');
+  static String encourageCorrect(int i) => _t('encourageCorrect$i');
+  static String encourageIncorrect(int i) => _t('encourageIncorrect$i');
+  static String get nextPattern => _t('nextPattern');
+  static String get seeResultsWithTrophy => _t('seeResultsWithTrophy');
+
+  // Completion
+  static String get missionCompleteTitle => _t('missionCompleteTitle');
+  static String get completeLineHigh => _t('completeLineHigh');
+  static String get completeLineMid => _t('completeLineMid');
+  static String get completeLineLow => _t('completeLineLow');
+  static String get statAccuracy => _t('statAccuracy');
+  static String get statCorrect => _t('statCorrect');
+  static String get learnWithPixy => _t('learnWithPixy');
+  static String get continueMissions => _t('continueMissions');
+  static String get tryAgain => _t('tryAgain');
+  static String get backToMenu => _t('backToMenu');
+
+  // Learning view
+  static String get lessonButton => _t('lessonButton');
+  static String get lessonNext => _t('lessonNext');
+  static String get lessonDidYouKnow => _t('lessonDidYouKnow');
+  static String get backToResults => _t('backToResults');
+
+  static String lessonCardTitle(int i) => _t('lessonCard${i}Title');
+  static String lessonCardBody(int i) => _t('lessonCard${i}Body');
+  static String lessonCardFact(int i) => _t('lessonCard${i}Fact');
 }
 
 /// Accessors for 'NumbersMission' texts

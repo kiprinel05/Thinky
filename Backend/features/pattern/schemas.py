@@ -1,35 +1,68 @@
+"""
+Schemas for the Complete-the-Pattern mission.
+
+The backend pre-generates all 5 rounds (emoji-based, bilingual) when the
+player starts the mission. The frontend then plays through them locally and
+sends each answer back for validation against the stored correct option.
+"""
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
+
 
 class PatternItem(BaseModel):
-    """An item in the pattern sequence."""
-    id: str
-    shape: str  # circle, square, triangle, star
-    color: str  # hex code or color name
+    """A single visual step in a pattern sequence.
+
+    Items are rendered as emojis on the client, but we also ship bilingual
+    labels for accessibility and the "correct answer" chip in feedback.
+    """
+    id: int
+    emoji: str
+    labelEn: str
+    labelRo: str
+
+
+class PatternQuestion(BaseModel):
+    """One round of the Complete-the-Pattern mission.
+
+    - `sequence` is the visible pattern (4-7 items) the child sees.
+    - `options` is a shuffled list of 3 choices (1 correct + 2 distractors).
+    - The correct option id is NOT exposed here; the backend validates via
+      `/answer` and only reveals the correct id in the answer response.
+    """
+    index: int
+    theme: str
+    rule: str
+    difficulty: int
+    sequence: List[PatternItem]
+    options: List[PatternItem]
+
 
 class PatternStartResponse(BaseModel):
-    """Response when starting a pattern mission."""
+    """Payload returned on /pattern/start."""
     missionId: int
-    sequence: List[PatternItem]  # The visible sequence
-    options: List[PatternItem]   # Detailed options for the user to choose from
-    difficulty: int
-    round: int
     totalRounds: int
-    instruction: str
+    questions: List[PatternQuestion]
+
 
 class PatternAnswerRequest(BaseModel):
-    selectedOptionId: str
+    questionIndex: int
+    selectedOptionId: int
 
-class PatternResultResponse(BaseModel):
+
+class PatternProgress(BaseModel):
+    completed: int
+    total: int
+
+
+class PatternAnswerResponse(BaseModel):
     success: bool
     correct: bool
-    correctOptionId: str
-    message: str
-    newDifficulty: int
-    completionProgress: float  # 0.0 - 1.0
+    correctOptionId: int
+    progress: PatternProgress
+
 
 class PatternProgressResponse(BaseModel):
     completed: int
     total: int
+    correctCount: int
     accuracy: float
-    currentDifficulty: int
