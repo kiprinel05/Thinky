@@ -164,22 +164,32 @@ def _preprocess_for_hds(
     """
     Turn an arbitrary canvas image into a 1×1×70×70 tensor matching HDS conventions.
 
-    Steps:
-      1. Heuristic: detect if strokes are dark-on-light or light-on-dark (corner
-         samples) and invert so we end up with dark strokes on white bg.
-      2. Binary mask of strokes (Otsu threshold).
-      3. Compute stroke bounding box (+ 4px padding).
-      4. Crop. If empty, signal has_strokes=False.
-      5. Pad to square (white) to preserve aspect, then resize to 70×70.
-      6. Normalize to [0,1] float, 1 channel, add batch dim.
+    The HDS dataset images are near-binary (black stroke on white paper) with
+    thin pencil-like strokes (~1-2 px at 70×70). User drawings from Flutter
+    canvas arrive thick (markers) and large (~800 px), which after LANCZOS
+    downscale produces anti-aliased grey pixels and thick strokes — a
+    distribution the model has never seen → it defaults to "other".
+
+    This function aggressively normalizes the input to match HDS:
+      1. Detect bg brightness (corners) and invert to get dark-on-light.
+      2. Otsu binary mask of strokes.
+      3. Crop to stroke bbox with small margin (contour crop is done upstream
+         in service.py; this pad is a safety net).
+      4. Pad to square (black = 0, no-stroke).
+      5. Downscale binary mask to 70×70 with INTER_AREA, re-threshold.
+      6. Normalize stroke thickness via iterative erosion so stroke radius is
+         ~1 px (matches HDS pencil strokes).
+      7. Invert back to black-stroke-on-white, normalize to [0,1].
 
     Returns:
       (tensor [1,1,70,70], aspect_ratio of stroke bbox, has_strokes).
     """
-    arr = np.asarray(pil_gray, dtype=np.uint8)
+    import cv2
 
-    # Detect background brightness from 4 corners.
+    arr = np.asarray(pil_gray, dtype=np.uint8)
     h, w = arr.shape
+
+    # Detect background brightness from 4 corners → invert if needed.
     s = max(5, min(h, w) // 20)
     corners = np.concatenate([
         arr[:s, :s].ravel(),
@@ -187,44 +197,56 @@ def _preprocess_for_hds(
         arr[-s:, :s].ravel(),
         arr[-s:, -s:].ravel(),
     ])
-    bg_bright = float(corners.mean())
-
-    # Normalize to dark-strokes-on-white (HDS convention).
-    if bg_bright < 128:
+    if float(corners.mean()) < 128:
         arr = 255 - arr
 
-    # Otsu threshold → binary mask of strokes (255 where stroke is).
-    try:
-        import cv2
-        _, mask = cv2.threshold(arr, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    except ImportError:  # pragma: no cover — cv2 is a hard dep but be defensive
-        mask = (arr < 128).astype(np.uint8) * 255
+    # Otsu binary mask (stroke = 255, background = 0).
+    _, mask = cv2.threshold(arr, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
     ys, xs = np.where(mask > 0)
     if len(xs) == 0:
-        # No strokes found — return a blank tensor, caller will handle it.
         blank = torch.ones((1, 1, 70, 70), dtype=torch.float32)
         return blank, 1.0, False
 
-    pad = 4
+    # Safety-net padding. The main contour-based crop lives in service.py.
+    pad = max(4, max(h, w) // 50)
     x0 = max(int(xs.min()) - pad, 0)
     y0 = max(int(ys.min()) - pad, 0)
     x1 = min(int(xs.max()) + pad + 1, w)
     y1 = min(int(ys.max()) + pad + 1, h)
 
-    crop = arr[y0:y1, x0:x1]
-    ch, cw = crop.shape
+    crop_mask = mask[y0:y1, x0:x1]
+    ch, cw = crop_mask.shape
     aspect = max(ch, cw) / max(min(ch, cw), 1)
 
-    # Pad to square with white (255) so resize doesn't distort the shape.
+    # Pad to square so the resize doesn't distort the shape. Background = 0.
     side = max(ch, cw)
-    square = np.full((side, side), 255, dtype=np.uint8)
+    square = np.zeros((side, side), dtype=np.uint8)
     oy = (side - ch) // 2
     ox = (side - cw) // 2
-    square[oy:oy + ch, ox:ox + cw] = crop
+    square[oy:oy + ch, ox:ox + cw] = crop_mask
 
-    pil = Image.fromarray(square).resize((70, 70), Image.LANCZOS)
-    tensor = torch.from_numpy(np.asarray(pil, dtype=np.float32) / 255.0)
+    # Downscale the BINARY mask (not the grayscale image) → avoids LANCZOS
+    # anti-aliasing producing mid-grey pixels that HDS never has.
+    small = cv2.resize(square, (70, 70), interpolation=cv2.INTER_AREA)
+    _, small = cv2.threshold(small, 127, 255, cv2.THRESH_BINARY)
+
+    # Normalize stroke thickness to ~HDS level (≈ 2 px diameter, radius ≈ 1).
+    if cv2.countNonZero(small) > 0:
+        dist = cv2.distanceTransform(small, cv2.DIST_L2, 3)
+        stroke_radius = float(np.percentile(dist[small > 0], 90))
+        target_radius = 1.0
+        if stroke_radius > target_radius + 0.3:
+            iterations = min(3, int(round(stroke_radius - target_radius)))
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            eroded = cv2.erode(small, kernel, iterations=iterations)
+            # Guard: if erosion wiped out the shape (thin outline), keep original.
+            if cv2.countNonZero(eroded) >= 20:
+                small = eroded
+
+    # Back to HDS convention: black stroke (0) on white (255) bg.
+    hds_style = 255 - small
+    tensor = torch.from_numpy(hds_style.astype(np.float32) / 255.0)
     tensor = tensor.unsqueeze(0).unsqueeze(0)  # [1, 1, 70, 70]
     return tensor, float(aspect), True
 
