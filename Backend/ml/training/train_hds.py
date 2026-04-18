@@ -58,7 +58,7 @@ def parse_args() -> argparse.Namespace:
                    help="Path to the HDS clone (folder containing data/).")
     p.add_argument("--out", type=Path, default=DEFAULT_WEIGHTS,
                    help="Path for the saved state_dict.")
-    p.add_argument("--epochs", type=int, default=12)
+    p.add_argument("--epochs", type=int, default=25)
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--weight-decay", type=float, default=1e-4)
@@ -89,15 +89,18 @@ def build_transforms(training: bool) -> transforms.Compose:
     """
     tfs: list = []
     if training:
+        # Gentle augmentations — HDS shapes are already size-normalized and
+        # centered. Stronger affine transforms (e.g. ±12°) pushed rotated
+        # rectangles into the "triangle" class during training.
         tfs.append(transforms.RandomAffine(
-            degrees=12,
-            translate=(0.06, 0.06),
-            scale=(0.9, 1.1),
+            degrees=8,
+            translate=(0.04, 0.04),
+            scale=(0.92, 1.08),
             fill=255,  # HDS convention: white background
         ))
     tfs.append(transforms.ToTensor())  # → [0,1] float, [C=1,H,W]
     if training:
-        tfs.append(transforms.RandomErasing(p=0.15, scale=(0.01, 0.04),
+        tfs.append(transforms.RandomErasing(p=0.10, scale=(0.01, 0.03),
                                             ratio=(0.3, 3.3), value=1.0))
     return transforms.Compose(tfs)
 

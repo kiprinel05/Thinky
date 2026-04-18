@@ -50,7 +50,7 @@ class HDSShapeClassifier(nn.Module):
     Total params: ~180k. Fast on CPU (≤5ms per image).
     """
 
-    def __init__(self, num_classes: int = 4, dropout: float = 0.3):
+    def __init__(self, num_classes: int = 4, dropout: float = 0.2):
         super().__init__()
         self.features = nn.Sequential(
             # Block 1: 70 → 35
