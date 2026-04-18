@@ -122,6 +122,35 @@ def _coverage(mask: np.ndarray) -> float:
     return float(cv2.countNonZero(mask)) / total if total else 0.0
 
 
+def _crop_to_contour_bbox(
+    image_bgr: np.ndarray, contour: np.ndarray, margin: float = 0.15
+) -> np.ndarray:
+    """
+    Crop the input image around the main contour with a relative margin.
+
+    Args:
+        image_bgr: full BGR image from cv2.imdecode.
+        contour: main stroke contour (from _largest_external_contour).
+        margin: fraction of the bbox's longer side added as padding on each
+                side. 0.15 means 15% margin, matching HDS-style centered shapes.
+
+    Returns:
+        A cropped BGR ndarray containing just the shape region with padding,
+        clamped to the image boundaries. Falls back to the full image if the
+        contour is degenerate.
+    """
+    h, w = image_bgr.shape[:2]
+    x, y, bw, bh = cv2.boundingRect(contour)
+    if bw <= 0 or bh <= 0:
+        return image_bgr
+    pad = int(round(max(bw, bh) * margin))
+    x0 = max(x - pad, 0)
+    y0 = max(y - pad, 0)
+    x1 = min(x + bw + pad, w)
+    y1 = min(y + bh + pad, h)
+    return image_bgr[y0:y1, x0:x1]
+
+
 # ---------------------------------------------------------------------------
 # K-means color detection (unchanged from the OpenCV service — works well)
 # ---------------------------------------------------------------------------
@@ -291,8 +320,14 @@ class DrawingService:
             if not self.model.is_loaded:
                 return _error("Drawing model is not available right now. "
                               "Please try again later.")
+
+            # Crop the original image to the main contour's bounding box with
+            # ~15% padding. This isolates the intended shape from stray strokes
+            # and matches the HDS convention of a centered shape with margin.
+            shape_input = _crop_to_contour_bbox(image, contour, margin=0.15)
+
             try:
-                shape_result = self.model.predict(image)
+                shape_result = self.model.predict(shape_input)
             except Exception as e:
                 print(f"[DrawingService] CNN prediction failed: {e}")
                 return _error("Oops! I couldn't analyze the drawing. "
@@ -303,25 +338,22 @@ class DrawingService:
             conf_shape: float = float(shape_result["confidence"])
 
             # Build a game-facing confidence dict. Map HDS probabilities onto
-            # the refined game labels so the frontend/debug UI can inspect them.
-            raw_probs: Dict[str, float] = shape_result["probabilities"]
-            shape_confs: Dict[str, float] = {s: 0.0 for s in SUPPORTED_SHAPES}
-            shape_confs["triangle"] = raw_probs.get("triangle", 0.0)
-            # rectangle probability is split between square vs rectangle based
-            # on which label the refinement picked.
+            # the refined game labels. We keep the rectangle probability in
+            # BOTH rectangle/square buckets (not zero-ing one out) so debug
+            # clients can see the raw model distribution.
+            raw_probs: Dict[str, float] = {
+                k: round(float(v), 4)
+                for k, v in shape_result["probabilities"].items()
+            }
             rect_prob = raw_probs.get("rectangle", 0.0)
-            if detected_shape == "square":
-                shape_confs["square"] = rect_prob
-                shape_confs["rectangle"] = 0.0
-            elif detected_shape == "rectangle":
-                shape_confs["rectangle"] = rect_prob
-            # ellipse vs circle split identically.
             ell_prob = raw_probs.get("ellipse", 0.0)
-            if detected_shape == "circle":
-                shape_confs["circle"] = ell_prob
-                shape_confs["ellipse"] = 0.0
-            elif detected_shape == "ellipse":
-                shape_confs["ellipse"] = ell_prob
+            shape_confs: Dict[str, float] = {
+                "triangle":  raw_probs.get("triangle", 0.0),
+                "square":    rect_prob,
+                "rectangle": rect_prob,
+                "circle":    ell_prob,
+                "ellipse":   ell_prob,
+            }
             shape_confs = {k: round(float(v), 3) for k, v in shape_confs.items()}
 
             # 4) Color detection (K-means on HSV inside stroke mask).
@@ -363,6 +395,7 @@ class DrawingService:
                 confidence_color=round(conf_color, 3),
                 coverage=round(coverage, 3),
                 shape_confidences=shape_confs,
+                raw_probabilities=raw_probs,
                 color_confidences=color_confs,
                 is_scribble=scribble,
                 is_too_small=too_small,

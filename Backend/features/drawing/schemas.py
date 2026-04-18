@@ -20,6 +20,10 @@ class DrawingAnalysisResponse(BaseModel):
     coverage: float = 0.0
 
     shape_confidences: Dict[str, float] = {}
+    # Raw HDS-class probabilities (ellipse / other / rectangle / triangle).
+    # Useful for debugging. The game-facing `shape_confidences` already splits
+    # rectangle→square and ellipse→circle based on aspect ratio.
+    raw_probabilities: Dict[str, float] = {}
     color_confidences: Dict[str, float] = {}
     is_scribble: bool = False
     is_too_small: bool = False
