@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+
 from .schemas import (
-    DescribeStartResponse,
-    TranscriptionResponse,
+    DescribeAnswerResponse,
     DescribeProgressResponse,
+    DescribeStartResponse,
 )
 from .service import get_describe_service
 
@@ -12,56 +12,30 @@ router = APIRouter(prefix="/describe", tags=["Describe Mission"])
 
 @router.get("/start")
 async def start_mission() -> DescribeStartResponse:
-    """Start a new describe mission — get the first image."""
-    service = get_describe_service()
-    return service.start_mission()
-
-
-@router.get("/next")
-async def next_round() -> DescribeStartResponse:
-    """Get the next image for a new round."""
-    service = get_describe_service()
-    return service.get_next_round()
+    """Preload a new 5-round Describe-It mission."""
+    return get_describe_service().start_mission()
 
 
 @router.post("/transcribe")
-async def transcribe_audio(audio: UploadFile = File(...)) -> TranscriptionResponse:
-    """
-    Accept audio file, transcribe via Whisper API, validate against keywords.
-    
-    Supported formats: wav, mp3, m4a, webm, ogg
-    """
+async def transcribe_audio(
+    audio: UploadFile = File(...),
+    questionIndex: int = Form(...),
+) -> DescribeAnswerResponse:
+    """Transcribe uploaded audio and validate it against the round's keywords."""
     service = get_describe_service()
-    
-    # Read audio bytes
+
     audio_bytes = await audio.read()
-    
     if not audio_bytes:
-        raise HTTPException(status_code=400, detail="Empty audio file")
-    
-    # Transcribe using Whisper
-    transcription = await service.transcribe_audio(audio_bytes, audio.filename or "audio.wav")
-    
-    # Validate against expected keywords
-    result = service.validate_transcription(transcription)
-    
-    return result
+        raise HTTPException(status_code=400, detail="Empty audio file.")
+
+    transcription = await service.transcribe_audio(
+        audio_bytes,
+        audio.filename or "audio.wav",
+    )
+    return service.validate_round(questionIndex, transcription)
 
 
 @router.get("/progress")
 async def get_progress() -> DescribeProgressResponse:
-    """Get current mission progress and analytics."""
-    service = get_describe_service()
-    return service.get_progress()
-
-
-@router.get("/image/{filename}")
-async def get_image(filename: str):
-    """Serve a describe mission image."""
-    service = get_describe_service()
-    image_path = service.get_image_path(filename)
-    
-    if not image_path.exists():
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    return FileResponse(image_path, media_type="image/png")
+    """Aggregate progress for the current session."""
+    return get_describe_service().get_progress()

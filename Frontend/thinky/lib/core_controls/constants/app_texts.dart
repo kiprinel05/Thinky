@@ -467,14 +467,68 @@ class Vocabulary {
   static String lessonCardFact(int i) => _t('lessonCard${i}Fact');
 }
 
-/// Accessors for 'DescribeImage' texts
-class DescribeImage {
-  static String get title => TextService.getString('DescribeImage', 'title');
-  static String get instruction => TextService.getString('DescribeImage', 'instruction');
-  static String get tapToRecord => TextService.getString('DescribeImage', 'tapToRecord');
-  static String get listening => TextService.getString('DescribeImage', 'listening');
-  static String get processing => TextService.getString('DescribeImage', 'processing');
-  static String get youSaid => TextService.getString('DescribeImage', 'youSaid');
+/// Accessors for 'DescribeMission' texts (Describe-It — voice + bilingual).
+class DescribeMission {
+  static String _t(String key) => TextService.getString('DescribeMission', key);
+
+  static String get title => _t('title');
+  static String get subtitle => _t('subtitle');
+
+  // Intro
+  static String get introTitle => _t('introTitle');
+  static String get introBody => _t('introBody');
+  static String get introFeature1 => _t('introFeature1');
+  static String get introFeature2 => _t('introFeature2');
+  static String get introFeature3 => _t('introFeature3');
+  static String get startButton => _t('startButton');
+
+  // Question / recording
+  static String get questionPrompt => _t('questionPrompt');
+  static String get tapToRecord => _t('tapToRecord');
+  static String get listening => _t('listening');
+  static String get tapStopWhenDone => _t('tapStopWhenDone');
+  static String get processing => _t('processing');
+  static String get processingHint => _t('processingHint');
+  static String get loadingScenes => _t('loadingScenes');
+  static String get microphonePermissionTitle =>
+      _t('microphonePermissionTitle');
+  static String get microphonePermissionBody =>
+      _t('microphonePermissionBody');
+  static String get openSettings => _t('openSettings');
+
+  // Feedback
+  static String get youSaid => _t('youSaid');
+  static String get matchedLabel => _t('matchedLabel');
+  static String get missingLabel => _t('missingLabel');
+  static String get nextScene => _t('nextScene');
+  static String get seeResultsWithTrophy => _t('seeResultsWithTrophy');
+  static String get recordAgain => _t('recordAgain');
+  static String feedbackCorrect(int i) => _t('feedbackCorrect$i');
+  static String feedbackIncorrect(int i) => _t('feedbackIncorrect$i');
+  static String encourageCorrect(int i) => _t('encourageCorrect$i');
+  static String encourageIncorrect(int i) => _t('encourageIncorrect$i');
+
+  // Completion
+  static String get missionCompleteTitle => _t('missionCompleteTitle');
+  static String get completeLineHigh => _t('completeLineHigh');
+  static String get completeLineMid => _t('completeLineMid');
+  static String get completeLineLow => _t('completeLineLow');
+  static String get statAccuracy => _t('statAccuracy');
+  static String get statCorrect => _t('statCorrect');
+  static String get statAverageScore => _t('statAverageScore');
+  static String get learnWithPixy => _t('learnWithPixy');
+  static String get continueMissions => _t('continueMissions');
+  static String get tryAgain => _t('tryAgain');
+
+  // Learning view
+  static String get lessonButton => _t('lessonButton');
+  static String get lessonNext => _t('lessonNext');
+  static String get lessonDidYouKnow => _t('lessonDidYouKnow');
+  static String get backToResults => _t('backToResults');
+
+  static String lessonCardTitle(int i) => _t('lessonCard${i}Title');
+  static String lessonCardBody(int i) => _t('lessonCard${i}Body');
+  static String lessonCardFact(int i) => _t('lessonCard${i}Fact');
 }
 
 /// Accessors for 'PatternMission' texts

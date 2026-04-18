@@ -92,6 +92,7 @@ abstract class AppColors {
   // ═══════════════════════════════════════════════════════════════════════
 
   static const Color patternPurple = Color(0xFF9C27B0);
+  static const Color describeOrange = Color(0xFFFF7043);
   static const Color numbersPrimary = Color(0xFF5C6BC0);
   static const Color drawingRed = Color(0xFFF44336);
   static const Color drawingBlue = Color(0xFF2196F3);
