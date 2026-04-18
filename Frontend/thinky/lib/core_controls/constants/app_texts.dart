@@ -183,6 +183,7 @@ class Quiz {
 /// Accessors for 'Animals' texts
 class Animals {
   static String get lookAtImage => TextService.getString('Animals', 'lookAtImage');
+  static String get askPixy => TextService.getString('Animals', 'askPixy');
   static String get continueAction => TextService.getString('Animals', 'continueAction');
   static String get missionTitle => TextService.getString('Animals', 'missionTitle');
   static String get roundShort => TextService.getString('Animals', 'roundShort');

@@ -138,6 +138,7 @@
     },
     "Animals": {
         "lookAtImage": "Look at this image and think about what you see in it.",
+        "askPixy": "Ask Pixy!",
         "continueAction": "Continue",
         "missionTitle": "Teach Pixy Animals",
         "roundShort": "Round",
