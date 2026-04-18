@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -33,8 +34,11 @@ class DescribeRepository {
     }
   }
 
+  /// Cross-platform: takes raw [audioBytes] + [filename] so the same code
+  /// works on web (where there's no file system) and native.
   static Future<DescribeAnswerResponse> transcribeAudio({
-    required String filePath,
+    required Uint8List audioBytes,
+    required String filename,
     required int questionIndex,
   }) async {
     try {
@@ -43,11 +47,37 @@ class DescribeRepository {
 
       final request = http.MultipartRequest('POST', url);
       request.fields['questionIndex'] = questionIndex.toString();
+
+      // Pick a reasonable MIME type from the filename's extension. Whisper
+      // accepts m4a / wav / mp3 / ogg / webm — we just need to declare one.
+      final ext = filename.split('.').last.toLowerCase();
+      MediaType mediaType;
+      switch (ext) {
+        case 'm4a':
+        case 'mp4':
+        case 'aac':
+          mediaType = MediaType('audio', 'm4a');
+          break;
+        case 'ogg':
+        case 'opus':
+          mediaType = MediaType('audio', 'ogg');
+          break;
+        case 'webm':
+          mediaType = MediaType('audio', 'webm');
+          break;
+        case 'mp3':
+          mediaType = MediaType('audio', 'mpeg');
+          break;
+        default:
+          mediaType = MediaType('audio', 'wav');
+      }
+
       request.files.add(
-        await http.MultipartFile.fromPath(
+        http.MultipartFile.fromBytes(
           'audio',
-          filePath,
-          contentType: MediaType('audio', 'wav'),
+          audioBytes,
+          filename: filename,
+          contentType: mediaType,
         ),
       );
 

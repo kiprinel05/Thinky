@@ -1,7 +1,9 @@
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 
 import 'package:thinky/core/errors/error_logger.dart';
@@ -11,6 +13,8 @@ import 'package:thinky/core_controls/services/mission_service.dart';
 
 import '../../data/describe_models.dart';
 import '../../data/describe_repository.dart';
+import '_audio_io_stub.dart'
+    if (dart.library.io) '_audio_io_native.dart' as audio_io;
 
 /// Phases of the Describe-It mission.
 enum DescribeMissionPhase {
@@ -157,6 +161,12 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
   }
 
   /// Start recording audio for the current round.
+  ///
+  /// Cross-platform:
+  ///  * **Web** — `record` writes to an in-browser blob; we don't need (and
+  ///    can't use) `path_provider`. Web defaults to `audio/webm;opus`.
+  ///  * **Native** — pick the first supported encoder (AAC LC → AAC ELD →
+  ///    Opus → WAV) and write to the OS temp directory.
   Future<void> startRecording() async {
     if (state.phase != DescribeMissionPhase.viewing) return;
     try {
@@ -169,12 +179,49 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
         return;
       }
 
-      final dir = await getTemporaryDirectory();
-      final path =
-          '${dir.path}/describe_${DateTime.now().millisecondsSinceEpoch}.wav';
+      // ── Pick a supported encoder ─────────────────────────────────────
+      AudioEncoder chosenEncoder = AudioEncoder.aacLc;
+      String chosenExt = 'm4a';
+
+      if (kIsWeb) {
+        // Browsers virtually always support Opus in WebM via MediaRecorder.
+        chosenEncoder = AudioEncoder.opus;
+        chosenExt = 'webm';
+      } else {
+        const candidates = <(AudioEncoder, String)>[
+          (AudioEncoder.aacLc, 'm4a'),
+          (AudioEncoder.aacEld, 'm4a'),
+          (AudioEncoder.opus, 'ogg'),
+          (AudioEncoder.wav, 'wav'),
+        ];
+        for (final entry in candidates) {
+          try {
+            if (await _recorder.isEncoderSupported(entry.$1)) {
+              chosenEncoder = entry.$1;
+              chosenExt = entry.$2;
+              break;
+            }
+          } catch (_) {
+            // Some platforms throw instead of returning false – try next.
+          }
+        }
+      }
+
+      // ── Build (or skip) a path ───────────────────────────────────────
+      String path = '';
+      if (!kIsWeb) {
+        path = await audio_io.tempFilePath(
+          'describe_${DateTime.now().millisecondsSinceEpoch}.$chosenExt',
+        );
+      }
 
       await _recorder.start(
-        const RecordConfig(encoder: AudioEncoder.wav),
+        RecordConfig(
+          encoder: chosenEncoder,
+          sampleRate: 16000,
+          numChannels: 1,
+          bitRate: 64000,
+        ),
         path: path,
       );
 
@@ -183,10 +230,11 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
         audioPath: path,
         recordingDuration: Duration.zero,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
-        errorMessage: UserFacingErrorMapper.map(e),
+        errorMessage: '${DescribeMission.microphonePermissionBody}\n\n($e)',
       );
     }
   }
@@ -206,12 +254,15 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
   }
 
   /// Stop recording and send for transcription + validation.
+  ///
+  /// On native we read the saved file's bytes; on web `_recorder.stop()`
+  /// returns a `blob:` URL that we have to fetch.
   Future<void> stopRecording() async {
     if (state.phase != DescribeMissionPhase.recording) return;
 
     try {
-      final path = await _recorder.stop();
-      if (path == null || path.isEmpty) {
+      final pathOrUrl = await _recorder.stop();
+      if (pathOrUrl == null || pathOrUrl.isEmpty) {
         state = state.copyWith(
           phase: DescribeMissionPhase.viewing,
           clearAudio: true,
@@ -221,11 +272,33 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
 
       state = state.copyWith(
         phase: DescribeMissionPhase.processing,
-        audioPath: path,
+        audioPath: pathOrUrl,
       );
 
+      // ── Read the recording bytes ─────────────────────────────────────
+      Uint8List bytes;
+      String filename;
+      if (kIsWeb) {
+        final response = await http.get(Uri.parse(pathOrUrl));
+        if (response.statusCode != 200) {
+          throw Exception(
+            'Failed to read recording blob: ${response.statusCode}',
+          );
+        }
+        bytes = response.bodyBytes;
+        filename = 'recording_${DateTime.now().millisecondsSinceEpoch}.webm';
+      } else {
+        bytes = await audio_io.readLocalFileBytes(pathOrUrl);
+        filename = audio_io.basenameOf(pathOrUrl);
+      }
+
+      if (bytes.isEmpty) {
+        throw Exception('Recording was empty.');
+      }
+
       final result = await DescribeRepository.transcribeAudio(
-        filePath: path,
+        audioBytes: bytes,
+        filename: filename,
         questionIndex: state.currentIndex,
       );
 
@@ -242,7 +315,8 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
         accumulatedScore:
             state.accumulatedScore + result.result.matchScore,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
       state = state.copyWith(
         phase: DescribeMissionPhase.error,
         errorMessage: UserFacingErrorMapper.map(e),
