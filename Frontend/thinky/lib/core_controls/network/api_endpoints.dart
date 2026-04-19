@@ -83,6 +83,7 @@ abstract class ApiEndpoints {
   static const String numbersRound = '/numbers/round';
   static const String numbersSubmitCount = '/numbers/submit-count';
   static const String numbersSubmitDrawing = '/numbers/submit-drawing';
+  static const String numbersTeachDrawing = '/numbers/teach-drawing';
   static const String numbersProgress = '/numbers/progress';
 
   // ══════════════════════════════════════════════════════════════════════════

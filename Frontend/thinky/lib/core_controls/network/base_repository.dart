@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:thinky/core_controls/network/api_exceptions.dart';
 import 'package:thinky/core_controls/config/app_config.dart';
 import 'package:thinky/core_controls/storage/local_storage.dart';
+import 'package:thinky/core_controls/services/text_service.dart';
 import 'package:thinky/shared/models/result.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 
@@ -16,9 +17,10 @@ abstract class BaseRepository {
   /// Get auth token from storage
   String? get token => storage.authToken;
 
-  /// Get default headers with auth token
+  /// Get default headers with auth token + current language
   Map<String, String> get headers => {
         'Content-Type': 'application/json',
+        'Accept-Language': TextService.currentLanguageCode,
         if (token != null) 'Authorization': 'Bearer $token',
       };
 

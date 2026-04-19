@@ -52,16 +52,37 @@ class CountingResponse(BaseModel):
 
 
 class DrawingResponse(BaseModel):
-    """Response after submitting a digit drawing."""
+    """Response after Pixy looks at a child's free drawing.
+
+    Pixy proposes a guess and a (display) confidence. The UI then asks the
+    child whether the guess was right via the /teach-drawing endpoint.
+    """
     guessed_digit: Optional[int] = None
-    confidence: float = 0.0
-    is_correct: bool = False
-    target_digit: int
+    confidence: float = 0.0  # display confidence shown to the child (0.0–1.0)
+    pixy_message: str
+    pixy_emotion: str
+    model_level: str
+    examples_taught: int
+    awaiting_confirmation: bool = True
+
+
+class TeachDrawingSubmission(BaseModel):
+    """Child confirms or corrects Pixy's last guess."""
+    claimed_digit: int  # what the child says they actually drew (0-9)
+
+
+class TeachDrawingResponse(BaseModel):
+    """Response after the child teaches Pixy what the drawing really was."""
+    was_pixy_correct: bool      # did Pixy's guess match the claim?
+    is_lying: bool              # did the child mis-label a clearly drawn digit?
+    claimed_digit: int
+    recognized_digit: Optional[int] = None
     pixy_message: str
     pixy_emotion: str
     model_level: str
     correct_count: int
     confusion_count: int
+    examples_taught: int
     show_professor: bool
     professor_message: Optional[str] = None
     professor_hint: Optional[str] = None

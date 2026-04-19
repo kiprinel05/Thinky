@@ -10,7 +10,14 @@ enum NumbersPhase {
   professorIntervention,
   modelUpgrade,
   transitionToPart2,
+  // Drawing flow (Part 2):
+  //   drawing            → blank canvas, child can draw any digit 0-9
+  //   drawingAwaitingConfirmation → Pixy proposed a guess, child must confirm/correct
+  //   drawingPickCorrection      → child said "no", picking actual digit on a 0-9 picker
+  //   drawingResult              → final feedback for this round (confirmed/corrected/lying)
   drawing,
+  drawingAwaitingConfirmation,
+  drawingPickCorrection,
   drawingResult,
   completion,
 }
@@ -23,7 +30,10 @@ class NumbersState extends BaseState {
   final PixyModelLevel modelLevel;
   final NumbersRound? round;
   final CountingResult? countingResult;
-  final DrawingResult? drawingResult;
+  // Drawing-related: in-flight Pixy guess + final round result.
+  final DrawingGuess? drawingGuess;
+  final TeachDrawingResult? drawingResult;
+  final int examplesTaught;
   final int? selectedAnswer;
   final int correctCount;
   final int confusionCount;
@@ -38,7 +48,9 @@ class NumbersState extends BaseState {
     this.modelLevel = PixyModelLevel.junior,
     this.round,
     this.countingResult,
+    this.drawingGuess,
     this.drawingResult,
+    this.examplesTaught = 0,
     this.selectedAnswer,
     this.correctCount = 0,
     this.confusionCount = 0,
@@ -57,7 +69,11 @@ class NumbersState extends BaseState {
     PixyModelLevel? modelLevel,
     NumbersRound? round,
     CountingResult? countingResult,
-    DrawingResult? drawingResult,
+    DrawingGuess? drawingGuess,
+    bool clearDrawingGuess = false,
+    TeachDrawingResult? drawingResult,
+    bool clearDrawingResult = false,
+    int? examplesTaught,
     int? selectedAnswer,
     bool clearSelectedAnswer = false,
     int? correctCount,
@@ -73,7 +89,10 @@ class NumbersState extends BaseState {
       modelLevel: modelLevel ?? this.modelLevel,
       round: round ?? this.round,
       countingResult: countingResult ?? this.countingResult,
-      drawingResult: drawingResult ?? this.drawingResult,
+      drawingGuess: clearDrawingGuess ? null : (drawingGuess ?? this.drawingGuess),
+      drawingResult:
+          clearDrawingResult ? null : (drawingResult ?? this.drawingResult),
+      examplesTaught: examplesTaught ?? this.examplesTaught,
       selectedAnswer: clearSelectedAnswer ? null : (selectedAnswer ?? this.selectedAnswer),
       correctCount: correctCount ?? this.correctCount,
       confusionCount: confusionCount ?? this.confusionCount,

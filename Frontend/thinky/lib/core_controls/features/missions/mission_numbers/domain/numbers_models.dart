@@ -173,17 +173,56 @@ class CountingResult {
   }
 }
 
-/// Result after submitting a digit drawing
-class DrawingResult {
+/// Pixy's first guess after looking at a drawing.
+///
+/// The flow is two-step:
+///   1. The child draws → server returns a [DrawingGuess].
+///   2. The child confirms / corrects → server returns a [TeachDrawingResult].
+class DrawingGuess {
   final int? guessedDigit;
-  final double confidence;
-  final bool isCorrect;
-  final int targetDigit;
+  final double confidence; // 0.0 – 1.0 (display value, not the raw recognizer)
+  final String pixyMessage;
+  final String pixyEmotion;
+  final PixyModelLevel modelLevel;
+  final int examplesTaught;
+  final bool awaitingConfirmation;
+
+  const DrawingGuess({
+    this.guessedDigit,
+    required this.confidence,
+    required this.pixyMessage,
+    required this.pixyEmotion,
+    required this.modelLevel,
+    required this.examplesTaught,
+    this.awaitingConfirmation = true,
+  });
+
+  factory DrawingGuess.fromJson(Map<String, dynamic> json) {
+    return DrawingGuess(
+      guessedDigit: json['guessed_digit'] as int?,
+      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
+      pixyMessage: json['pixy_message'] as String? ?? '',
+      pixyEmotion: json['pixy_emotion'] as String? ?? 'thinking',
+      modelLevel:
+          PixyModelLevel.fromString(json['model_level'] as String? ?? 'junior'),
+      examplesTaught: json['examples_taught'] as int? ?? 0,
+      awaitingConfirmation: json['awaiting_confirmation'] as bool? ?? true,
+    );
+  }
+}
+
+/// Result after the child confirms / corrects Pixy's last guess.
+class TeachDrawingResult {
+  final bool wasPixyCorrect;
+  final bool isLying;
+  final int claimedDigit;
+  final int? recognizedDigit;
   final String pixyMessage;
   final String pixyEmotion;
   final PixyModelLevel modelLevel;
   final int correctCount;
   final int confusionCount;
+  final int examplesTaught;
   final bool showProfessor;
   final String? professorMessage;
   final String? professorHint;
@@ -191,16 +230,17 @@ class DrawingResult {
   final PixyModelLevel? newModelLevel;
   final bool partCompleted;
 
-  const DrawingResult({
-    this.guessedDigit,
-    required this.confidence,
-    required this.isCorrect,
-    required this.targetDigit,
+  const TeachDrawingResult({
+    required this.wasPixyCorrect,
+    required this.isLying,
+    required this.claimedDigit,
+    this.recognizedDigit,
     required this.pixyMessage,
     required this.pixyEmotion,
     required this.modelLevel,
     required this.correctCount,
     required this.confusionCount,
+    required this.examplesTaught,
     required this.showProfessor,
     this.professorMessage,
     this.professorHint,
@@ -209,17 +249,19 @@ class DrawingResult {
     this.partCompleted = false,
   });
 
-  factory DrawingResult.fromJson(Map<String, dynamic> json) {
-    return DrawingResult(
-      guessedDigit: json['guessed_digit'] as int?,
-      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.0,
-      isCorrect: json['is_correct'] as bool? ?? false,
-      targetDigit: json['target_digit'] as int? ?? 1,
+  factory TeachDrawingResult.fromJson(Map<String, dynamic> json) {
+    return TeachDrawingResult(
+      wasPixyCorrect: json['was_pixy_correct'] as bool? ?? false,
+      isLying: json['is_lying'] as bool? ?? false,
+      claimedDigit: json['claimed_digit'] as int? ?? 0,
+      recognizedDigit: json['recognized_digit'] as int?,
       pixyMessage: json['pixy_message'] as String? ?? '',
-      pixyEmotion: json['pixy_emotion'] as String? ?? 'neutral',
-      modelLevel: PixyModelLevel.fromString(json['model_level'] as String? ?? 'junior'),
+      pixyEmotion: json['pixy_emotion'] as String? ?? 'happy',
+      modelLevel:
+          PixyModelLevel.fromString(json['model_level'] as String? ?? 'junior'),
       correctCount: json['correct_count'] as int? ?? 0,
       confusionCount: json['confusion_count'] as int? ?? 0,
+      examplesTaught: json['examples_taught'] as int? ?? 0,
       showProfessor: json['show_professor'] as bool? ?? false,
       professorMessage: json['professor_message'] as String?,
       professorHint: json['professor_hint'] as String?,

@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from features.numbers.schemas import (
     ObjectItem, NumbersStartResponse, NumbersRoundResponse,
     CountingSubmission, CountingResponse,
-    DrawingResponse, NumbersProgressResponse
+    DrawingResponse, NumbersProgressResponse,
+    TeachDrawingSubmission, TeachDrawingResponse,
 )
 from features.numbers.digit_recognition import digit_recognition_service
 
@@ -25,56 +26,146 @@ OBJECT_POOLS = {
     "star": {"emoji": "⭐", "type": "star"},
 }
 
-# Pixy personality messages per model level
+# Pixy personality messages per model level — bilingual (EN / RO)
 PIXY_MESSAGES = {
-    "junior": {
-        "guess": "Hmm… cred că sunt {n}? 🤔",
-        "correct_confirmed": "Ura! Am ghicit! Mulțumesc că m-ai ajutat! 😊",
-        "wrong_confirmed": "Oh, ok… atunci sunt {n}... 😕",
-        "corrected": "Ohhh, am greșit? Atunci sunt {n}! Mulțumesc! 😅",
-        "confused": "Sunt confuz... nu mai știu câte sunt... 😵",
-        "drawing_guess": "Hmm… cred că este {n}? 🤔",
-        "drawing_correct": "Am reușit! Este {n}! Mulțumesc! 😊",
-        "drawing_wrong": "Oh nu, am greșit din nou... 😢",
+    "ro": {
+        "junior": {
+            "guess": "Hmm… cred că sunt {n}? 🤔",
+            "correct_confirmed": "Ura! Am ghicit! Mulțumesc că m-ai ajutat! 😊",
+            "wrong_confirmed": "Oh, ok… atunci sunt {n}... 😕",
+            "corrected": "Ohhh, am greșit? Atunci sunt {n}! Mulțumesc! 😅",
+            "confused": "Sunt confuz... nu mai știu câte sunt... 😵",
+            "drawing_thinks": "Hmm… cred că ai desenat un {n}? 🤔",
+            "drawing_confirmed": "Yey! Am ghicit! Era un {n}! 😊",
+            "drawing_corrected": "Aha, era un {n}? Mulțumesc, învăț! 😅",
+            "drawing_caught_lying": "Sigur era un {n}? Eu eram destul de sigur că este un {m}... 🤨",
+        },
+        "student": {
+            "guess": "Cred că sunt {n}! 🙂",
+            "correct_confirmed": "Super! Am ghicit corect! Învăț repede! 😄",
+            "wrong_confirmed": "Hmm, sigur sunt {n}? Ok... 🤨",
+            "corrected": "Aha, sunt {n}! Am înțeles, mulțumesc! 📝",
+            "confused": "Hmm, sunt puțin confuz acum... 😕",
+            "drawing_thinks": "Cred că ai desenat un {n}! 🙂",
+            "drawing_confirmed": "Excelent! Era un {n}! Recunosc tot mai bine! 😄",
+            "drawing_corrected": "Aha, era un {n}! Am notat, mulțumesc! 📝",
+            "drawing_caught_lying": "Hmm, dar mie chiar mi se părea un {m}... ești sigur că este {n}? 🤔",
+        },
+        "expert": {
+            "guess": "Este clar! Sunt {n}! 🎉",
+            "correct_confirmed": "Știam! Am învățat foarte bine! 🌟",
+            "wrong_confirmed": "Hmm, chiar sunt {n}? Mă gândesc din nou... 🧐",
+            "corrected": "Oh, am greșit! Sunt {n}. Mulțumesc pentru corecție! 🙏",
+            "confused": "Ciudat, ceva nu se potrivește... 😐",
+            "drawing_thinks": "Este clar! Ai desenat numărul {n}! 🎉",
+            "drawing_confirmed": "Perfect! Era un {n}! Acum recunosc cifrele foarte bine! 🌟",
+            "drawing_corrected": "Oh, era un {n}? Mulțumesc, mă antrenez mai mult! 🙏",
+            "drawing_caught_lying": "Eram foarte sigur că este un {m}, nu un {n}... ești absolut sigur? 🧐",
+        },
     },
-    "student": {
-        "guess": "Cred că sunt {n}! 🙂",
-        "correct_confirmed": "Super! Am ghicit corect! Învăț repede! 😄",
-        "wrong_confirmed": "Hmm, sigur sunt {n}? Ok... 🤨",
-        "corrected": "Aha, sunt {n}! Am înțeles, mulțumesc! 📝",
-        "confused": "Hmm, sunt puțin confuz acum... 😕",
-        "drawing_guess": "Cred că ai desenat un {n}! 🙂",
-        "drawing_correct": "Da! Este un {n}! Recunosc tot mai bine! 😄",
-        "drawing_wrong": "Hmm, nu sunt sigur ce ai desenat... 🤔",
-    },
-    "expert": {
-        "guess": "Este clar! Sunt {n}! 🎉",
-        "correct_confirmed": "Știam! Am învățat foarte bine! 🌟",
-        "wrong_confirmed": "Hmm, chiar sunt {n}? Mă gândesc din nou... 🧐",
-        "corrected": "Oh, am greșit! Sunt {n}. Mulțumesc pentru corecție! 🙏",
-        "confused": "Ciudat, ceva nu se potrivește... 😐",
-        "drawing_guess": "Este clar! Ai desenat numărul {n}! 🎉",
-        "drawing_correct": "Perfect! Recunosc numerele foarte bine acum! 🌟",
-        "drawing_wrong": "Hmm, am greșit? Mă antrenez mai mult! 💪",
+    "en": {
+        "junior": {
+            "guess": "Hmm… I think there are {n}? 🤔",
+            "correct_confirmed": "Yay! I guessed it! Thanks for helping me! 😊",
+            "wrong_confirmed": "Oh, okay… so it's {n}... 😕",
+            "corrected": "Ohhh, I was wrong? So it's {n}! Thank you! 😅",
+            "confused": "I'm confused... I don't know how many there are anymore... 😵",
+            "drawing_thinks": "Hmm… I think you drew a {n}? 🤔",
+            "drawing_confirmed": "Yay! I guessed right! It was a {n}! 😊",
+            "drawing_corrected": "Oh, it was a {n}? Thanks, I'm learning! 😅",
+            "drawing_caught_lying": "Are you sure it was a {n}? I was pretty sure it looked like a {m}... 🤨",
+        },
+        "student": {
+            "guess": "I think there are {n}! 🙂",
+            "correct_confirmed": "Awesome! I guessed right! I'm learning fast! 😄",
+            "wrong_confirmed": "Hmm, are you sure it's {n}? Ok... 🤨",
+            "corrected": "Aha, it's {n}! Got it, thanks! 📝",
+            "confused": "Hmm, I'm a little confused now... 😕",
+            "drawing_thinks": "I think you drew a {n}! 🙂",
+            "drawing_confirmed": "Awesome! It was a {n}! I'm getting better and better! 😄",
+            "drawing_corrected": "Aha, it was a {n}! Noted, thanks! 📝",
+            "drawing_caught_lying": "Hmm, but it really looked like a {m} to me... are you sure it's a {n}? 🤔",
+        },
+        "expert": {
+            "guess": "It's clear! There are {n}! 🎉",
+            "correct_confirmed": "I knew it! I've learned really well! 🌟",
+            "wrong_confirmed": "Hmm, is it really {n}? Let me think again... 🧐",
+            "corrected": "Oh, I was wrong! It's {n}. Thanks for the correction! 🙏",
+            "confused": "Strange, something doesn't add up... 😐",
+            "drawing_thinks": "Crystal clear! You drew the digit {n}! 🎉",
+            "drawing_confirmed": "Perfect! It was a {n}! I recognize digits really well now! 🌟",
+            "drawing_corrected": "Oh, it was a {n}? Thanks, I'll train more! 🙏",
+            "drawing_caught_lying": "I was really confident it was a {m}, not a {n}... are you absolutely sure? 🧐",
+        },
     },
 }
 
 PROFESSOR_MESSAGES = {
-    "wrong_count": (
-        "Pixy învață din ce îl învățăm noi. "
-        "Dacă îi arătăm lucruri greșite, va învăța greșit. "
-        "Hai să-l ajutăm corect! Numără obiectele cu atenție."
-    ),
-    "wrong_drawing": (
-        "Pixy nu știe ce este corect sau greșit. "
-        "El învață din desenele tale. "
-        "Dacă îl învățăm greșit, va recunoaște greșit."
-    ),
-    "model_upgrade": (
-        "Bravo! Pixy a învățat suficient și a trecut la nivelul următor! "
-        "AI-ul învață bine atunci când oamenii sunt atenți și răbdători. 🌟"
-    ),
+    "ro": {
+        "wrong_count": (
+            "Pixy învață din ce îl învățăm noi. "
+            "Dacă îi arătăm lucruri greșite, va învăța greșit. "
+            "Hai să-l ajutăm corect! Numără obiectele cu atenție."
+        ),
+        "wrong_drawing": (
+            "Pixy nu știe ce este corect sau greșit. "
+            "El învață din desenele tale. "
+            "Dacă îl învățăm greșit, va recunoaște greșit."
+        ),
+        "wrong_teaching": (
+            "Atenție! Pixy a recunoscut clar un {m}, dar tu i-ai spus că este un {n}. "
+            "Dacă îl învățăm cifre greșite, AI-ul învață greșit. "
+            "Spune-i mereu ce ai desenat cu adevărat — așa învață corect!"
+        ),
+        "model_upgrade": (
+            "Bravo! Pixy a învățat suficient și a trecut la nivelul următor! "
+            "AI-ul învață bine atunci când oamenii sunt atenți și răbdători. 🌟"
+        ),
+    },
+    "en": {
+        "wrong_count": (
+            "Pixy learns from what we teach him. "
+            "If we show him wrong things, he'll learn the wrong way. "
+            "Let's help him out! Count the objects carefully."
+        ),
+        "wrong_drawing": (
+            "Pixy doesn't know what's right or wrong. "
+            "He learns from your drawings. "
+            "If we teach him wrong, he'll recognize things wrong."
+        ),
+        "wrong_teaching": (
+            "Careful! Pixy clearly recognized a {m}, but you told him it was a {n}. "
+            "If we teach the AI wrong digits, it will learn wrong. "
+            "Always tell Pixy what you really drew — that's how he learns properly!"
+        ),
+        "model_upgrade": (
+            "Great job! Pixy has learned enough and moved to the next level! "
+            "AI learns best when people are attentive and patient. 🌟"
+        ),
+    },
 }
+
+START_MESSAGES = {
+    "ro": "Bună! Eu sunt Pixy! Ajută-mă să învăț câte obiecte sunt! 🤖",
+    "en": "Hi! I'm Pixy! Help me learn how many objects there are! 🤖",
+}
+
+
+def _normalize_lang(lang: Optional[str]) -> str:
+    """Normalize an Accept-Language style string to one of our supported codes."""
+    if not lang:
+        return "en"
+    # Take the first 2 chars (handles "en-US", "ro-RO", "en, ro;q=0.9", etc.)
+    code = lang.strip().lower()[:2]
+    return code if code in ("en", "ro") else "en"
+
+
+def _pixy_msgs(model_level: str, lang: str) -> Dict[str, str]:
+    return PIXY_MESSAGES.get(lang, PIXY_MESSAGES["en"])[model_level]
+
+
+def _professor_msgs(lang: str) -> Dict[str, str]:
+    return PROFESSOR_MESSAGES.get(lang, PROFESSOR_MESSAGES["en"])
 
 # Model configuration
 MODEL_LEVELS = ["junior", "student", "expert"]
@@ -107,11 +198,17 @@ class NumbersService:
                 "rounds_completed": 0,
                 "total_correct": 0,
                 "pixy_guess": 0,
+                # Drawing-specific (Part 2): free-draw / teach loop
+                "last_recognized_digit": None,
+                "last_raw_confidence": 0.0,
+                "examples_taught": 0,
+                "drawing_lying_count": 0,
             }
         return self._sessions[user_id]
 
-    def start_session(self, user_id: int) -> NumbersStartResponse:
+    def start_session(self, user_id: int, lang: str = "en") -> NumbersStartResponse:
         """Start a new numbers learning session."""
+        lang = _normalize_lang(lang)
         session = self._get_or_create_session(user_id)
 
         # Reset session
@@ -121,6 +218,10 @@ class NumbersService:
         session["current_part"] = 1
         session["rounds_completed"] = 0
         session["total_correct"] = 0
+        session["last_recognized_digit"] = None
+        session["last_raw_confidence"] = 0.0
+        session["examples_taught"] = 0
+        session["drawing_lying_count"] = 0
 
         # Generate first round
         target = random.randint(1, 5)
@@ -135,11 +236,12 @@ class NumbersService:
             objects=objects,
             model_level=session["model_level"],
             current_part=1,
-            message=f"Bună! Eu sunt Pixy! Ajută-mă să învăț câte obiecte sunt! 🤖",
+            message=START_MESSAGES.get(lang, START_MESSAGES["en"]),
         )
 
-    def get_round(self, user_id: int) -> NumbersRoundResponse:
+    def get_round(self, user_id: int, lang: str = "en") -> NumbersRoundResponse:
         """Get the current round data including Pixy's guess."""
+        lang = _normalize_lang(lang)
         session = self._get_or_create_session(user_id)
 
         if session["target_number"] == 0:
@@ -158,7 +260,7 @@ class NumbersService:
         pixy_guess = self._pixy_guess_count(target, model_level)
         session["pixy_guess"] = pixy_guess
 
-        messages = PIXY_MESSAGES[model_level]
+        messages = _pixy_msgs(model_level, lang)
         pixy_message = messages["guess"].format(n=pixy_guess)
 
         confidence = "low" if model_level == "junior" else ("medium" if model_level == "student" else "high")
@@ -173,13 +275,15 @@ class NumbersService:
             current_part=session["current_part"],
         )
 
-    def submit_count(self, user_id: int, submission: CountingSubmission) -> CountingResponse:
+    def submit_count(self, user_id: int, submission: CountingSubmission, lang: str = "en") -> CountingResponse:
         """Process a counting answer from the child."""
+        lang = _normalize_lang(lang)
         session = self._get_or_create_session(user_id)
         target = session["target_number"]
         model_level = session["model_level"]
         pixy_guess = session.get("pixy_guess", target)
-        messages = PIXY_MESSAGES[model_level]
+        messages = _pixy_msgs(model_level, lang)
+        prof_messages = _professor_msgs(lang)
 
         is_correct = submission.answer == target
         show_professor = False
@@ -204,7 +308,7 @@ class NumbersService:
 
                 if session["confusion_count"] >= CONFUSION_THRESHOLD:
                     show_professor = True
-                    professor_message = PROFESSOR_MESSAGES["wrong_count"]
+                    professor_message = prof_messages["wrong_count"]
                     session["confusion_count"] = 0
                     pixy_message = messages["confused"]
         else:
@@ -227,7 +331,7 @@ class NumbersService:
 
                 if session["confusion_count"] >= CONFUSION_THRESHOLD:
                     show_professor = True
-                    professor_message = PROFESSOR_MESSAGES["wrong_count"]
+                    professor_message = prof_messages["wrong_count"]
                     session["confusion_count"] = 0
 
         # Check for model upgrade
@@ -271,47 +375,125 @@ class NumbersService:
             part_completed=part_completed,
         )
 
-    def submit_drawing(self, user_id: int, image_bytes: bytes) -> DrawingResponse:
-        """Process a digit drawing from the child."""
+    # ── Drawing flow (free-draw + teach) ─────────────────────────────────────
+    #
+    # The child draws any digit they like (0-9). Pixy makes a guess
+    # (`submit_drawing`). The UI then asks the child to confirm or correct
+    # the guess (`teach_drawing`). Pixy "learns" with each example: confidence
+    # grows and reaches ~100% by the 4th–5th example. If the recognizer was
+    # very confident in something different from what the child claimed, the
+    # professor steps in to warn against teaching the AI wrong things.
+
+    # Threshold above which the recognizer is considered "confident" about its
+    # own answer; if the child claims something else, that's a probable lie.
+    CHEATING_CONFIDENCE_THRESHOLD = 0.70
+
+    @staticmethod
+    def _display_confidence(raw: float, examples_taught: int) -> float:
+        """Blend the raw recognizer confidence with a learning bonus.
+
+        Reaches 100% by the 5th confirmed example, regardless of raw value, so
+        the simulated AI feels like it actually gets better with each round.
+        """
+        floor = min(1.0, 0.30 + 0.18 * examples_taught)  # 0.30, 0.48, 0.66, 0.84, 1.00
+        return float(min(1.0, max(raw, floor)))
+
+    def submit_drawing(self, user_id: int, image_bytes: bytes, lang: str = "en") -> DrawingResponse:
+        """Pixy looks at the drawing and proposes a guess.
+
+        No `target` digit is involved — the child is free to draw any digit
+        from 0 to 9. The UI must follow up with `teach_drawing` so the child
+        can confirm / correct what they actually drew.
+        """
+        lang = _normalize_lang(lang)
         session = self._get_or_create_session(user_id)
         model_level = session["model_level"]
-        target = session["target_number"]
-        messages = PIXY_MESSAGES[model_level]
+        messages = _pixy_msgs(model_level, lang)
 
-        if target == 0:
-            target = random.randint(1, 5)
-            session["target_number"] = target
-
-        # Recognize the digit
-        guessed_digit, confidence = digit_recognition_service.recognize(
+        # Recognize the digit. The recognizer is built around 1–5; if it
+        # returns 0, fall back to its best non-zero guess (still safe — we
+        # only need a coherent display value).
+        guessed_digit, raw_confidence = digit_recognition_service.recognize(
             image_bytes, model_level
         )
+        if not guessed_digit:
+            guessed_digit = random.randint(1, 5)
+            raw_confidence = max(raw_confidence, 0.20)
 
-        is_correct = guessed_digit == target
+        examples_taught = int(session.get("examples_taught", 0))
+        display_conf = self._display_confidence(raw_confidence, examples_taught)
+
+        session["last_recognized_digit"] = guessed_digit
+        session["last_raw_confidence"] = float(raw_confidence)
+
+        pixy_message = messages["drawing_thinks"].format(n=guessed_digit)
+
+        return DrawingResponse(
+            guessed_digit=guessed_digit,
+            confidence=display_conf,
+            pixy_message=pixy_message,
+            pixy_emotion="thinking",
+            model_level=model_level,
+            examples_taught=examples_taught,
+            awaiting_confirmation=True,
+        )
+
+    def teach_drawing(
+        self,
+        user_id: int,
+        submission: TeachDrawingSubmission,
+        lang: str = "en",
+    ) -> TeachDrawingResponse:
+        """The child confirms or corrects Pixy's last guess."""
+        lang = _normalize_lang(lang)
+        session = self._get_or_create_session(user_id)
+        model_level = session["model_level"]
+        messages = _pixy_msgs(model_level, lang)
+        prof_messages = _professor_msgs(lang)
+
+        recognized = session.get("last_recognized_digit")
+        raw_conf = float(session.get("last_raw_confidence", 0.0))
+        claimed = int(submission.claimed_digit)
+
+        was_pixy_correct = recognized is not None and claimed == recognized
+        is_lying = (
+            recognized is not None
+            and claimed != recognized
+            and raw_conf >= self.CHEATING_CONFIDENCE_THRESHOLD
+        )
+
         show_professor = False
         professor_message = None
         professor_hint = None
-        model_upgraded = False
-        new_model_level = None
+        pixy_emotion = "happy"
 
-        if is_correct:
-            session["correct_count"] += 1
-            session["total_correct"] += 1
+        if is_lying:
+            # Don't reward, don't penalise the model knowledge — but warn the kid.
+            session["drawing_lying_count"] = int(session.get("drawing_lying_count", 0)) + 1
+            session["confusion_count"] = int(session.get("confusion_count", 0)) + 1
+            pixy_message = messages["drawing_caught_lying"].format(n=claimed, m=recognized)
+            pixy_emotion = "confused"
+            show_professor = True
+            professor_message = prof_messages["wrong_teaching"].format(
+                n=claimed, m=recognized
+            )
+        elif was_pixy_correct:
+            session["correct_count"] = int(session["correct_count"]) + 1
+            session["total_correct"] = int(session["total_correct"]) + 1
+            session["examples_taught"] = int(session.get("examples_taught", 0)) + 1
             session["confusion_count"] = 0
-            pixy_message = messages["drawing_correct"]
+            pixy_message = messages["drawing_confirmed"].format(n=claimed)
             pixy_emotion = "happy"
         else:
-            session["confusion_count"] += 1
-            pixy_message = messages["drawing_guess"].format(n=guessed_digit)
+            # Pixy was wrong, the child corrected → still a valid teaching example.
+            session["examples_taught"] = int(session.get("examples_taught", 0)) + 1
+            session["confusion_count"] = 0
+            pixy_message = messages["drawing_corrected"].format(n=claimed)
             pixy_emotion = "thinking"
 
-            if session["confusion_count"] >= CONFUSION_THRESHOLD:
-                show_professor = True
-                professor_message = PROFESSOR_MESSAGES["wrong_drawing"]
-                professor_hint = digit_recognition_service.get_hint(target)
-                session["confusion_count"] = 0
-
-        # Check for model upgrade
+        # ── Model upgrade after enough confirmed-correct examples ───────────
+        model_upgraded = False
+        new_model_level = None
         if session["correct_count"] >= CORRECT_TO_UPGRADE:
             current_idx = MODEL_LEVELS.index(model_level)
             if current_idx < len(MODEL_LEVELS) - 1:
@@ -321,27 +503,32 @@ class NumbersService:
                 model_upgraded = True
                 new_model_level = new_level
 
-        session["rounds_completed"] += 1
+        session["rounds_completed"] = int(session.get("rounds_completed", 0)) + 1
 
-        # Check if Part 2 is complete
+        # ── Part 2 completion ───────────────────────────────────────────────
         part_completed = False
-        if session["model_level"] == "expert" and session["correct_count"] >= CORRECT_TO_UPGRADE:
+        if (
+            session["model_level"] == "expert"
+            and session["correct_count"] >= CORRECT_TO_UPGRADE
+        ):
             part_completed = True
             self._complete_mission(user_id, session)
 
-        # Generate new target for next round
-        session["target_number"] = random.randint(1, 5)
+        # Reset last-drawing state so the next round starts fresh.
+        session["last_recognized_digit"] = None
+        session["last_raw_confidence"] = 0.0
 
-        return DrawingResponse(
-            guessed_digit=guessed_digit,
-            confidence=confidence,
-            is_correct=is_correct,
-            target_digit=target,
+        return TeachDrawingResponse(
+            was_pixy_correct=was_pixy_correct,
+            is_lying=is_lying,
+            claimed_digit=claimed,
+            recognized_digit=recognized,
             pixy_message=pixy_message,
             pixy_emotion=pixy_emotion,
             model_level=session["model_level"],
             correct_count=session["correct_count"],
             confusion_count=session["confusion_count"],
+            examples_taught=int(session.get("examples_taught", 0)),
             show_professor=show_professor,
             professor_message=professor_message,
             professor_hint=professor_hint,

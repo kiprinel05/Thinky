@@ -17,13 +17,27 @@ class DigitRecognitionService:
     not a production ML model.
     """
 
-    # Heuristic descriptions for each digit (used for professor hints)
+    # Heuristic descriptions for each digit (used for professor hints) — bilingual
     DIGIT_HINTS = {
-        1: "Cifra 1 este o linie dreaptă, de sus în jos.",
-        2: "Cifra 2 are o curbă sus și o linie orizontală jos.",
-        3: "Cifra 3 are două curbe rotunde, una deasupra celeilalte.",
-        4: "Cifra 4 are o linie în jos, una orizontală și una verticală.",
-        5: "Cifra 5 are o linie orizontală sus, o curbă jos.",
+        "ro": {
+            1: "Cifra 1 este o linie dreaptă, de sus în jos.",
+            2: "Cifra 2 are o curbă sus și o linie orizontală jos.",
+            3: "Cifra 3 are două curbe rotunde, una deasupra celeilalte.",
+            4: "Cifra 4 are o linie în jos, una orizontală și una verticală.",
+            5: "Cifra 5 are o linie orizontală sus, o curbă jos.",
+        },
+        "en": {
+            1: "The digit 1 is a straight line, from top to bottom.",
+            2: "The digit 2 has a curve on top and a horizontal line at the bottom.",
+            3: "The digit 3 has two round curves, one above the other.",
+            4: "The digit 4 has a vertical line down, a horizontal one, and another vertical one.",
+            5: "The digit 5 has a horizontal line on top and a curve at the bottom.",
+        },
+    }
+
+    DIGIT_HINT_FALLBACK = {
+        "ro": "Încearcă să desenezi cifra clar.",
+        "en": "Try to draw the digit clearly.",
     }
 
     def __init__(self):
@@ -259,9 +273,13 @@ class DigitRecognitionService:
 
         return (digit, confidence)
 
-    def get_hint(self, digit: int) -> str:
-        """Get a professor hint for how to draw a digit."""
-        return self.DIGIT_HINTS.get(digit, "Încearcă să desenezi cifra clar.")
+    def get_hint(self, digit: int, lang: str = "en") -> str:
+        """Get a professor hint for how to draw a digit, in the requested language."""
+        code = (lang or "en").strip().lower()[:2]
+        if code not in ("en", "ro"):
+            code = "en"
+        hints = self.DIGIT_HINTS.get(code, self.DIGIT_HINTS["en"])
+        return hints.get(digit, self.DIGIT_HINT_FALLBACK.get(code, self.DIGIT_HINT_FALLBACK["en"]))
 
 
 # Singleton

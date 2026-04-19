@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Header
+from typing import Optional
 from sqlalchemy.orm import Session
 
 # Support both old (api/) and new (features/) architecture
@@ -17,6 +18,7 @@ from features.numbers.schemas import (
     NumbersStartResponse, NumbersRoundResponse,
     CountingSubmission, CountingResponse,
     DrawingResponse, NumbersProgressResponse,
+    TeachDrawingSubmission, TeachDrawingResponse,
 )
 from features.numbers.service import NumbersService
 from features.mission.repository import MissionRepository
@@ -33,18 +35,20 @@ def get_numbers_service(db: Session = Depends(get_db)) -> NumbersService:
 async def start_session(
     current_user: User = Depends(get_current_user),
     service: NumbersService = Depends(get_numbers_service),
+    accept_language: Optional[str] = Header(default=None),
 ):
     """Start a new numbers learning session."""
-    return service.start_session(current_user.id)
+    return service.start_session(current_user.id, lang=accept_language or "en")
 
 
 @router.get("/round", response_model=NumbersRoundResponse)
 async def get_round(
     current_user: User = Depends(get_current_user),
     service: NumbersService = Depends(get_numbers_service),
+    accept_language: Optional[str] = Header(default=None),
 ):
     """Get the current round data with Pixy's guess."""
-    return service.get_round(current_user.id)
+    return service.get_round(current_user.id, lang=accept_language or "en")
 
 
 @router.post("/submit-count", response_model=CountingResponse)
@@ -52,9 +56,10 @@ async def submit_count(
     submission: CountingSubmission,
     current_user: User = Depends(get_current_user),
     service: NumbersService = Depends(get_numbers_service),
+    accept_language: Optional[str] = Header(default=None),
 ):
     """Submit a counting answer for Part 1."""
-    return service.submit_count(current_user.id, submission)
+    return service.submit_count(current_user.id, submission, lang=accept_language or "en")
 
 
 @router.post("/submit-drawing", response_model=DrawingResponse)
@@ -62,6 +67,7 @@ async def submit_drawing(
     file: UploadFile = File(..., description="PNG or JPG image of the drawn digit"),
     current_user: User = Depends(get_current_user),
     service: NumbersService = Depends(get_numbers_service),
+    accept_language: Optional[str] = Header(default=None),
 ):
     """Submit a digit drawing for Part 2."""
     try:
@@ -79,7 +85,7 @@ async def submit_drawing(
                 detail="Image too large. Maximum size is 5MB.",
             )
 
-        return service.submit_drawing(current_user.id, contents)
+        return service.submit_drawing(current_user.id, contents, lang=accept_language or "en")
 
     except HTTPException:
         raise
@@ -89,6 +95,24 @@ async def submit_drawing(
             status_code=500,
             detail=f"Error processing drawing: {str(e)}",
         )
+
+
+@router.post("/teach-drawing", response_model=TeachDrawingResponse)
+async def teach_drawing(
+    submission: TeachDrawingSubmission,
+    current_user: User = Depends(get_current_user),
+    service: NumbersService = Depends(get_numbers_service),
+    accept_language: Optional[str] = Header(default=None),
+):
+    """Confirm or correct Pixy's last drawing guess.
+
+    Pair this with a previous /submit-drawing call: that one stores Pixy's
+    proposal in the session, this one resolves it (and may detect when the
+    child is teaching wrong digits).
+    """
+    return service.teach_drawing(
+        current_user.id, submission, lang=accept_language or "en"
+    )
 
 
 @router.get("/progress", response_model=NumbersProgressResponse)

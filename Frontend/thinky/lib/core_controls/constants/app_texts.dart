@@ -628,17 +628,100 @@ class NumbersMission {
   static String get continueCaps => TextService.getString('NumbersMission', 'continueCaps');
   static String get drawDigitHint => TextService.getString('NumbersMission', 'drawDigitHint');
   static String get pixyDrawPrompt => TextService.getString('NumbersMission', 'pixyDrawPrompt');
+  static String get freeDrawTitle =>
+      TextService.getString('NumbersMission', 'freeDrawTitle');
+  static String get freeDrawSubtitle =>
+      TextService.getString('NumbersMission', 'freeDrawSubtitle');
   static String get clear => TextService.getString('NumbersMission', 'clear');
   static String get analyzing => TextService.getString('NumbersMission', 'analyzing');
   static String get sendToPixy => TextService.getString('NumbersMission', 'sendToPixy');
   static String get drawingRecognized =>
       TextService.getString('NumbersMission', 'drawingRecognized');
   static String get nextDigit => TextService.getString('NumbersMission', 'nextDigit');
+  static String get askWasItCorrect =>
+      TextService.getString('NumbersMission', 'askWasItCorrect');
+  static String get yesPixyCorrect =>
+      TextService.getString('NumbersMission', 'yesPixyCorrect');
+  static String get noCorrectIt =>
+      TextService.getString('NumbersMission', 'noCorrectIt');
+  static String get pickWhatYouDrew =>
+      TextService.getString('NumbersMission', 'pickWhatYouDrew');
+  static String get teachPixy =>
+      TextService.getString('NumbersMission', 'teachPixy');
+  static String get drawingTeachThanks =>
+      TextService.getString('NumbersMission', 'drawingTeachThanks');
+  static String get drawingCheatingTitle =>
+      TextService.getString('NumbersMission', 'drawingCheatingTitle');
+
+  static String pixyConfidence(int percent) =>
+      TextService.getString('NumbersMission', 'pixyConfidence')
+          .replaceAll('{percent}', '$percent');
+  static String examplesTaught(int n) =>
+      TextService.getString('NumbersMission', 'examplesTaught')
+          .replaceAll('{n}', '$n');
   static String get upgradeDrawingSubtitle =>
       TextService.getString('NumbersMission', 'upgradeDrawingSubtitle');
   static String get levelJunior => TextService.getString('NumbersMission', 'levelJunior');
   static String get levelStudent => TextService.getString('NumbersMission', 'levelStudent');
   static String get levelExpert => TextService.getString('NumbersMission', 'levelExpert');
+
+  // New flow buttons
+  static String get pixyGuessLabel =>
+      TextService.getString('NumbersMission', 'pixyGuessLabel');
+  static String get sameAsPixyChip =>
+      TextService.getString('NumbersMission', 'sameAsPixyChip');
+  static String get submitMyAnswer =>
+      TextService.getString('NumbersMission', 'submitMyAnswer');
+  static String get pickANumberFirst =>
+      TextService.getString('NumbersMission', 'pickANumberFirst');
+
+  // Localized fallback messages (offline mode)
+  static String get pixyLocalCorrect =>
+      TextService.getString('NumbersMission', 'pixyLocalCorrect');
+  static String get pixyLocalWrong =>
+      TextService.getString('NumbersMission', 'pixyLocalWrong');
+  static String get professorLocalHint =>
+      TextService.getString('NumbersMission', 'professorLocalHint');
+  static String get pixyDrawingFailedFallback =>
+      TextService.getString('NumbersMission', 'pixyDrawingFailedFallback');
+
+  static String pixyLocalGuess(int n) =>
+      TextService.getString('NumbersMission', 'pixyLocalGuess')
+          .replaceAll('{n}', '$n');
+
+  // Completion stats + actions
+  static String get statCorrectAnswers =>
+      TextService.getString('NumbersMission', 'statCorrectAnswers');
+  static String get statRounds =>
+      TextService.getString('NumbersMission', 'statRounds');
+  static String get statTopLevel =>
+      TextService.getString('NumbersMission', 'statTopLevel');
+  static String get learnWithPixy =>
+      TextService.getString('NumbersMission', 'learnWithPixy');
+  static String get tryAgainCaps =>
+      TextService.getString('NumbersMission', 'tryAgainCaps');
+
+  static String missionCompleteSubtitle(String level, String emoji) =>
+      TextService.getString('NumbersMission', 'missionCompleteSubtitle')
+          .replaceAll('{level}', level)
+          .replaceAll('{emoji}', emoji);
+
+  // Learning view
+  static String get lessonNext =>
+      TextService.getString('NumbersMission', 'lessonNext');
+  static String get lessonDone =>
+      TextService.getString('NumbersMission', 'lessonDone');
+  static String get lessonDidYouKnow =>
+      TextService.getString('NumbersMission', 'lessonDidYouKnow');
+  static String get backToResults =>
+      TextService.getString('NumbersMission', 'backToResults');
+
+  static String lessonCardTitle(int i) =>
+      TextService.getString('NumbersMission', 'lessonCard${i}Title');
+  static String lessonCardBody(int i) =>
+      TextService.getString('NumbersMission', 'lessonCard${i}Body');
+  static String lessonCardFact(int i) =>
+      TextService.getString('NumbersMission', 'lessonCard${i}Fact');
 
   static String levelLine(String levelName, String emoji) =>
       TextService.getString('NumbersMission', 'levelLine')

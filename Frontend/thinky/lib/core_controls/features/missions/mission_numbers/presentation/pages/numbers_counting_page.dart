@@ -9,13 +9,18 @@ import 'package:thinky/shared_controls/widgets/animations/animated_widgets.dart'
 import '../../domain/numbers_models.dart';
 import '../controllers/numbers_controller.dart';
 import '../controllers/numbers_state.dart';
+import '../widgets/numbers_professor_overlay.dart';
 
-/// Part 1: Counting objects and helping Pixy learn numbers
+/// Part 1 of the Numbers mission: count the objects on screen and pick the
+/// correct number. Pixy makes its own guess and the child can either pick the
+/// same number (= "I agree with Pixy") or pick a different one — there is a
+/// single primary CTA at the bottom in both cases.
 class NumbersCountingPage extends ConsumerStatefulWidget {
   const NumbersCountingPage({super.key});
 
   @override
-  ConsumerState<NumbersCountingPage> createState() => _NumbersCountingPageState();
+  ConsumerState<NumbersCountingPage> createState() =>
+      _NumbersCountingPageState();
 }
 
 class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
@@ -26,12 +31,6 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   late Animation<double> _pixyBounceAnim;
   late Animation<Offset> _professorSlideAnim;
   late Animation<double> _upgradeScaleAnim;
-
-  static const Color _primaryColor = Color(0xFFFF9A5C);
-  static const Color _primaryLight = Color(0xFFFFB347);
-  static const Color _primaryDark = Color(0xFFE87B3A);
-  static const Color _successColor = Color(0xFF4CAF50);
-  static const Color _errorColor = Color(0xFFFF6B6B);
 
   @override
   void initState() {
@@ -79,15 +78,16 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
     ref.watch(textRefreshProvider);
     final colors = context.appColors;
     final state = ref.watch(numbersStateProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent =
+        isDark ? AppColors.numbersOrangeLight : AppColors.numbersOrangeDark;
 
-    // Trigger professor animation
     if (state.phase == NumbersPhase.professorIntervention) {
       _professorSlideController.forward();
     } else {
       _professorSlideController.reverse();
     }
 
-    // Trigger upgrade animation
     if (state.phase == NumbersPhase.modelUpgrade) {
       _upgradeAnimController.forward(from: 0.0);
     }
@@ -99,20 +99,23 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
           children: [
             Column(
               children: [
-                _buildHeader(state),
+                _buildHeader(state, colors, accent),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       children: [
                         const SizedBox(height: 8),
-                        _buildObjectsArea(state),
+                        _buildObjectsArea(state, colors, isDark),
                         const SizedBox(height: 16),
-                        _buildPixySection(state),
+                        _buildPixySection(state, colors, accent, isDark),
                         const SizedBox(height: 16),
-                        if (state.phase == NumbersPhase.counting) _buildNumberButtons(state),
-                        if (state.phase == NumbersPhase.pixyGuessing) _buildResultSection(state),
-                        if (state.phase == NumbersPhase.transitionToPart2) _buildTransitionCard(),
+                        if (state.phase == NumbersPhase.counting)
+                          _buildAnswerArea(state, colors, accent, isDark),
+                        if (state.phase == NumbersPhase.pixyGuessing)
+                          _buildResultSection(state, colors, isDark),
+                        if (state.phase == NumbersPhase.transitionToPart2)
+                          _buildTransitionCard(colors, accent, isDark),
                         const SizedBox(height: 20),
                       ],
                     ),
@@ -120,12 +123,15 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                 ),
               ],
             ),
-            // Professor overlay
             if (state.phase == NumbersPhase.professorIntervention)
-              _buildProfessorOverlay(state),
-            // Model upgrade celebration
+              NumbersProfessorOverlay(
+                slideAnimation: _professorSlideAnim,
+                message: state.countingResult?.professorMessage ?? '',
+                onUnderstood: () =>
+                    ref.read(numbersStateProvider.notifier).dismissProfessor(),
+              ),
             if (state.phase == NumbersPhase.modelUpgrade)
-              _buildUpgradeOverlay(state),
+              _buildUpgradeOverlay(state, colors, accent, isDark),
           ],
         ),
       ),
@@ -133,11 +139,14 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // HEADER with progress
+  // HEADER
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildHeader(NumbersState state) {
-    final colors = context.appColors;
+  Widget _buildHeader(
+    NumbersState state,
+    AppColorsExtension colors,
+    Color accent,
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
@@ -160,11 +169,11 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _primaryColor.withValues(alpha: 0.1),
+                    color: AppColors.numbersOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.arrow_back_ios_new_rounded,
-                      color: _primaryDark, size: 18),
+                      color: accent, size: 18),
                 ),
               ),
               const SizedBox(width: 12),
@@ -188,7 +197,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                       ),
                       style: GoogleFonts.alata(
                         fontSize: 12,
-                        color: _primaryDark,
+                        color: accent,
                       ),
                     ),
                   ],
@@ -197,13 +206,14 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             ],
           ),
           const SizedBox(height: 10),
-          // Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: state.upgradeProgress.clamp(0.0, 1.0),
-              backgroundColor: _primaryColor.withValues(alpha: 0.12),
-              valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+              backgroundColor:
+                  AppColors.numbersOrange.withValues(alpha: 0.12),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.numbersOrange),
               minHeight: 8,
             ),
           ),
@@ -213,7 +223,8 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             children: [
               Text(
                 NumbersMission.progressUpgrade(state.correctCount),
-                style: GoogleFonts.alata(fontSize: 10, color: colors.textSecondary),
+                style: GoogleFonts.alata(
+                    fontSize: 10, color: colors.textSecondary),
               ),
               Row(
                 children: List.generate(3, (i) {
@@ -222,19 +233,18 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                   final isPast = state.modelLevel.index > level.index;
                   return Container(
                     margin: const EdgeInsets.only(left: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? _primaryColor
+                          ? AppColors.numbersOrange
                           : isPast
-                              ? _successColor.withValues(alpha: 0.15)
-                              : Colors.grey.withValues(alpha: 0.08),
+                              ? AppColors.success.withValues(alpha: 0.15)
+                              : colors.border,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      level.emoji,
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    child: Text(level.emoji,
+                        style: const TextStyle(fontSize: 12)),
                   );
                 }),
               ),
@@ -249,8 +259,11 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   // OBJECTS DISPLAY
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildObjectsArea(NumbersState state) {
-    final colors = context.appColors;
+  Widget _buildObjectsArea(
+    NumbersState state,
+    AppColorsExtension colors,
+    bool isDark,
+  ) {
     final round = state.round;
     if (round == null) return const SizedBox.shrink();
 
@@ -263,7 +276,8 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
         border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: _primaryColor.withValues(alpha: 0.1),
+            color: AppColors.numbersOrange
+                .withValues(alpha: isDark ? 0.18 : 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -290,10 +304,12 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _primaryColor.withValues(alpha: 0.06),
+                    color: AppColors.numbersOrange
+                        .withValues(alpha: isDark ? 0.14 : 0.06),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _primaryColor.withValues(alpha: 0.15),
+                      color: AppColors.numbersOrange
+                          .withValues(alpha: isDark ? 0.3 : 0.15),
                     ),
                   ),
                   child: Text(
@@ -313,15 +329,20 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   // PIXY SECTION
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildPixySection(NumbersState state) {
-    final colors = context.appColors;
+  Widget _buildPixySection(
+    NumbersState state,
+    AppColorsExtension colors,
+    Color accent,
+    bool isDark,
+  ) {
     final round = state.round;
     if (round == null) return const SizedBox.shrink();
 
     String pixyText;
     String pixyEmoji;
 
-    if (state.phase == NumbersPhase.pixyGuessing && state.countingResult != null) {
+    if (state.phase == NumbersPhase.pixyGuessing &&
+        state.countingResult != null) {
       pixyText = state.countingResult!.pixyMessage;
       pixyEmoji = _emotionToEmoji(state.countingResult!.pixyEmotion);
     } else {
@@ -339,10 +360,18 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_primaryColor.withValues(alpha: 0.12), _primaryLight.withValues(alpha: 0.08)],
+                colors: [
+                  AppColors.numbersOrange
+                      .withValues(alpha: isDark ? 0.20 : 0.12),
+                  AppColors.numbersOrangeLight
+                      .withValues(alpha: isDark ? 0.14 : 0.08),
+                ],
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: AppColors.numbersOrange
+                    .withValues(alpha: isDark ? 0.32 : 0.2),
+              ),
             ),
             child: Row(
               children: [
@@ -354,7 +383,8 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                     border: Border.all(color: colors.border),
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryColor.withValues(alpha: 0.15),
+                        color: AppColors.numbersOrange
+                            .withValues(alpha: 0.15),
                         blurRadius: 8,
                       ),
                     ],
@@ -371,7 +401,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                         style: GoogleFonts.alata(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: _primaryDark,
+                          color: accent,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -395,12 +425,24 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // NUMBER BUTTONS (1-5)
+  // ANSWER AREA — single-CTA flow
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildNumberButtons(NumbersState state) {
-    final colors = context.appColors;
+  /// Replaces the old dual-button (Confirm Pixy / Send) row.
+  ///
+  /// The user picks a number from the 1–5 grid; if they happen to pick the
+  /// same number as Pixy's guess we surface a small "you agree with Pixy"
+  /// chip. Either way there is exactly ONE primary CTA at the bottom.
+  Widget _buildAnswerArea(
+    NumbersState state,
+    AppColorsExtension colors,
+    Color accent,
+    bool isDark,
+  ) {
     final controller = ref.read(numbersStateProvider.notifier);
+    final pixyGuess = state.round?.pixyGuess;
+    final selected = state.selectedAnswer;
+    final agreesWithPixy = selected != null && selected == pixyGuess;
 
     return Column(
       children: [
@@ -412,91 +454,140 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             color: colors.textSecondary,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(5, (i) {
             final number = i + 1;
-            final isSelected = state.selectedAnswer == number;
+            final isSelected = selected == number;
+            final isPixyChoice = pixyGuess == number;
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: GestureDetector(
-                onTap: () => controller.selectAnswer(number),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: isSelected ? _primaryColor : colors.cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected ? _primaryDark : _primaryColor.withValues(alpha: 0.3),
-                      width: isSelected ? 2.5 : 1.5,
-                    ),
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: _primaryColor.withValues(alpha: 0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                onTap: state.isSubmitting
+                    ? null
+                    : () => controller.selectAnswer(number),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.numbersOrange
+                            : colors.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.numbersOrangeDark
+                              : AppColors.numbersOrange
+                                  .withValues(alpha: 0.3),
+                          width: isSelected ? 2.5 : 1.5,
                         ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '$number',
-                    style: GoogleFonts.alata(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? Colors.white : _primaryDark,
+                        boxShadow: [
+                          if (isSelected)
+                            BoxShadow(
+                              color: AppColors.numbersOrange
+                                  .withValues(alpha: 0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$number',
+                        style: GoogleFonts.alata(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? Colors.white : accent,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (isPixyChoice)
+                      Positioned(
+                        top: -8,
+                        right: -8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: colors.cardColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.numbersOrange
+                                  .withValues(alpha: 0.6),
+                            ),
+                          ),
+                          child: const Text(
+                            '🤖',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );
           }),
         ),
-        const SizedBox(height: 20),
-        // Submit OR Confirm Pixy's guess
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionButton(
-                label: NumbersMission.confirmPixy,
-                icon: Icons.check_circle_rounded,
-                color: _successColor,
-                onTap: state.isSubmitting ? null : () => controller.submitCount(confirmed: true),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionButton(
-                label: NumbersMission.send,
-                icon: Icons.send_rounded,
-                color: _primaryColor,
-                enabled: state.selectedAnswer != null,
-                onTap: state.selectedAnswer == null || state.isSubmitting
-                    ? null
-                    : () => controller.submitCount(),
-              ),
-            ),
-          ],
+        const SizedBox(height: 12),
+        // Subtle status row: either "Pick a number" hint or "agree with Pixy" chip
+        SizedBox(
+          height: 28,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: agreesWithPixy
+                ? _PixyAgreementChip(
+                    key: const ValueKey('agree'),
+                    label: NumbersMission.sameAsPixyChip,
+                  )
+                : selected == null
+                    ? Center(
+                        key: const ValueKey('hint'),
+                        child: Text(
+                          NumbersMission.pickANumberFirst,
+                          style: GoogleFonts.alata(
+                            fontSize: 12,
+                            color: colors.textHint,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('empty')),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // SINGLE primary CTA — replaces the awkward Confirm + Send pair
+        SizedBox(
+          width: double.infinity,
+          child: _buildPrimaryButton(
+            label: NumbersMission.submitMyAnswer,
+            icon: Icons.send_rounded,
+            enabled: selected != null && !state.isSubmitting,
+            isLoading: state.isSubmitting,
+            onTap: () => controller.submitCount(),
+          ),
         ),
       ],
     );
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // RESULT SECTION (after submission)
+  // RESULT SECTION
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildResultSection(NumbersState state) {
-    final colors = context.appColors;
+  Widget _buildResultSection(
+    NumbersState state,
+    AppColorsExtension colors,
+    bool isDark,
+  ) {
     final result = state.countingResult;
     if (result == null) return const SizedBox.shrink();
-
     final controller = ref.read(numbersStateProvider.notifier);
+    final positive = result.isCorrect ? AppColors.success : AppColors.incorrectRed;
 
     return Column(
       children: [
@@ -504,21 +595,19 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: result.isCorrect
-                ? _successColor.withValues(alpha: 0.08)
-                : _errorColor.withValues(alpha: 0.08),
+            color: positive.withValues(alpha: isDark ? 0.16 : 0.08),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: result.isCorrect
-                  ? _successColor.withValues(alpha: 0.3)
-                  : _errorColor.withValues(alpha: 0.3),
+              color: positive.withValues(alpha: 0.3),
             ),
           ),
           child: Column(
             children: [
               Icon(
-                result.isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                color: result.isCorrect ? _successColor : _errorColor,
+                result.isCorrect
+                    ? Icons.check_circle_rounded
+                    : Icons.cancel_rounded,
+                color: positive,
                 size: 40,
               ),
               const SizedBox(height: 12),
@@ -529,7 +618,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                 style: GoogleFonts.alata(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: result.isCorrect ? _successColor : _errorColor,
+                  color: positive,
                 ),
               ),
               const SizedBox(height: 8),
@@ -548,10 +637,10 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
-          child: _buildActionButton(
+          child: _buildPrimaryButton(
             label: NumbersMission.nextRound,
             icon: Icons.arrow_forward_rounded,
-            color: _primaryColor,
+            enabled: true,
             onTap: () => controller.nextRound(),
           ),
         ),
@@ -563,8 +652,11 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   // TRANSITION TO PART 2
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildTransitionCard() {
-    final colors = context.appColors;
+  Widget _buildTransitionCard(
+    AppColorsExtension colors,
+    Color accent,
+    bool isDark,
+  ) {
     final controller = ref.read(numbersStateProvider.notifier);
 
     return Container(
@@ -572,10 +664,15 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_primaryColor.withValues(alpha: 0.15), _primaryLight.withValues(alpha: 0.1)],
+          colors: [
+            AppColors.numbersOrange.withValues(alpha: isDark ? 0.22 : 0.15),
+            AppColors.numbersOrangeLight.withValues(alpha: isDark ? 0.16 : 0.1),
+          ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: _primaryColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: AppColors.numbersOrange.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
@@ -587,7 +684,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             style: GoogleFonts.alata(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: _primaryDark,
+              color: accent,
             ),
           ),
           const SizedBox(height: 8),
@@ -600,10 +697,10 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
             ),
           ),
           const SizedBox(height: 24),
-          _buildActionButton(
+          _buildPrimaryButton(
             label: NumbersMission.goToDrawing,
             icon: Icons.brush_rounded,
-            color: _primaryColor,
+            enabled: true,
             onTap: () => controller.switchToPart2(),
           ),
         ],
@@ -612,101 +709,15 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // PROFESSOR OVERLAY
-  // ══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildProfessorOverlay(NumbersState state) {
-    final colors = context.appColors;
-    final controller = ref.read(numbersStateProvider.notifier);
-    final message = state.countingResult?.professorMessage ?? '';
-
-    return Container(
-      color: Colors.black.withValues(alpha: 0.45),
-      child: Center(
-        child: SlideTransition(
-          position: _professorSlideAnim,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 28),
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: colors.cardColor,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: colors.border),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 15),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.numbersPrimary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Text('👨‍🏫', style: TextStyle(fontSize: 48)),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  NumbersMission.professorSays,
-                  style: GoogleFonts.alata(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.numbersPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.alata(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: colors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => controller.dismissProfessor(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.numbersPrimary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      NumbersMission.professorUnderstood,
-                      style: GoogleFonts.alata(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
   // MODEL UPGRADE OVERLAY
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildUpgradeOverlay(NumbersState state) {
-    final colors = context.appColors;
+  Widget _buildUpgradeOverlay(
+    NumbersState state,
+    AppColorsExtension colors,
+    Color accent,
+    bool isDark,
+  ) {
     final controller = ref.read(numbersStateProvider.notifier);
     final newLevel = state.modelLevel;
 
@@ -724,7 +735,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
               border: Border.all(color: colors.border),
               boxShadow: [
                 BoxShadow(
-                  color: _primaryColor.withValues(alpha: 0.3),
+                  color: AppColors.numbersOrange.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -740,15 +751,19 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                   style: GoogleFonts.alata(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: _primaryDark,
+                    color: accent,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_primaryColor, _primaryLight],
+                      colors: [
+                        AppColors.numbersOrange,
+                        AppColors.numbersOrangeLight,
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -780,7 +795,7 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
                   child: ElevatedButton(
                     onPressed: () => controller.dismissUpgrade(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
+                      backgroundColor: AppColors.numbersOrange,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -809,28 +824,28 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
   // HELPERS
   // ══════════════════════════════════════════════════════════════════════════
 
-  Widget _buildActionButton({
+  Widget _buildPrimaryButton({
     required String label,
     required IconData icon,
-    required Color color,
-    VoidCallback? onTap,
-    bool enabled = true,
+    required bool enabled,
+    required VoidCallback onTap,
+    bool isLoading = false,
   }) {
-    final isEnabled = enabled && onTap != null;
-
     return GestureDetector(
-      onTap: isEnabled ? onTap : null,
+      onTap: enabled ? onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: isEnabled ? color : color.withValues(alpha: 0.3),
+          color: enabled
+              ? AppColors.numbersOrange
+              : AppColors.numbersOrange.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            if (isEnabled)
+            if (enabled)
               BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 12,
+                color: AppColors.numbersOrange.withValues(alpha: 0.35),
+                blurRadius: 14,
                 offset: const Offset(0, 6),
               ),
           ],
@@ -838,15 +853,25 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
+            if (isLoading)
+              const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            else
+              Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 10),
             Text(
               label,
               style: GoogleFonts.alata(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
-                fontSize: 13,
-                letterSpacing: 0.5,
+                fontSize: 14,
+                letterSpacing: 0.6,
               ),
             ),
           ],
@@ -868,5 +893,35 @@ class _NumbersCountingPageState extends ConsumerState<NumbersCountingPage>
       default:
         return '🤖';
     }
+  }
+}
+
+/// Tiny chip telling the child their selection happens to match Pixy's guess.
+class _PixyAgreementChip extends StatelessWidget {
+  final String label;
+  const _PixyAgreementChip({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.success.withValues(alpha: 0.35),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.alata(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: AppColors.success,
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:thinky/core_controls/network/base_repository.dart';
 import 'package:thinky/core_controls/network/api_endpoints.dart';
 import 'package:thinky/core_controls/network/api_exceptions.dart';
+import 'package:thinky/core_controls/services/text_service.dart';
 import 'package:thinky/shared/models/result.dart';
 import 'package:thinky/core/errors/error_logger.dart';
 import '../domain/numbers_models.dart';
@@ -46,14 +47,20 @@ class NumbersRepository extends BaseRepository {
     );
   }
 
-  /// Submit a digit drawing (Part 2) — multipart upload
-  Future<Result<DrawingResult, ApiException>> submitDrawing(Uint8List imageBytes) async {
+  /// Submit a digit drawing (Part 2, step 1) — Pixy proposes a guess.
+  ///
+  /// The child is free to draw any digit (0–9). The server stores the
+  /// recognized digit + confidence in the session and returns Pixy's
+  /// proposal. The UI must follow up with [teachDrawing] so the child can
+  /// confirm or correct the guess.
+  Future<Result<DrawingGuess, ApiException>> submitDrawing(Uint8List imageBytes) async {
     try {
       final url = buildUrl(ApiEndpoints.numbersSubmitDrawing);
       ErrorLogger().logInfo('[POST multipart] Request: $url');
 
       final request = http.MultipartRequest('POST', Uri.parse(url))
         ..headers.addAll({
+          'Accept-Language': TextService.currentLanguageCode,
           if (token != null) 'Authorization': 'Bearer $token',
         })
         ..files.add(http.MultipartFile.fromBytes(
@@ -72,7 +79,7 @@ class NumbersRepository extends BaseRepository {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
-        return Result.success(DrawingResult.fromJson(data));
+        return Result.success(DrawingGuess.fromJson(data));
       } else if (response.statusCode == 401) {
         return const Result.failure(UnauthorizedException());
       } else {
@@ -91,6 +98,17 @@ class NumbersRepository extends BaseRepository {
       ErrorLogger().logError('[POST multipart] Error: drawing upload', stackTrace: stack);
       return Result.failure(NetworkException('Network error: $e'));
     }
+  }
+
+  /// Submit a digit drawing (Part 2, step 2) — child confirms / corrects.
+  Future<Result<TeachDrawingResult, ApiException>> teachDrawing({
+    required int claimedDigit,
+  }) async {
+    return post<TeachDrawingResult>(
+      endpoint: ApiEndpoints.numbersTeachDrawing,
+      body: {'claimed_digit': claimedDigit},
+      parser: (data) => TeachDrawingResult.fromJson(data),
+    );
   }
 
   /// Get session progress

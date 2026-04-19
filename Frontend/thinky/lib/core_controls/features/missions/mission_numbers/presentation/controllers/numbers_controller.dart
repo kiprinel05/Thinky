@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
+import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import '../../data/numbers_repository.dart';
 import '../../domain/numbers_models.dart';
@@ -50,8 +51,20 @@ class NumbersController extends BaseAsyncController<NumbersState> {
     await loadRound();
   }
 
-  /// Load current round data
+  /// Load current round data.
+  ///
+  /// In Part 2 (drawing) the child is free to draw any digit, so we don't
+  /// fetch a round from the server — we just reset the drawing canvas state.
   Future<void> loadRound() async {
+    if (state.currentPart == 2) {
+      safeUpdate(state.copyWith(
+        phase: NumbersPhase.drawing,
+        clearDrawingGuess: true,
+        clearDrawingResult: true,
+      ));
+      return;
+    }
+
     await executeSilent<NumbersRound>(
       operation: () async {
         final result = await _repository.getRound();
@@ -61,14 +74,14 @@ class NumbersController extends BaseAsyncController<NumbersState> {
         round: round,
         modelLevel: round.modelLevel,
         clearSelectedAnswer: true,
-        phase: state.currentPart == 1 ? NumbersPhase.counting : NumbersPhase.drawing,
+        phase: NumbersPhase.counting,
       ),
       errorState: (error) {
         // Fallback: generate local round
         return state.copyWith(
           round: _generateLocalRound(),
           clearSelectedAnswer: true,
-          phase: state.currentPart == 1 ? NumbersPhase.counting : NumbersPhase.drawing,
+          phase: NumbersPhase.counting,
         );
       },
     );
@@ -79,10 +92,17 @@ class NumbersController extends BaseAsyncController<NumbersState> {
     safeUpdate(state.copyWith(selectedAnswer: answer));
   }
 
-  /// Submit the counting answer (Part 1)
-  Future<void> submitCount({bool confirmed = false}) async {
-    final answer = confirmed ? (state.round?.pixyGuess ?? 1) : (state.selectedAnswer ?? 1);
-    if (state.isSubmitting) return;
+  /// Submit the counting answer (Part 1).
+  ///
+  /// New unified flow: the user always picks a number from the grid; if it
+  /// matches Pixy's guess, we infer that they "confirmed" Pixy. There is no
+  /// longer a separate Confirm/Send button pair on the UI.
+  Future<void> submitCount() async {
+    final answer = state.selectedAnswer;
+    if (answer == null || state.isSubmitting) return;
+
+    final pixyGuess = state.round?.pixyGuess ?? -1;
+    final confirmed = answer == pixyGuess;
 
     safeUpdate(state.copyWith(isSubmitting: true));
 
@@ -97,7 +117,6 @@ class NumbersController extends BaseAsyncController<NumbersState> {
           _handleCountingResult(countResult);
         },
         onFailure: (error) {
-          // Fallback: simulate result locally
           _handleCountingResultLocal(answer, confirmed);
         },
       );
@@ -182,13 +201,16 @@ class NumbersController extends BaseAsyncController<NumbersState> {
         isCorrect: isCorrect,
         correctAnswer: target,
         pixyGuess: state.round?.pixyGuess ?? 1,
-        pixyMessage: isCorrect ? 'Super! Am ghicit! 😊' : 'Oh nu, am greșit... 😢',
+        pixyMessage: isCorrect
+            ? NumbersMission.pixyLocalCorrect
+            : NumbersMission.pixyLocalWrong,
         pixyEmotion: isCorrect ? 'happy' : 'sad',
         modelLevel: newModelLevel ?? state.modelLevel,
         correctCount: newCorrectCount,
         confusionCount: newConfusionCount,
         showProfessor: showProfessor,
-        professorMessage: showProfessor ? 'Numără obiectele cu atenție și alege numărul corect!' : null,
+        professorMessage:
+            showProfessor ? NumbersMission.professorLocalHint : null,
         modelUpgraded: modelUpgraded,
         newModelLevel: newModelLevel,
         partCompleted: partCompleted,
@@ -201,7 +223,17 @@ class NumbersController extends BaseAsyncController<NumbersState> {
     ));
   }
 
-  /// Submit a digit drawing (Part 2)
+  // ─── Drawing flow (Part 2) ────────────────────────────────────────────────
+  //
+  // Step 1 — child draws → submitDrawing(): Pixy proposes a guess.
+  // Step 2 — child confirms / corrects → confirmPixyGuess() / correctPixyGuess(int).
+  //
+  // The session handles the "AI learning" simulation: each accepted example
+  // raises the displayed confidence, and after enough confirmed examples the
+  // model levels up. If the recognizer was confident but the child claims a
+  // very different digit, the professor intervenes (cheating detection).
+
+  /// Step 1: child has drawn a digit; ask Pixy what it thinks.
   Future<void> submitDrawing(Uint8List imageBytes) async {
     if (state.isSubmitting) return;
 
@@ -211,25 +243,30 @@ class NumbersController extends BaseAsyncController<NumbersState> {
       final result = await _repository.submitDrawing(imageBytes);
 
       result.fold(
-        onSuccess: (drawResult) {
-          _handleDrawingResult(drawResult);
-        },
-        onFailure: (error) {
+        onSuccess: (guess) {
           safeUpdate(state.copyWith(
             isSubmitting: false,
-            drawingResult: DrawingResult(
-              guessedDigit: null,
-              confidence: 0.0,
-              isCorrect: false,
-              targetDigit: state.round?.targetNumber ?? 1,
-              pixyMessage: 'Hmm, nu am putut vedea desenul... Încearcă din nou! 🤔',
+            drawingGuess: guess,
+            phase: NumbersPhase.drawingAwaitingConfirmation,
+            modelLevel: guess.modelLevel,
+            examplesTaught: guess.examplesTaught,
+          ));
+        },
+        onFailure: (error) {
+          // Local fallback: pretend Pixy guessed something so the kid can still
+          // play the loop offline. Pick a random 1-5 guess.
+          final fallbackGuess = (1 + (DateTime.now().millisecondsSinceEpoch % 5));
+          safeUpdate(state.copyWith(
+            isSubmitting: false,
+            drawingGuess: DrawingGuess(
+              guessedDigit: fallbackGuess,
+              confidence: 0.30 + 0.18 * state.examplesTaught,
+              pixyMessage: NumbersMission.pixyDrawingFailedFallback,
               pixyEmotion: 'thinking',
               modelLevel: state.modelLevel,
-              correctCount: state.correctCount,
-              confusionCount: state.confusionCount,
-              showProfessor: false,
+              examplesTaught: state.examplesTaught,
             ),
-            phase: NumbersPhase.drawingResult,
+            phase: NumbersPhase.drawingAwaitingConfirmation,
           ));
         },
       );
@@ -238,7 +275,66 @@ class NumbersController extends BaseAsyncController<NumbersState> {
     }
   }
 
-  void _handleDrawingResult(DrawingResult result) {
+  /// Step 2a: child confirms Pixy's guess was right.
+  Future<void> confirmPixyGuess() async {
+    final guess = state.drawingGuess;
+    if (guess == null || guess.guessedDigit == null) return;
+    await _teach(guess.guessedDigit!);
+  }
+
+  /// Switch the UI to the digit-picker so the child can correct Pixy.
+  void startCorrection() {
+    safeUpdate(state.copyWith(phase: NumbersPhase.drawingPickCorrection));
+  }
+
+  /// Cancel the in-progress correction and go back to the confirmation buttons.
+  void cancelCorrection() {
+    safeUpdate(state.copyWith(phase: NumbersPhase.drawingAwaitingConfirmation));
+  }
+
+  /// Step 2b: child says "no, it was actually [claimedDigit]".
+  Future<void> correctPixyGuess(int claimedDigit) async {
+    await _teach(claimedDigit);
+  }
+
+  Future<void> _teach(int claimedDigit) async {
+    if (state.isSubmitting) return;
+    safeUpdate(state.copyWith(isSubmitting: true));
+
+    try {
+      final result = await _repository.teachDrawing(claimedDigit: claimedDigit);
+
+      result.fold(
+        onSuccess: (teachResult) {
+          _handleTeachResult(teachResult);
+        },
+        onFailure: (error) {
+          // Offline fallback: assume the claim is correct, increment progress.
+          final guess = state.drawingGuess;
+          final wasPixyCorrect = guess?.guessedDigit == claimedDigit;
+          _handleTeachResult(TeachDrawingResult(
+            wasPixyCorrect: wasPixyCorrect,
+            isLying: false,
+            claimedDigit: claimedDigit,
+            recognizedDigit: guess?.guessedDigit,
+            pixyMessage: NumbersMission.drawingTeachThanks,
+            pixyEmotion: 'happy',
+            modelLevel: state.modelLevel,
+            correctCount: wasPixyCorrect
+                ? state.correctCount + 1
+                : state.correctCount,
+            confusionCount: 0,
+            examplesTaught: state.examplesTaught + 1,
+            showProfessor: false,
+          ));
+        },
+      );
+    } catch (e) {
+      safeUpdate(state.copyWith(isSubmitting: false));
+    }
+  }
+
+  void _handleTeachResult(TeachDrawingResult result) {
     NumbersPhase nextPhase;
 
     if (result.showProfessor) {
@@ -258,6 +354,7 @@ class NumbersController extends BaseAsyncController<NumbersState> {
       modelLevel: result.newModelLevel ?? result.modelLevel,
       correctCount: result.correctCount,
       confusionCount: result.confusionCount,
+      examplesTaught: result.examplesTaught,
     ));
   }
 
@@ -266,7 +363,8 @@ class NumbersController extends BaseAsyncController<NumbersState> {
     safeUpdate(state.copyWith(
       clearSelectedAnswer: true,
       countingResult: null,
-      drawingResult: null,
+      clearDrawingGuess: true,
+      clearDrawingResult: true,
     ));
     await loadRound();
   }
@@ -279,23 +377,41 @@ class NumbersController extends BaseAsyncController<NumbersState> {
       modelLevel: PixyModelLevel.junior,
       correctCount: 0,
       confusionCount: 0,
+      examplesTaught: 0,
       clearSelectedAnswer: true,
       countingResult: null,
+      clearDrawingGuess: true,
+      clearDrawingResult: true,
     ));
     await loadRound();
   }
 
-  /// Dismiss professor overlay and continue
+  /// Dismiss professor overlay and continue.
+  ///
+  /// In Part 2 we keep the canvas blank for a fresh attempt; we do NOT auto-
+  /// teach the model anything — the lesson was about not teaching wrong
+  /// labels.
   Future<void> dismissProfessor() async {
-    safeUpdate(state.copyWith(
-      phase: state.currentPart == 1 ? NumbersPhase.counting : NumbersPhase.drawing,
-    ));
+    if (state.currentPart == 2) {
+      safeUpdate(state.copyWith(
+        phase: NumbersPhase.drawing,
+        clearDrawingGuess: true,
+        clearDrawingResult: true,
+      ));
+      return;
+    }
+    safeUpdate(state.copyWith(phase: NumbersPhase.counting));
     await nextRound();
   }
 
   /// Dismiss model upgrade celebration and continue
   Future<void> dismissUpgrade() async {
     await nextRound();
+  }
+
+  /// Restart the entire mission from the intro screen.
+  Future<void> restart() async {
+    state = const NumbersState();
   }
 
   /// Generate a local fallback round
@@ -313,7 +429,7 @@ class NumbersController extends BaseAsyncController<NumbersState> {
         (_) => NumberObject(emoji: emojis.first, objectType: 'apple'),
       ),
       pixyGuess: target, // Simplified for offline
-      pixyMessage: 'Hmm… cred că sunt $target? 🤔',
+      pixyMessage: NumbersMission.pixyLocalGuess(target),
       pixyConfidence: 'low',
       modelLevel: state.modelLevel,
       currentPart: state.currentPart,
