@@ -38,6 +38,7 @@ class ContextCollector {
       '/profile': 'Profile',
       '/workshop/create': 'Create Mission',
       '/workshop/my-missions': 'My Missions',
+      '/mascot-chat': 'Mascot Chat',
     };
     return map[path] ?? path;
   }

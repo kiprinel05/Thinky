@@ -43,23 +43,33 @@ class ApiClient {
     );
   }
 
-  static Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
+  static Future<http.Response> post(
+    String endpoint,
+    Map<String, dynamic> body, {
+    Map<String, String>? extraHeaders,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     final headers = await _getHeaders();
+    if (extraHeaders != null) {
+      headers.addAll(extraHeaders);
+    }
     final url = '${AppConfig.apiBaseUrl}$endpoint';
     final bodyJson = jsonEncode(body);
-    
+
     try {
       final response = await _client.post(
         Uri.parse(url),
         headers: headers,
         body: bodyJson,
       ).timeout(
-        const Duration(seconds: 10),
+        timeout,
         onTimeout: () {
-          throw TimeoutException('Request timeout after 10 seconds');
+          throw TimeoutException(
+            'Request timeout after ${timeout.inSeconds} seconds',
+          );
         },
       );
-      
+
       return response;
     } on TimeoutException {
       rethrow;

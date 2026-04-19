@@ -1034,8 +1034,26 @@ class MascotTexts {
   static String get greeting => TextService.getString('Mascot', 'greeting');
   static String get title => TextService.getString('Mascot', 'title');
   static String get subtitle => TextService.getString('Mascot', 'subtitle');
+  static String get online => TextService.getString('Mascot', 'online');
   static String get typing => TextService.getString('Mascot', 'typing');
   static String get suggest1 => TextService.getString('Mascot', 'suggest1');
   static String get suggest2 => TextService.getString('Mascot', 'suggest2');
   static String get suggest3 => TextService.getString('Mascot', 'suggest3');
+  static String get clearChat => TextService.getString('Mascot', 'clearChat');
+  static String get clearChatConfirmTitle =>
+      TextService.getString('Mascot', 'clearChatConfirmTitle');
+  static String get clearChatConfirmBody =>
+      TextService.getString('Mascot', 'clearChatConfirmBody');
+  static String get clearChatConfirmAction =>
+      TextService.getString('Mascot', 'clearChatConfirmAction');
+  static String get clearChatCancel =>
+      TextService.getString('Mascot', 'clearChatCancel');
+  static String get errorEmptyReply =>
+      TextService.getString('Mascot', 'errorEmptyReply');
+  static String get errorConnection =>
+      TextService.getString('Mascot', 'errorConnection');
+  static String get errorGeneric =>
+      TextService.getString('Mascot', 'errorGeneric');
+  static String get retry => TextService.getString('Mascot', 'retry');
+  static String get sendTooltip => TextService.getString('Mascot', 'sendTooltip');
 }

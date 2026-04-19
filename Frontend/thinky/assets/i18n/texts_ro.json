@@ -842,12 +842,23 @@
     },
     "Mascot": {
         "inputHint": "Scrie un mesaj...",
-        "greeting": "Salut! Eu sunt Pixy 🤖\nCu ce te pot ajuta în aplicație?",
+        "greeting": "Salut! Eu sunt Pixy.\nCu ce te pot ajuta în aplicație?",
         "title": "Asistentul Pixy",
         "subtitle": "Asistent AI",
+        "online": "Online",
         "typing": "Pixy se gândește...",
-        "suggest1": "Ce misiuni am?",
+        "suggest1": "Ce misiuni pot încerca?",
         "suggest2": "Cum învață Pixy?",
-        "suggest3": "Explică-mi Atelierul"
+        "suggest3": "Cum funcționează Atelierul?",
+        "clearChat": "Șterge conversația",
+        "clearChatConfirmTitle": "Începem o conversație nouă?",
+        "clearChatConfirmBody": "Asta va șterge conversația curentă. Pixy va uita despre ce am vorbit.",
+        "clearChatConfirmAction": "Conversație nouă",
+        "clearChatCancel": "Anulează",
+        "errorEmptyReply": "Hmm, nu a venit niciun răspuns. Încerci din nou?",
+        "errorConnection": "Nu pot ajunge la server momentan. Verifică conexiunea și încearcă din nou.",
+        "errorGeneric": "Ceva nu a mers la mine. Te rog încearcă din nou imediat.",
+        "retry": "Reîncearcă",
+        "sendTooltip": "Trimite"
     }
 }

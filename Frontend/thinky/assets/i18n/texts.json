@@ -842,12 +842,23 @@
     },
     "Mascot": {
         "inputHint": "Write a message...",
-        "greeting": "Hi! I'm Pixy 🤖\nHow can I help you with the app?",
+        "greeting": "Hi! I'm Pixy.\nHow can I help you with the app today?",
         "title": "Pixy assistant",
         "subtitle": "AI helper",
+        "online": "Online",
         "typing": "Pixy is thinking...",
-        "suggest1": "What missions do I have?",
+        "suggest1": "What missions can I try?",
         "suggest2": "How does Pixy learn?",
-        "suggest3": "Explain the Workshop"
+        "suggest3": "How does the Workshop work?",
+        "clearChat": "Clear chat",
+        "clearChatConfirmTitle": "Start a new chat?",
+        "clearChatConfirmBody": "This will clear the current conversation. Pixy will forget what we talked about.",
+        "clearChatConfirmAction": "New chat",
+        "clearChatCancel": "Cancel",
+        "errorEmptyReply": "Hmm, no reply came through. Try again?",
+        "errorConnection": "I can't reach the server right now. Check your connection and try again.",
+        "errorGeneric": "Something went wrong on my side. Please try again in a moment.",
+        "retry": "Retry",
+        "sendTooltip": "Send"
     }
 }

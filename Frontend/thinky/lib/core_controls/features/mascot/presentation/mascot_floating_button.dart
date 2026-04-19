@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:thinky/shared_controls/theme/app_colors.dart';
+
+import 'package:thinky/core_controls/features/mascot/presentation/widgets/pixy_avatar.dart';
 
 /// A small floating button that opens the Pixy mascot chat.
 /// Place this in the MainShellPage's Stack, above the navbar.
@@ -47,24 +48,7 @@ class _MascotFloatingButtonState extends State<MascotFloatingButton>
       },
       child: GestureDetector(
         onTap: () => context.push('/mascot-chat'),
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.primaryPurple,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryPurple.withValues(alpha: 0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text('🤖', style: TextStyle(fontSize: 22)),
-          ),
-        ),
+        child: const PixyAvatar(size: 48, withGlow: true),
       ),
     );
   }
