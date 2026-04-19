@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import traceback
 
 from core.config import settings
-from core.database import engine, Base
+from core.database import Base, engine, wait_for_db
 
 # Import all models to ensure they are registered with SQLAlchemy Base before creation
 from features.auth.models import User, PasswordResetCode
@@ -80,6 +80,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Startup Event
 @app.on_event("startup")
 def startup_event():
+    # Azure SQL serverless auto-pauses; the first connection of the day can
+    # take 30-60s while the database wakes back up. Probe with retry-and-
+    # backoff before attempting any DDL or migrations so the API doesn't
+    # crash on a cold boot.
+    db_ready = wait_for_db()
+
+    if not db_ready:
+        print(
+            "[WARNING] Skipping schema/migrations — database is unreachable. "
+            "API will start but DB-backed endpoints will fail until the DB is up."
+        )
+        return
+
     try:
         Base.metadata.create_all(bind=engine)
         print("[OK] Database tables verified/created")
