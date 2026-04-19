@@ -6,6 +6,7 @@ import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 
 import '../../data/vocabulary_models.dart';
 import '../../data/vocabulary_repository.dart';
@@ -190,6 +191,12 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
+      // XP grant is idempotent server-side per (user, slug); a duplicate
+      // tap on "next" can't double-award. Score is the strict accuracy.
+      final pct = state.totalQuestions > 0
+          ? (state.correctCount / state.totalQuestions) * 100.0
+          : 0.0;
+      XpService.awardXp('vocabulary', pct);
       state = state.copyWith(phase: VocabMissionPhase.missionComplete);
       return;
     }

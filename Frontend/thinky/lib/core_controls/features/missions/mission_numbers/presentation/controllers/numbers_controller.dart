@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:thinky/base_controls/base_controller.dart';
 import 'package:thinky/base_controls/base_state.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 import 'package:thinky/core_controls/storage/storage_provider.dart';
 import '../../data/numbers_repository.dart';
 import '../../domain/numbers_models.dart';
@@ -151,6 +152,8 @@ class NumbersController extends BaseAsyncController<NumbersState> {
       confusionCount: result.confusionCount,
       currentPart: state.currentPart,
     ));
+
+    _awardXpIfComplete(nextPhase);
   }
 
   void _handleCountingResultLocal(int answer, bool confirmed) {
@@ -356,6 +359,22 @@ class NumbersController extends BaseAsyncController<NumbersState> {
       confusionCount: result.confusionCount,
       examplesTaught: result.examplesTaught,
     ));
+
+    _awardXpIfComplete(nextPhase);
+  }
+
+  /// Local guard so the same playthrough can't double-fire the (already
+  /// idempotent) backend XP grant — keeps client logs cleaner.
+  bool _xpAwarded = false;
+
+  /// Grants XP the first time we land on [NumbersPhase.completion]. The
+  /// score is binary (100%) — same convention as Animals/Drawing — because
+  /// the Numbers mission gates completion on actual correct answers, so
+  /// reaching the end already implies success.
+  void _awardXpIfComplete(NumbersPhase phase) {
+    if (phase != NumbersPhase.completion || _xpAwarded) return;
+    _xpAwarded = true;
+    XpService.awardXp('numbers', 100.0);
   }
 
   /// Proceed to next round

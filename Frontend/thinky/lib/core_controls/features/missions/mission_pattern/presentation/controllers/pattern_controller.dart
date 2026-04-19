@@ -6,6 +6,7 @@ import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 
 import '../../data/pattern_models.dart';
 import '../../data/pattern_repository.dart';
@@ -186,6 +187,10 @@ class PatternController extends StateNotifier<PatternMissionState> {
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
+      final pct = state.totalQuestions > 0
+          ? (state.correctCount / state.totalQuestions) * 100.0
+          : 0.0;
+      XpService.awardXp('pattern', pct);
       state = state.copyWith(phase: PatternPhase.missionComplete);
       return;
     }

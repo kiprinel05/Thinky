@@ -10,6 +10,7 @@ import 'package:thinky/core/errors/error_logger.dart';
 import 'package:thinky/core_controls/constants/app_texts.dart';
 import 'package:thinky/core_controls/network/user_facing_error_mapper.dart';
 import 'package:thinky/core_controls/services/mission_service.dart';
+import 'package:thinky/core_controls/services/xp_service.dart';
 
 import '../../data/describe_models.dart';
 import '../../data/describe_repository.dart';
@@ -356,6 +357,15 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
       } catch (e, stack) {
         ErrorLogger().logError(e, stackTrace: stack);
       }
+      // Describe gives a per-round match score (0-1) from the backend, so
+      // averageScore is a finer signal than strict correct/total. Falls back
+      // to plain accuracy if no rounds had a score (defensive).
+      final pct = state.averageScore > 0
+          ? state.averageScore * 100.0
+          : (state.totalQuestions > 0
+              ? (state.correctCount / state.totalQuestions) * 100.0
+              : 0.0);
+      XpService.awardXp('describe', pct);
       state = state.copyWith(phase: DescribeMissionPhase.missionComplete);
       return;
     }
