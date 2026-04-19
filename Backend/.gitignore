@@ -29,3 +29,6 @@ data/
 .env
 .env.local
 
+# Local cache for downloaded training datasets (MNIST etc.)
+.cache/
+

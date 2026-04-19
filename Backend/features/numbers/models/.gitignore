@@ -1,0 +1,6 @@
+# The trained model file `digit_cnn.pt` IS committed (it's only ~2 MB and we
+# want servers to pick it up without re-training). Larger experimental files
+# stay local.
+*.pth
+*.onnx
+*.ckpt

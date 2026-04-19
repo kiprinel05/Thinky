@@ -376,7 +376,7 @@ class NumbersService:
         )
 
     # ── Drawing flow (free-draw + teach) ─────────────────────────────────────
-    #
+    #~
     # The child draws any digit they like (0-9). Pixy makes a guess
     # (`submit_drawing`). The UI then asks the child to confirm or correct
     # the guess (`teach_drawing`). Pixy "learns" with each example: confidence
@@ -401,35 +401,37 @@ class NumbersService:
     def submit_drawing(self, user_id: int, image_bytes: bytes, lang: str = "en") -> DrawingResponse:
         """Pixy looks at the drawing and proposes a guess.
 
-        No `target` digit is involved — the child is free to draw any digit
-        from 0 to 9. The UI must follow up with `teach_drawing` so the child
-        can confirm / correct what they actually drew.
+        No ``target`` digit is involved — the child is free to draw any digit
+        from 0 to 9. The UI must follow up with :meth:`teach_drawing` so the
+        child can confirm / correct what they actually drew.
+
+        Pixy always shows the *real* digit the CNN recognized — otherwise a
+        kid clicking "YES, CORRECT" on a noisily-mislabelled digit would get
+        flagged as cheating. The "Pixy is learning" effect is simulated via
+        the displayed *confidence* alone (see :meth:`_display_confidence`),
+        which starts low and reaches 100% by example #4–5.
         """
         lang = _normalize_lang(lang)
         session = self._get_or_create_session(user_id)
         model_level = session["model_level"]
         messages = _pixy_msgs(model_level, lang)
 
-        # Recognize the digit. The recognizer is built around 1–5; if it
-        # returns 0, fall back to its best non-zero guess (still safe — we
-        # only need a coherent display value).
-        guessed_digit, raw_confidence = digit_recognition_service.recognize(
-            image_bytes, model_level
+        # Underlying ML truth — also what Pixy shows to the child.
+        truth_digit, truth_confidence = digit_recognition_service.recognize_truth(
+            image_bytes
         )
-        if not guessed_digit:
-            guessed_digit = random.randint(1, 5)
-            raw_confidence = max(raw_confidence, 0.20)
 
         examples_taught = int(session.get("examples_taught", 0))
-        display_conf = self._display_confidence(raw_confidence, examples_taught)
+        display_conf = self._display_confidence(truth_confidence, examples_taught)
 
-        session["last_recognized_digit"] = guessed_digit
-        session["last_raw_confidence"] = float(raw_confidence)
+        session["last_recognized_digit"] = truth_digit
+        session["last_raw_confidence"] = float(truth_confidence)
 
-        pixy_message = messages["drawing_thinks"].format(n=guessed_digit)
+        display_digit = truth_digit
+        pixy_message = messages["drawing_thinks"].format(n=display_digit)
 
         return DrawingResponse(
-            guessed_digit=guessed_digit,
+            guessed_digit=display_digit,
             confidence=display_conf,
             pixy_message=pixy_message,
             pixy_emotion="thinking",

@@ -75,6 +75,8 @@ class _NumbersMissionPageState extends ConsumerState<NumbersMissionPage>
         }
         return const NumbersCountingPage();
       case NumbersPhase.drawing:
+      case NumbersPhase.drawingAwaitingConfirmation:
+      case NumbersPhase.drawingPickCorrection:
       case NumbersPhase.drawingResult:
         return const NumbersDrawingPage();
       case NumbersPhase.completion:
