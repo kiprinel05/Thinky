@@ -41,6 +41,14 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
     _checkAuth();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isLoading) {
+      _loadMissions();
+    }
+  }
+
   Future<void> _checkAuth() async {
     final user = await AuthService.getCurrentUser();
     final isGuest = user?['isGuest'] ?? true;
@@ -274,7 +282,8 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
   }) {
     final backgroundColor = mission.backgroundColorAsColor;
     final missionPath = mission.missionPath;
-    
+    final isCompleted = mission.progress?.isCompleted ?? false;
+
     Widget cardWidget = ScaleInWidget(
       delay: Duration(milliseconds: 400 + (mission.orderIndex * 100)),
       child: GestureDetector(
@@ -285,10 +294,15 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(20),
+            border: isCompleted
+                ? Border.all(color: const Color(0xFF4CAF50), width: 3)
+                : null,
             boxShadow: [
               BoxShadow(
-                color: backgroundColor.withOpacity(0.3),
-                blurRadius: 8,
+                color: isCompleted
+                    ? const Color(0xFF4CAF50).withOpacity(0.35)
+                    : backgroundColor.withOpacity(0.3),
+                blurRadius: isCompleted ? 12 : 8,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -298,7 +312,7 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
               // Background image
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(isCompleted ? 17 : 20),
                   child: Image.asset(
                     'assets/missions/$missionPath/background.png',
                     fit: BoxFit.cover,
@@ -357,8 +371,8 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                   decoration: BoxDecoration(
                     color: backgroundColor.withOpacity(0.9),
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(isCompleted ? 17 : 20),
+                      bottomRight: Radius.circular(isCompleted ? 17 : 20),
                     ),
                   ),
                   child: Text(
@@ -372,6 +386,32 @@ class _MissionsMenuPageState extends State<MissionsMenuPage> with TickerProvider
                   ),
                 ),
               ),
+              // Completed badge
+              if (isCompleted)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4CAF50).withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
               // Locked overlay
               if (isLocked)
                 Positioned.fill(

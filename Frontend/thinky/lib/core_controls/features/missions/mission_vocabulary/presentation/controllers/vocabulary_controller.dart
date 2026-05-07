@@ -6,6 +6,7 @@ import '../../data/vocabulary_repository.dart';
 
 /// Phases of the vocabulary mission
 enum VocabMissionPhase {
+  intro,        // Presentation / intro screen
   loading,
   question,     // Showing a word + image options
   submitting,   // Waiting for backend validation
@@ -25,10 +26,11 @@ class VocabMissionState {
   final int correctCount;
   final int answeredCount;
   final String? errorMessage;
-  final String? encouragement; // Mascot bubble text
+  final String? encouragement;
+  final int questionTimeSeconds;
 
   const VocabMissionState({
-    this.phase = VocabMissionPhase.loading,
+    this.phase = VocabMissionPhase.intro,
     this.questions = const [],
     this.currentIndex = 0,
     this.totalQuestions = 0,
@@ -38,6 +40,7 @@ class VocabMissionState {
     this.answeredCount = 0,
     this.errorMessage,
     this.encouragement,
+    this.questionTimeSeconds = 0,
   });
 
   VocabQuestion? get currentQuestion {
@@ -65,6 +68,7 @@ class VocabMissionState {
     String? errorMessage,
     String? encouragement,
     bool clearEncouragement = false,
+    int? questionTimeSeconds,
   }) {
     return VocabMissionState(
       phase: phase ?? this.phase,
@@ -77,12 +81,18 @@ class VocabMissionState {
       answeredCount: answeredCount ?? this.answeredCount,
       errorMessage: errorMessage,
       encouragement: clearEncouragement ? null : (encouragement ?? this.encouragement),
+      questionTimeSeconds: questionTimeSeconds ?? this.questionTimeSeconds,
     );
   }
 }
 
 class VocabularyController extends StateNotifier<VocabMissionState> {
   VocabularyController() : super(const VocabMissionState());
+
+  /// Start from intro — transition to loading and fetch questions
+  Future<void> startFromIntro() async {
+    await startMission();
+  }
 
   /// Start the mission — load all questions from backend
   Future<void> startMission() async {
@@ -100,6 +110,7 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
         answeredCount: 0,
         clearSelection: true,
         clearEncouragement: true,
+        questionTimeSeconds: 0,
       );
     } catch (e) {
       state = state.copyWith(
@@ -113,6 +124,15 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
   void selectImage(int imageId) {
     if (state.phase != VocabMissionPhase.question) return;
     state = state.copyWith(selectedImageId: imageId);
+  }
+
+  /// Increment timer
+  void tickTimer() {
+    if (state.phase == VocabMissionPhase.question) {
+      state = state.copyWith(
+        questionTimeSeconds: state.questionTimeSeconds + 1,
+      );
+    }
   }
 
   /// Submit the selected answer
@@ -149,7 +169,6 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
     final nextIndex = state.currentIndex + 1;
 
     if (nextIndex >= state.totalQuestions) {
-      // Mission complete
       try {
         await MissionService.completeMission(-7);
       } catch (e, stack) {
@@ -163,6 +182,7 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
         clearSelection: true,
         lastAnswer: null,
         clearEncouragement: true,
+        questionTimeSeconds: 0,
       );
     }
   }
@@ -173,8 +193,8 @@ class VocabularyController extends StateNotifier<VocabMissionState> {
   }
 }
 
-/// Provider for VocabularyController
+/// Provider for VocabularyController — autoDispose ensures fresh state on re-entry
 final vocabularyControllerProvider =
-    StateNotifierProvider<VocabularyController, VocabMissionState>((ref) {
+    StateNotifierProvider.autoDispose<VocabularyController, VocabMissionState>((ref) {
   return VocabularyController();
 });

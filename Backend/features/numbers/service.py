@@ -127,6 +127,7 @@ class NumbersService:
         obj_key = random.choice(list(OBJECT_POOLS.keys()))
         session["target_number"] = target
         session["object_type"] = obj_key
+        session["drawing_target"] = random.randint(0, 9)
 
         objects = self._generate_objects(target, obj_key)
 
@@ -275,17 +276,34 @@ class NumbersService:
         """Process a digit drawing from the child."""
         session = self._get_or_create_session(user_id)
         model_level = session["model_level"]
-        target = session["target_number"]
+        target = session.get("drawing_target", session["target_number"])
         messages = PIXY_MESSAGES[model_level]
 
-        if target == 0:
-            target = random.randint(1, 5)
-            session["target_number"] = target
+        if target == 0 and "drawing_target" not in session:
+            target = random.randint(0, 9)
+            session["drawing_target"] = target
 
         # Recognize the digit
         guessed_digit, confidence = digit_recognition_service.recognize(
             image_bytes, model_level
         )
+
+        # If confidence is extremely low, the drawing is unclear
+        if confidence < 0.08:
+            return DrawingResponse(
+                guessed_digit=None,
+                confidence=confidence,
+                is_correct=False,
+                target_digit=target,
+                pixy_message="Hmm, nu reușesc să recunosc ce ai desenat... "
+                             "Încearcă să desenezi cifra mai clar! ✏️",
+                pixy_emotion="confused",
+                model_level=model_level,
+                correct_count=session["correct_count"],
+                confusion_count=session["confusion_count"],
+                show_professor=False,
+                part_completed=False,
+            )
 
         is_correct = guessed_digit == target
         show_professor = False
@@ -331,6 +349,7 @@ class NumbersService:
 
         # Generate new target for next round
         session["target_number"] = random.randint(1, 5)
+        session["drawing_target"] = random.randint(0, 9)
 
         return DrawingResponse(
             guessed_digit=guessed_digit,
