@@ -583,19 +583,35 @@ class _NumbersDrawingPageState extends ConsumerState<NumbersDrawingPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    result.isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                    color: result.isCorrect ? _successColor : _errorColor,
+                    result.isCorrect
+                        ? Icons.check_circle_rounded
+                        : (result.guessedDigit == null
+                            ? Icons.help_outline_rounded
+                            : Icons.cancel_rounded),
+                    color: result.isCorrect
+                        ? _successColor
+                        : (result.guessedDigit == null
+                            ? const Color(0xFFFF9800)
+                            : _errorColor),
                     size: 28,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    result.isCorrect
-                        ? 'Pixy a recunoscut corect! 🎉'
-                        : 'Pixy a ghicit: ${result.guessedDigit ?? "?"}',
-                    style: GoogleFonts.alata(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: result.isCorrect ? _successColor : _errorColor,
+                  Flexible(
+                    child: Text(
+                      result.isCorrect
+                          ? 'Pixy a recunoscut corect! 🎉'
+                          : result.guessedDigit == null
+                              ? 'Pixy nu a putut recunoaște desenul'
+                              : 'Pixy a ghicit: ${result.guessedDigit}',
+                      style: GoogleFonts.alata(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: result.isCorrect
+                            ? _successColor
+                            : (result.guessedDigit == null
+                                ? const Color(0xFFFF9800)
+                                : _errorColor),
+                      ),
                     ),
                   ),
                 ],

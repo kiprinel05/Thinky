@@ -32,6 +32,10 @@ class _DescribeMissionPageState extends ConsumerState<DescribeMissionPage>
   Timer? _recordingTimer;
   int _recordingSeconds = 0;
 
+  // Input mode toggle
+  bool _isTextMode = false;
+  final TextEditingController _textController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +79,7 @@ class _DescribeMissionPageState extends ConsumerState<DescribeMissionPage>
     _feedbackController.dispose();
     _encouragementController.dispose();
     _recordingTimer?.cancel();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -298,19 +303,175 @@ class _DescribeMissionPageState extends ConsumerState<DescribeMissionPage>
               ],
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 20),
 
-          // Record button
-          _buildRecordButton(
-            icon: Icons.mic,
-            label: 'Tap to Record',
-            color: const Color(0xFFFF7043),
-            onTap: () {
-              ref.read(describeControllerProvider.notifier).startRecording();
-            },
+          // Voice/Text toggle
+          _buildInputModeToggle(),
+          const SizedBox(height: 20),
+
+          // Record button or text input based on mode
+          if (_isTextMode)
+            _buildTextInputSection()
+          else
+            _buildRecordButton(
+              icon: Icons.mic,
+              label: 'Tap to Record',
+              color: const Color(0xFFFF7043),
+              onTap: () {
+                ref.read(describeControllerProvider.notifier).startRecording();
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputModeToggle() {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F3F7),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _isTextMode = false),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                decoration: BoxDecoration(
+                  color: !_isTextMode ? const Color(0xFFFF7043) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.mic,
+                        size: 18,
+                        color: !_isTextMode ? Colors.white : const Color(0xFF8A8A8F),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Voice',
+                        style: GoogleFonts.alata(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: !_isTextMode ? Colors.white : const Color(0xFF8A8A8F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _isTextMode = true),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                decoration: BoxDecoration(
+                  color: _isTextMode ? const Color(0xFFFF7043) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.keyboard,
+                        size: 18,
+                        color: _isTextMode ? Colors.white : const Color(0xFF8A8A8F),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Text',
+                        style: GoogleFonts.alata(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _isTextMode ? Colors.white : const Color(0xFF8A8A8F),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextInputSection() {
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8FA),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE8E8ED)),
+          ),
+          child: TextField(
+            controller: _textController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Describe what you see in the image...',
+              hintStyle: GoogleFonts.alata(
+                fontSize: 14,
+                color: const Color(0xFFBBBBC5),
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+            style: GoogleFonts.alata(
+              fontSize: 14,
+              color: const Color(0xFF222222),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              if (_textController.text.trim().isNotEmpty) {
+                ref
+                    .read(describeControllerProvider.notifier)
+                    .submitText(_textController.text);
+                _textController.clear();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF7043),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Submit Description',
+                  style: GoogleFonts.alata(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

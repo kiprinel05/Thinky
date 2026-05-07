@@ -30,6 +30,11 @@ class TranscriptionResponse(BaseModel):
     encouragement: str       # Mascot bubble text
 
 
+class TextDescriptionRequest(BaseModel):
+    """Request for text-based description submission."""
+    text: str
+
+
 class DescribeProgressResponse(BaseModel):
     """Overall session progress."""
     completed: int

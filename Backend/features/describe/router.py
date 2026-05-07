@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from .schemas import (
     DescribeStartResponse,
     TranscriptionResponse,
+    TextDescriptionRequest,
     DescribeProgressResponse,
 )
 from .service import get_describe_service
@@ -45,6 +46,18 @@ async def transcribe_audio(audio: UploadFile = File(...)) -> TranscriptionRespon
     # Validate against expected keywords
     result = service.validate_transcription(transcription)
     
+    return result
+
+
+@router.post("/submit-text")
+async def submit_text(request: TextDescriptionRequest) -> TranscriptionResponse:
+    """Accept text description and validate against keywords."""
+    service = get_describe_service()
+
+    if not request.text or not request.text.strip():
+        raise HTTPException(status_code=400, detail="Empty text description")
+
+    result = service.validate_transcription(request.text.strip())
     return result
 
 

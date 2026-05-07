@@ -183,6 +183,31 @@ class DescribeController extends StateNotifier<DescribeMissionState> {
     }
   }
 
+  /// Submit text description (alternative to voice)
+  Future<void> submitText(String text) async {
+    if (text.trim().isEmpty) return;
+
+    state = state.copyWith(phase: DescribeMissionPhase.processing);
+
+    try {
+      final result = await DescribeRepository.submitText(text.trim());
+
+      state = state.copyWith(
+        phase: DescribeMissionPhase.feedback,
+        lastResult: result,
+        encouragement: result.encouragement,
+        correctRounds: result.matchScore >= 0.5
+            ? state.correctRounds + 1
+            : state.correctRounds,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        phase: DescribeMissionPhase.error,
+        errorMessage: 'Failed to process text: $e',
+      );
+    }
+  }
+
   /// Advance to next round or complete mission
   Future<void> nextRound() async {
     if (state.currentRound >= state.totalRounds) {

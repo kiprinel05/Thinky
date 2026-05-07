@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,8 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
   late Animation<double> _feedbackSlide;
   late Animation<double> _sparkleOpacity;
   late Animation<double> _encouragementOpacity;
+
+  Timer? _questionTimer;
 
   @override
   void initState() {
@@ -68,15 +71,11 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     _encouragementOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _encouragementController, curve: Curves.easeOut),
     );
-
-    // Start mission
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(vocabularyControllerProvider.notifier).startMission();
-    });
   }
 
   @override
   void dispose() {
+    _questionTimer?.cancel();
     _wordBounceController.dispose();
     _feedbackController.dispose();
     _sparkleController.dispose();
@@ -84,17 +83,37 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     super.dispose();
   }
 
+  void _startTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      ref.read(vocabularyControllerProvider.notifier).tickTimer();
+    });
+  }
+
+  void _stopTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = null;
+  }
+
+  String _formatTime(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(vocabularyControllerProvider);
 
-    // Listen for phase changes to trigger animations
+    // Listen for phase changes to trigger animations and timer
     ref.listen<VocabMissionState>(vocabularyControllerProvider, (prev, next) {
       if (next.phase == VocabMissionPhase.question &&
           prev?.phase != VocabMissionPhase.question) {
         _wordBounceController.forward(from: 0.0);
+        _startTimer();
       }
       if (next.phase == VocabMissionPhase.feedback) {
+        _stopTimer();
         _feedbackController.forward(from: 0.0);
         if (next.lastAnswer?.correct == true) {
           _sparkleController.forward(from: 0.0);
@@ -103,7 +122,15 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
           _encouragementController.forward(from: 0.0);
         }
       }
+      if (next.phase == VocabMissionPhase.missionComplete ||
+          next.phase == VocabMissionPhase.error) {
+        _stopTimer();
+      }
     });
+
+    if (state.phase == VocabMissionPhase.intro) {
+      return _buildIntroPhase();
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -166,6 +193,12 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
               ],
             ),
           ),
+          // Timer badge in app bar
+          if (state.phase == VocabMissionPhase.question)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _buildTimerWidget(state.questionTimeSeconds),
+            ),
           // Score badge
           if (state.answeredCount > 0)
             Container(
@@ -232,6 +265,8 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
 
   Widget _buildContent(VocabMissionState state) {
     switch (state.phase) {
+      case VocabMissionPhase.intro:
+        return _buildIntroPhase();
       case VocabMissionPhase.loading:
       case VocabMissionPhase.submitting:
         return _buildLoading();
@@ -302,6 +337,38 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
               padding: const EdgeInsets.only(bottom: 16),
               child: _buildSubmitButton(),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimerWidget(int seconds) {
+    final color = seconds > 30
+        ? const Color(0xFFFF8A65)
+        : seconds > 15
+            ? const Color(0xFFFFB74D)
+            : const Color(0xFF8E97FD);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withAlpha(20),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(60)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(
+            _formatTime(seconds),
+            style: GoogleFonts.alata(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
         ],
       ),
     );
@@ -550,17 +617,47 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
                 ),
                 const SizedBox(height: 20),
 
-                // Show correct answer image if incorrect
+                // Show selected vs correct when incorrect
                 if (!isCorrect && question != null) ...[
-                  Text(
-                    'The correct image:',
-                    style: GoogleFonts.alata(
-                      fontSize: 14,
-                      color: const Color(0xFF8A8A8F),
+                  // Word reminder
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8E97FD).withAlpha(15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Word: ${question.word}',
+                      style: GoogleFonts.alata(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF8E97FD),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  _buildCorrectAnswerCard(question, answer.correctImageId),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Selected (wrong) image
+                      _buildComparisonCard(
+                        question,
+                        state.selectedImageId,
+                        label: 'Your pick',
+                        borderColor: const Color(0xFFFF8A65),
+                        icon: Icons.close,
+                      ),
+                      const Icon(Icons.arrow_forward, color: Color(0xFF8A8A8F)),
+                      // Correct image
+                      _buildComparisonCard(
+                        question,
+                        answer.correctImageId,
+                        label: 'Correct',
+                        borderColor: const Color(0xFF66BB6A),
+                        icon: Icons.check,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
                 ],
 
@@ -662,41 +759,278 @@ class _VocabularyMissionPageState extends ConsumerState<VocabularyMissionPage>
     );
   }
 
-  Widget _buildCorrectAnswerCard(VocabQuestion question, int correctId) {
-    final correctImage =
-        question.images.where((img) => img.id == correctId).firstOrNull;
-    if (correctImage == null) return const SizedBox.shrink();
+  Widget _buildComparisonCard(
+    VocabQuestion question,
+    int? imageId, {
+    required String label,
+    required Color borderColor,
+    required IconData icon,
+  }) {
+    final image = question.images.where((img) => img.id == imageId).firstOrNull;
+    if (image == null) return const SizedBox.shrink();
 
-    final imageUrl = VocabularyRepository.getImageUrl(correctImage.url);
+    final imageUrl = VocabularyRepository.getImageUrl(image.url);
 
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF66BB6A), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF66BB6A).withAlpha(51),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return Column(
+      children: [
+        Container(
+          width: 110,
+          height: 110,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                color: borderColor.withAlpha(51),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Center(
-            child: Text(
-              correctImage.label,
-              style: GoogleFonts.alata(
-                  fontSize: 14, color: const Color(0xFF8A8A8F)),
-            ),
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(13),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (_, __, ___) => Center(
+                    child: Text(
+                      image.label,
+                      style: GoogleFonts.alata(
+                          fontSize: 14, color: const Color(0xFF8A8A8F)),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: borderColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 16),
+                ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: GoogleFonts.alata(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: borderColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INTRO PHASE
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  Widget _buildIntroPhase() {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFB8BEFD), Color(0xFF9AA2FD), Color(0xFF8E97FD)],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: -80,
+                left: -60,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withAlpha(20),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 120,
+                right: -40,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withAlpha(15),
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  // Back button
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(true),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(40),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.arrow_back,
+                              color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(flex: 2),
+
+                  // Mascot
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withAlpha(30),
+                    ),
+                    child: const Text('📖', style: TextStyle(fontSize: 64)),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Title card
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(40),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withAlpha(60)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Word Match',
+                          style: GoogleFonts.alata(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Match each word to the correct image. Test your vocabulary knowledge!',
+                          style: GoogleFonts.alata(
+                            fontSize: 14,
+                            color: Colors.white.withAlpha(210),
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Feature pills
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _buildFeaturePill(Icons.image_outlined, 'Image matching'),
+                      _buildFeaturePill(Icons.timer_outlined, 'Timed'),
+                      _buildFeaturePill(Icons.star_outline, 'Score tracking'),
+                    ],
+                  ),
+
+                  const Spacer(flex: 3),
+
+                  // Start button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          ref
+                              .read(vocabularyControllerProvider.notifier)
+                              .startFromIntro();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF8E97FD),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                          elevation: 6,
+                          shadowColor:
+                              const Color(0xFF8E97FD).withAlpha(100),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Start Mission',
+                              style: GoogleFonts.alata(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturePill(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(30),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withAlpha(50)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.alata(
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

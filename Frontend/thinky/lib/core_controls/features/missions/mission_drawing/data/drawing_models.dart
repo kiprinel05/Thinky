@@ -24,9 +24,18 @@ class DrawingAnalysisResult {
     this.pixyEmotion = 'neutral',
   });
 
+  static const _shapeNormalize = {
+    'ellipse': 'circle',
+  };
+
+  static String? _normalizeShape(String? shape) {
+    if (shape == null) return null;
+    return _shapeNormalize[shape.toLowerCase()] ?? shape;
+  }
+
   factory DrawingAnalysisResult.fromJson(Map<String, dynamic> json) {
     return DrawingAnalysisResult(
-      detectedShape: json['detected_shape'] as String?,
+      detectedShape: _normalizeShape(json['detected_shape'] as String?),
       detectedColor: json['detected_color'] as String?,
       vertexCount: json['vertex_count'] as int? ?? 0,
       isTriangle: json['is_triangle'] as bool? ?? false,

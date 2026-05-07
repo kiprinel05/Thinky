@@ -17,6 +17,11 @@ SHAPE_ALIASES = {
     "rectangle": ["square", "circle"],  # Round rect ≈ circle
     "square": ["rectangle", "circle"],  # Round square ≈ circle (coloring mission)
     "diamond": ["square"],  # Diamond is a rotated square
+    "ellipse": ["circle"],  # Ellipse ≈ circle
+}
+
+SHAPE_NORMALIZE = {
+    "ellipse": "circle",
 }
 
 
@@ -82,7 +87,7 @@ class DrawingService:
 
             # Detect shape with multiple epsilon attempts
             shape_result = self._detect_shape_robust(main_contour)
-            detected_shape = shape_result["shape"]
+            detected_shape = SHAPE_NORMALIZE.get(shape_result["shape"], shape_result["shape"])
             confidence_shape = shape_result["confidence"]
 
             # Detect color

@@ -70,6 +70,26 @@ class DescribeRepository {
     }
   }
 
+  /// Submit text description for validation.
+  static Future<TranscriptionResponse> submitText(String text) async {
+    try {
+      final url = Uri.parse('${AppConfig.apiBaseUrl}$_basePath/submit-text');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'text': text}),
+      );
+      if (response.statusCode == 200) {
+        return TranscriptionResponse.fromJson(jsonDecode(response.body));
+      }
+      throw Exception(
+          'Failed to submit text: ${response.statusCode} ${response.body}');
+    } catch (e, stack) {
+      ErrorLogger().logError(e, stackTrace: stack);
+      rethrow;
+    }
+  }
+
   /// Build full image URL from relative path
   static String getImageUrl(String relativePath) {
     return '${AppConfig.apiBaseUrl}$relativePath';

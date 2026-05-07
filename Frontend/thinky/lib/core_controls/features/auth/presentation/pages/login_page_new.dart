@@ -29,6 +29,16 @@ class LoginPage extends ConsumerWidget {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(RouteNames.intro);
+            }
+          },
+        ),
       ),
       backgroundColor: AppColors.backgroundWhite,
       body: Stack(
