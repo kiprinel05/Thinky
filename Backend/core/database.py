@@ -30,14 +30,18 @@ if "Active Directory" in str(DATABASE_URL) or settings.USE_AZURE_AD:
     # Additional Azure AD handling logic could go here similar to original database.py
     # For now, we assume proper connection string formation in config.py or env
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-    echo=False,
-    connect_args=connect_args
-)
+engine_kwargs = {
+    "pool_pre_ping": True,
+    "echo": False,
+    "connect_args": connect_args,
+}
+# SQLite (fallback when DATABASE_URL is unset, and the dialect used for tests)
+# rejects pool_size / max_overflow because it uses SingletonThreadPool.
+if not DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 10
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

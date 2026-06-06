@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -71,9 +72,13 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Pydantic v2 attaches the raw exception (e.g. ValueError raised inside a
+    # @field_validator) to errors()[i]["ctx"]["error"], which is not JSON
+    # serializable. jsonable_encoder coerces those to strings so the 422 response
+    # actually renders instead of crashing with a 500.
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": exc.errors()},
+        content={"detail": jsonable_encoder(exc.errors())},
         headers={"Access-Control-Allow-Origin": "*"}
     )
 
